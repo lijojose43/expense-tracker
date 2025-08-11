@@ -243,3 +243,23 @@ footer {
 #search {
   width: 100%;
 }
+
+/* Mobile refinements (e.g., iPhone 12) */
+@media (max-width: 420px) {
+  /* Improve tap targets and avoid iOS zooming */
+  .filters select,
+  .filters input,
+  .modal-content input,
+  .modal-content select {
+    font-size: 16px; /* iOS: >=16px prevents zoom */
+    min-height: 44px; /* Apple HIG minimum touch target */
+    padding: 12px;
+  }
+
+  /* Normalize native select appearance on iOS */
+  select {
+    -webkit-appearance: none;
+    appearance: none;
+    background-color: #fff;
+  }
+}
