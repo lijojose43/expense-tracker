@@ -13,7 +13,11 @@
     <header class="topbar">
       <button id="backBtn" class="icon"></button>
       <h1 id="screenTitle">Home</h1>
-      <button id="addBtn" class="primary">+ Add</button>
+      <div style="display:flex; gap:8px; align-items:center">
+        <button id="exportBtn" class="secondary" aria-label="Export data">Export</button>
+        <button id="importBtn" class="secondary" aria-label="Import data">Import</button>
+        <button id="addBtn" class="primary">+ Add</button>
+      </div>
     </header>
 
     <main id="homeTab" class="content">
@@ -56,6 +60,9 @@
     </main>
 
   </div>
+
+  <!-- Hidden file input for importing JSON -->
+  <input id="importFile" type="file" accept="application/json" style="display:none" />
 
   <!-- Add / Edit Modal -->
   <div id="modal" class="modal hide" role="dialog" aria-modal="true">

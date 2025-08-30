@@ -65,6 +65,14 @@ body {
   border-radius: 8px;
   cursor: pointer;
 }
+.secondary {
+  background: transparent;
+  color: #0f172a;
+  border: 1px solid rgba(2, 6, 23, 0.12);
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
 .content {
   padding: 16px;
 }
@@ -120,6 +128,24 @@ body {
   padding: 10px;
   border-radius: 10px;
   background: transparent;
+}
+.txActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.icon.small {
+  font-size: 14px;
+  padding: 6px;
+  border: 1px solid rgba(2, 6, 23, 0.08);
+  background: #fff;
+}
+.icon.small.danger {
+  color: var(--danger);
+  border-color: rgba(239, 68, 68, 0.35); /* from --danger */
+}
+.icon.small.danger:hover {
+  background: rgba(239, 68, 68, 0.08);
 }
 .tx .meta {
   display: flex;

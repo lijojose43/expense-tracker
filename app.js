@@ -30,6 +30,10 @@ const categorySelect = $("category");
 const filterCategory = $("filterCategory");
 const filterType = $("filterType");
 const searchInput = $("search");
+// Import/Export controls
+const exportBtn = $("exportBtn");
+const importBtn = $("importBtn");
+const importFileInput = $("importFile");
 // Tabs and title
 const screenTitle = $("screenTitle");
 const homeTabEl = $("homeTab");
@@ -37,6 +41,7 @@ const summaryTabEl = $("summaryTab");
 const tabHome = $("tabHome");
 const tabSummary = $("tabSummary");
 let donutChart = null;
+let editId = null; // track transaction being edited
 
 function save() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
@@ -49,6 +54,96 @@ function formatMoney(n) {
 
 function uid() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+}
+
+// ---------- Import / Export ----------
+function normalizeTx(raw) {
+  if (!raw || typeof raw !== "object") return null;
+  const t = { ...raw };
+  // id
+  if (typeof t.id !== "string" || !t.id.trim()) t.id = uid();
+  // amount
+  const amt = Number(t.amount);
+  if (!isFinite(amt)) return null;
+  t.amount = Math.abs(amt);
+  // type
+  t.type = t.type === "income" ? "income" : "expense";
+  // category
+  if (typeof t.category !== "string" || !t.category.trim()) t.category = "Other";
+  // date
+  const d = new Date(t.date);
+  if (isNaN(d.getTime())) t.date = new Date().toISOString().slice(0, 10);
+  // description
+  if (typeof t.description !== "string") t.description = "";
+  return {
+    id: t.id,
+    amount: t.amount,
+    type: t.type,
+    category: t.category,
+    date: t.date,
+    description: t.description,
+  };
+}
+
+function exportData() {
+  try {
+    const payload = {
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      items: data,
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `expenses-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  } catch (err) {
+    console.error(err);
+    alert("Export failed");
+  }
+}
+
+async function importFromFile(file) {
+  const text = await file.text();
+  let json;
+  try {
+    json = JSON.parse(text);
+  } catch (e) {
+    throw new Error("Invalid JSON");
+  }
+  const items = Array.isArray(json)
+    ? json
+    : json && Array.isArray(json.items)
+    ? json.items
+    : null;
+  if (!items) throw new Error("Invalid file format: expected an array or {items: []}");
+  const cleaned = items.map(normalizeTx).filter(Boolean);
+  if (cleaned.length === 0) throw new Error("No valid transactions found");
+
+  const replace = confirm(
+    "Replace existing data with imported items?\nOK = Replace, Cancel = Merge"
+  );
+  if (replace) {
+    data = cleaned;
+  } else {
+    const existing = new Set(data.map((t) => t.id));
+    for (const t of cleaned) {
+      if (!t.id || existing.has(t.id)) t.id = uid();
+      data.push(t);
+    }
+  }
+  save();
+  populateCategories();
+  computeTotals();
+  renderList();
+  if (!summaryTabEl.classList.contains("hidden")) renderDonut();
+  alert("Import successful");
 }
 
 function populateCategories() {
@@ -206,8 +301,52 @@ function renderList() {
       (t.type === "expense" ? "-" : "+") +
       "₹" +
       Math.abs(Number(t.amount)).toFixed(2);
+    const actions = document.createElement("div");
+    actions.className = "txActions";
+    const editBtn = document.createElement("button");
+    editBtn.className = "icon small";
+    editBtn.type = "button";
+    editBtn.title = "Edit";
+    editBtn.ariaLabel = "Edit";
+    editBtn.textContent = "✏️";
+    const delBtn = document.createElement("button");
+    delBtn.className = "icon small danger";
+    delBtn.type = "button";
+    delBtn.title = "Delete";
+    delBtn.ariaLabel = "Delete";
+    delBtn.textContent = "🗑️";
+    actions.appendChild(editBtn);
+    actions.appendChild(delBtn);
+
     el.appendChild(meta);
     el.appendChild(amt);
+    el.appendChild(actions);
+
+    editBtn.addEventListener("click", () => {
+      populateCategories();
+      editId = t.id;
+      const modalTitle = document.getElementById("modalTitle");
+      if (modalTitle) modalTitle.textContent = "Edit Transaction";
+      const submitBtn = txForm.querySelector('button[type="submit"]');
+      if (submitBtn) submitBtn.textContent = "Update";
+      openModal({
+        amount: Math.abs(Number(t.amount)).toFixed(2),
+        type: t.type,
+        category: t.category,
+        date: t.date,
+        description: t.description || "",
+      });
+    });
+    delBtn.addEventListener("click", () => {
+      if (confirm("Delete this transaction?")) {
+        data = data.filter((x) => x.id !== t.id);
+        save();
+        populateCategories();
+        computeTotals();
+        renderList();
+        if (!summaryTabEl.classList.contains("hidden")) renderDonut();
+      }
+    });
     el.addEventListener("contextmenu", (e) => {
       e.preventDefault();
       if (confirm("Delete this transaction?")) {
@@ -242,12 +381,36 @@ function closeModalFn() {
 
 addBtn.addEventListener("click", () => {
   populateCategories();
+  editId = null;
+  const modalTitle = document.getElementById("modalTitle");
+  if (modalTitle) modalTitle.textContent = "Add Transaction";
+  const submitBtn = txForm.querySelector('button[type="submit"]');
+  if (submitBtn) submitBtn.textContent = "Save";
   openModal();
 });
 $("backBtn").addEventListener("click", () => {
   alert("Back pressed — integrate with routing if needed.");
 });
 closeModal.addEventListener("click", closeModalFn);
+// Import/Export events
+if (exportBtn) {
+  exportBtn.addEventListener("click", exportData);
+}
+if (importBtn && importFileInput) {
+  importBtn.addEventListener("click", () => importFileInput.click());
+  importFileInput.addEventListener("change", async (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    try {
+      await importFromFile(file);
+    } catch (err) {
+      console.error(err);
+      alert("Import failed: " + err.message);
+    } finally {
+      e.target.value = ""; // reset so same file can be chosen again
+    }
+  });
+}
 // Tab events
 if (tabHome && tabSummary) {
   tabHome.addEventListener("click", () => switchTab("home"));
@@ -261,22 +424,41 @@ txForm.addEventListener("submit", (e) => {
   const category = $("category").value || "Other";
   const date = $("date").value;
   const description = $("description").value;
-  const tx = {
-    id: uid(),
-    amount: Math.abs(amount),
-    type,
-    category,
-    date,
-    description,
-  };
-  // if amount negative and type expense, convert accordingly - UI expects positive and type denotes sign
-  data.push(tx);
+  if (editId) {
+    const idx = data.findIndex((x) => x.id === editId);
+    if (idx !== -1) {
+      data[idx] = {
+        ...data[idx],
+        amount: Math.abs(amount),
+        type,
+        category,
+        date,
+        description,
+      };
+    }
+  } else {
+    const tx = {
+      id: uid(),
+      amount: Math.abs(amount),
+      type,
+      category,
+      date,
+      description,
+    };
+    // if amount negative and type expense, convert accordingly - UI expects positive and type denotes sign
+    data.push(tx);
+  }
   save();
   populateCategories();
   computeTotals();
   renderList();
   // update chart if on summary tab
   if (!summaryTabEl.classList.contains("hidden")) renderDonut();
+  editId = null;
+  const modalTitle = document.getElementById("modalTitle");
+  if (modalTitle) modalTitle.textContent = "Add Transaction";
+  const submitBtn = txForm.querySelector('button[type="submit"]');
+  if (submitBtn) submitBtn.textContent = "Save";
   closeModalFn();
 });
 
