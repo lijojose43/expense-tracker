@@ -27,27 +27,21 @@ body {
   color: #0f172a;
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  padding: 24px;
-  padding-bottom: 96px;
+  display: block;
+  padding: 0;
+  padding-bottom: 96px; /* keep space for bottom bar */
 }
 [data-theme="dark"] body,
 [data-theme="dark"] {
   color: #e5e7eb;
 }
 .app {
-  width: 420px;
-  max-width: 100%;
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.6),
-    rgba(255, 255, 255, 0.6)
-  );
-  border-radius: 14px;
+  width: 100%;
+  max-width: none;
+  background: transparent;
+  border-radius: 0;
   padding-bottom: 72px;
-  box-shadow: 0 6px 20px rgba(2, 6, 23, 0.08);
+  box-shadow: none;
   position: relative;
 }
 .topbar {
@@ -146,18 +140,21 @@ body {
   margin-bottom: 12px;
   flex-wrap: wrap;
 }
+[data-theme="dark"] .topbar {
+  border-bottom-color: rgba(148, 163, 184, 0.08);
+}
 .card {
   background: var(--card);
   padding: 12px;
   border-radius: 12px;
   flex: 1;
   min-width: 120px;
-  box-shadow: 0 2px 8px rgba(2, 6, 23, 0.04);
+  border: 1px solid rgba(2, 6, 23, 0.06);
+  box-shadow: 0 2px 10px rgba(2, 6, 23, 0.06);
 }
 [data-theme="dark"] .card {
-  /* darker card with subtle separation */
-  border: 1px solid rgba(148, 163, 184, 0.08);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+  border-color: rgba(148, 163, 184, 0.12);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.35);
 }
 .card.wide {
   flex-basis: 100%;
@@ -194,9 +191,22 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px;
-  border-radius: 10px;
-  background: transparent;
+  padding: 12px;
+  border-radius: 12px;
+  background: var(--card);
+  border: 1px solid rgba(2, 6, 23, 0.06);
+  box-shadow: 0 2px 10px rgba(2, 6, 23, 0.06);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+[data-theme="dark"] .tx {
+  border-color: rgba(148, 163, 184, 0.12);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.35);
+}
+.tx:active {
+  box-shadow: 0 4px 16px rgba(2, 6, 23, 0.12);
+}
+[data-theme="dark"] .tx:active {
+  box-shadow: 0 10px 20px rgba(0,0,0,0.5);
 }
 .txActions {
   display: flex;
