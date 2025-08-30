@@ -394,21 +394,62 @@ function renderList() {
       "₹" +
       Math.abs(Number(t.amount)).toFixed(2);
     const actions = document.createElement("div");
-    actions.className = "txActions";
-    const delBtn = document.createElement("button");
-    delBtn.className = "icon small danger";
-    delBtn.type = "button";
-    delBtn.title = "Delete";
-    delBtn.ariaLabel = "Delete";
-    delBtn.textContent = "🗑️";
-    actions.appendChild(delBtn);
+    actions.className = "txActions"; // kept for layout spacing; no buttons inside
 
     el.appendChild(meta);
     el.appendChild(amt);
     el.appendChild(actions);
 
-    // Open edit on row click
+    // Swipe-to-delete gesture handling
+    let startX = 0;
+    let dx = 0;
+    let swiping = false;
+    let moved = false;
+
+    function resetTransform() {
+      el.style.transition = "transform 0.2s ease";
+      el.style.transform = "translateX(0)";
+      setTimeout(() => (el.style.transition = ""), 220);
+    }
+
+    el.addEventListener("touchstart", (e) => {
+      if (!e.touches || e.touches.length === 0) return;
+      startX = e.touches[0].clientX;
+      dx = 0;
+      swiping = false;
+      moved = false;
+      el.style.transition = ""; // disable during drag
+    }, { passive: true });
+
+    el.addEventListener("touchmove", (e) => {
+      if (!e.touches || e.touches.length === 0) return;
+      dx = e.touches[0].clientX - startX; // negative when moving left
+      if (dx < -10) swiping = true;
+      if (Math.abs(dx) > 6) moved = true;
+      if (swiping) {
+        const limited = Math.max(dx, -120);
+        el.style.transform = `translateX(${limited}px)`;
+      }
+    }, { passive: true });
+
+    el.addEventListener("touchend", () => {
+      if (swiping && dx <= -80) {
+        if (confirm("Delete this transaction?")) {
+          data = data.filter((x) => x.id !== t.id);
+          save();
+          populateCategories();
+          computeTotals();
+          renderList();
+          if (!summaryTabEl.classList.contains("hidden")) renderDonut();
+          return; // element removed; do not animate back
+        }
+      }
+      resetTransform();
+    });
+
+    // Open edit on row click (ignore if a swipe occurred)
     el.addEventListener("click", () => {
+      if (moved) return; // don't treat swipe as click
       populateCategories();
       editId = t.id;
       const modalTitle = document.getElementById("modalTitle");
@@ -422,17 +463,6 @@ function renderList() {
         date: t.date,
         description: t.description || "",
       });
-    });
-    delBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      if (confirm("Delete this transaction?")) {
-        data = data.filter((x) => x.id !== t.id);
-        save();
-        populateCategories();
-        computeTotals();
-        renderList();
-        if (!summaryTabEl.classList.contains("hidden")) renderDonut();
-      }
     });
     el.addEventListener("contextmenu", (e) => {
       e.preventDefault();
