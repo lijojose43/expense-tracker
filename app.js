@@ -117,22 +117,6 @@ function formatDateTimeDisplay(dt) {
     minute: "2-digit",
   });
 }
-// Theme toggle events
-if (themeBtn) {
-  themeBtn.addEventListener("click", () => {
-    const current = document.documentElement.getAttribute("data-theme") || (systemPrefersDark() ? "dark" : "light");
-    const next = current === "dark" ? "light" : "dark";
-    localStorage.setItem(THEME_KEY, next);
-    applyTheme(next);
-  });
-  // Follow system changes only if no user preference saved
-  const mql = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)");
-  if (mql && mql.addEventListener) {
-    mql.addEventListener("change", (e) => {
-      if (!localStorage.getItem(THEME_KEY)) applyTheme(e.matches ? "dark" : "light");
-    });
-  }
-}
 
 // Date-only helpers
 function toDateInputValue(dt) {
@@ -342,7 +326,7 @@ function switchTab(name) {
     tabSummary.classList.remove("active");
     screenTitle.textContent = "Home";
     if (addBtn) addBtn.style.display = "";
-    if (optionsBtn) optionsBtn.style.display = "";
+    if (optionsMenu) optionsMenu.classList.remove("open");
   } else {
     homeTabEl.classList.add("hidden");
     summaryTabEl.classList.remove("hidden");
@@ -350,7 +334,7 @@ function switchTab(name) {
     tabSummary.classList.add("active");
     screenTitle.textContent = "Summary";
     if (addBtn) addBtn.style.display = "none";
-    if (optionsBtn) optionsBtn.style.display = "none";
+    if (optionsMenu) optionsMenu.classList.remove("open");
     // ensure chart reflects latest data
     renderDonut();
   }
@@ -539,6 +523,7 @@ if (exportOption) {
 if (importOption && importFileInput) {
   importOption.addEventListener("click", () => {
     importFileInput.click();
+    closeMenu();
   });
   importFileInput.addEventListener("change", async (e) => {
     const file = e.target.files && e.target.files[0];
