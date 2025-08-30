@@ -348,9 +348,20 @@ function renderList() {
   const list = data
     .slice()
     .sort((a, b) => {
-      const ab = isFinite(Number(b.createdAt)) ? Number(b.createdAt) : new Date(b.date).getTime();
-      const aa = isFinite(Number(a.createdAt)) ? Number(a.createdAt) : new Date(a.date).getTime();
-      return ab - aa;
+      // Primary: by transaction date (day precision) desc
+      const da = new Date(a.date);
+      const db = new Date(b.date);
+      const dayA = isNaN(da.getTime())
+        ? 0
+        : new Date(da.getFullYear(), da.getMonth(), da.getDate()).getTime();
+      const dayB = isNaN(db.getTime())
+        ? 0
+        : new Date(db.getFullYear(), db.getMonth(), db.getDate()).getTime();
+      if (dayB !== dayA) return dayB - dayA;
+      // Secondary: by createdAt (time added) desc
+      const ca = isFinite(Number(a.createdAt)) ? Number(a.createdAt) : 0;
+      const cb = isFinite(Number(b.createdAt)) ? Number(b.createdAt) : 0;
+      return cb - ca;
     })
     .filter((t) => {
       if (ft !== "all" && t.type !== ft) return false;
