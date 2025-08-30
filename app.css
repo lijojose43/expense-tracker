@@ -321,6 +321,10 @@ textarea:focus {
   padding: 10px 28px 23px 28px;
   border-radius: 12px;
 }
+[data-theme="dark"] .modal-content {
+  /* Help native controls (select dropdown) render with dark palette */
+  color-scheme: dark;
+}
 .modal-content header {
   display: flex;
   align-items: center;
@@ -336,7 +340,17 @@ textarea:focus {
 .modal-content select {
   padding: 10px;
   border-radius: 8px;
-  border: 1px solid rgba(2, 6, 23, 0.06);
+  background: var(--card);
+  color: inherit;
+  border: 1px solid rgba(2, 6, 23, 0.12);
+}
+[data-theme="dark"] .modal-content input,
+[data-theme="dark"] .modal-content select {
+  border-color: rgba(148, 163, 184, 0.2);
+}
+.modal-content select option {
+  background: var(--card);
+  color: inherit;
 }
 .actions {
   display: flex;
