@@ -30,10 +30,14 @@ const categorySelect = $("category");
 const filterCategory = $("filterCategory");
 const filterType = $("filterType");
 const searchInput = $("search");
-// Import/Export controls
-const exportBtn = $("exportBtn");
-const importBtn = $("importBtn");
+// Import/Export controls (hidden file input kept)
 const importFileInput = $("importFile");
+// Options menu controls
+const optionsBtn = $("optionsBtn");
+const optionsMenu = $("optionsMenu");
+const themeOption = $("themeOption");
+const exportOption = $("exportOption");
+const importOption = $("importOption");
 // Tabs and title
 const screenTitle = $("screenTitle");
 const homeTabEl = $("homeTab");
@@ -54,6 +58,39 @@ function formatMoney(n) {
 
 function uid() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+}
+
+// ---------- Theme handling ----------
+const THEME_KEY = "expense-tracker-theme";
+function systemPrefersDark() {
+  return (
+    typeof window !== "undefined" &&
+    window.matchMedia &&
+    window.matchMedia("(prefers-color-scheme: dark)").matches
+  );
+}
+function setThemeMetaColor(theme) {
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (!meta) return;
+  const color = theme === "dark" ? "#0b1220" : "#f1f5f9";
+  meta.setAttribute("content", color);
+}
+function setThemeIcon(theme) {
+  const icon = document.getElementById("themeIcon");
+  if (!icon) return;
+  // Sun (light) vs Moon (dark)
+  if (theme === "light") {
+    icon.innerHTML = '<circle cx="12" cy="12" r="5"></circle><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path>';
+  } else {
+    icon.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 1 0 9.79 9.79z"></path>';
+  }
+}
+function applyTheme(theme) {
+  const chosen =
+    theme || localStorage.getItem(THEME_KEY) || (systemPrefersDark() ? "dark" : "light");
+  document.documentElement.setAttribute("data-theme", chosen);
+  setThemeMetaColor(chosen);
+  setThemeIcon(chosen);
 }
 
 // Date-time helpers
@@ -79,6 +116,22 @@ function formatDateTimeDisplay(dt) {
     hour: "2-digit",
     minute: "2-digit",
   });
+}
+// Theme toggle events
+if (themeBtn) {
+  themeBtn.addEventListener("click", () => {
+    const current = document.documentElement.getAttribute("data-theme") || (systemPrefersDark() ? "dark" : "light");
+    const next = current === "dark" ? "light" : "dark";
+    localStorage.setItem(THEME_KEY, next);
+    applyTheme(next);
+  });
+  // Follow system changes only if no user preference saved
+  const mql = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)");
+  if (mql && mql.addEventListener) {
+    mql.addEventListener("change", (e) => {
+      if (!localStorage.getItem(THEME_KEY)) applyTheme(e.matches ? "dark" : "light");
+    });
+  }
 }
 
 // Date-only helpers
@@ -289,8 +342,7 @@ function switchTab(name) {
     tabSummary.classList.remove("active");
     screenTitle.textContent = "Home";
     if (addBtn) addBtn.style.display = "";
-    if (exportBtn) exportBtn.style.display = "";
-    if (importBtn) importBtn.style.display = "";
+    if (optionsBtn) optionsBtn.style.display = "";
   } else {
     homeTabEl.classList.add("hidden");
     summaryTabEl.classList.remove("hidden");
@@ -298,8 +350,7 @@ function switchTab(name) {
     tabSummary.classList.add("active");
     screenTitle.textContent = "Summary";
     if (addBtn) addBtn.style.display = "none";
-    if (exportBtn) exportBtn.style.display = "none";
-    if (importBtn) importBtn.style.display = "none";
+    if (optionsBtn) optionsBtn.style.display = "none";
     // ensure chart reflects latest data
     renderDonut();
   }
@@ -449,12 +500,51 @@ $("backBtn").addEventListener("click", () => {
   alert("Back pressed — integrate with routing if needed.");
 });
 closeModal.addEventListener("click", closeModalFn);
-// Import/Export events
-if (exportBtn) {
-  exportBtn.addEventListener("click", exportData);
+// Options menu events
+function closeMenu() {
+  if (optionsMenu) optionsMenu.classList.remove("open");
+  if (optionsBtn) optionsBtn.setAttribute("aria-expanded", "false");
 }
-if (importBtn && importFileInput) {
-  importBtn.addEventListener("click", () => importFileInput.click());
+function toggleMenu() {
+  if (!optionsMenu || !optionsBtn) return;
+  const open = optionsMenu.classList.toggle("open");
+  optionsBtn.setAttribute("aria-expanded", open ? "true" : "false");
+}
+if (optionsBtn) {
+  optionsBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    toggleMenu();
+  });
+}
+document.addEventListener("click", (e) => {
+  if (!optionsMenu || !optionsBtn) return;
+  const menuWrapper = document.getElementById("options");
+  if (menuWrapper && !menuWrapper.contains(e.target)) closeMenu();
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") closeMenu();
+});
+if (themeOption) {
+  themeOption.addEventListener("click", () => {
+    const current =
+      document.documentElement.getAttribute("data-theme") ||
+      (systemPrefersDark() ? "dark" : "light");
+    const next = current === "dark" ? "light" : "dark";
+    localStorage.setItem(THEME_KEY, next);
+    applyTheme(next);
+    closeMenu();
+  });
+}
+if (exportOption) {
+  exportOption.addEventListener("click", () => {
+    exportData();
+    closeMenu();
+  });
+}
+if (importOption && importFileInput) {
+  importOption.addEventListener("click", () => {
+    importFileInput.click();
+  });
   importFileInput.addEventListener("change", async (e) => {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
@@ -525,6 +615,8 @@ filterCategory.addEventListener("change", renderList);
 searchInput.addEventListener("input", renderList);
 
 document.addEventListener("DOMContentLoaded", () => {
+  // initialize theme
+  applyTheme();
   populateCategories();
   computeTotals();
   renderList();

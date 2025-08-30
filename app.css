@@ -8,6 +8,16 @@
   font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto,
     "Helvetica Neue", Arial;
 }
+
+/* Dark theme */
+[data-theme="dark"] {
+  --bg: #0b1220;
+  --card: #0a1020;
+  --muted: #94a3b8;
+  --accent: #60a5fa;
+  --danger: #f87171;
+  --glass: rgba(15, 23, 42, 0.6);
+}
 * {
   box-sizing: border-box;
 }
@@ -22,6 +32,10 @@ body {
   justify-content: center;
   padding: 24px;
   padding-bottom: 96px;
+}
+[data-theme="dark"] body,
+[data-theme="dark"] {
+  color: #e5e7eb;
 }
 .app {
   width: 420px;
@@ -42,6 +56,9 @@ body {
   gap: 12px;
   padding: 16px 20px;
   border-bottom: 1px solid rgba(2, 6, 23, 0.04);
+}
+[data-theme="dark"] .topbar {
+  border-bottom-color: rgba(148, 163, 184, 0.08);
 }
 .topbar h1 {
   flex: 1;
@@ -76,6 +93,53 @@ body {
 .content {
   padding: 16px;
 }
+
+/* Options dropdown */
+.menu-panel {
+  position: absolute;
+  top: 42px;
+  right: 0;
+  background: var(--card);
+  border-radius: 12px;
+  box-shadow: 0 12px 30px rgba(2, 6, 23, 0.16);
+  border: 1px solid rgba(2, 6, 23, 0.06);
+  padding: 6px;
+  min-width: 200px;
+  display: none;
+  z-index: 1000;
+}
+[data-theme="dark"] .menu-panel {
+  box-shadow: 0 12px 30px rgba(0,0,0,0.5);
+  border-color: rgba(148, 163, 184, 0.12);
+}
+.menu-panel.open {
+  display: block;
+}
+.menu-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: transparent;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 12px;
+  text-align: left;
+  color: inherit;
+}
+.menu-item:hover {
+  background: rgba(2, 6, 23, 0.06);
+}
+[data-theme="dark"] .menu-item:hover {
+  background: rgba(148, 163, 184, 0.1);
+}
+.mi-icon {
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
 .summary {
   display: flex;
   gap: 12px;
@@ -89,6 +153,11 @@ body {
   flex: 1;
   min-width: 120px;
   box-shadow: 0 2px 8px rgba(2, 6, 23, 0.04);
+}
+[data-theme="dark"] .card {
+  /* darker card with subtle separation */
+  border: 1px solid rgba(148, 163, 184, 0.08);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
 }
 .card.wide {
   flex-basis: 100%;
@@ -161,6 +230,9 @@ body {
   align-items: center;
   justify-content: center;
   box-shadow: 0 1px 6px rgba(2, 6, 23, 0.04);
+}
+[data-theme="dark"] .iconBox {
+  box-shadow: 0 1px 6px rgba(15, 23, 42, 0.5);
 }
 .tx .title {
   font-weight: 600;
@@ -250,6 +322,9 @@ footer {
   padding-bottom: calc(8px + constant(safe-area-inset-bottom, 0px));
   z-index: 900;
   box-shadow: 0 -2px 12px rgba(2, 6, 23, 0.08);
+}
+[data-theme="dark"] .bottombar {
+  box-shadow: 0 -2px 12px rgba(2, 6, 23, 0.6);
 }
 .bottombar .tab {
   flex: 1;
