@@ -411,26 +411,20 @@ function renderList() {
       Math.abs(Number(t.amount)).toFixed(2);
     const actions = document.createElement("div");
     actions.className = "txActions";
-    const editBtn = document.createElement("button");
-    editBtn.className = "icon small";
-    editBtn.type = "button";
-    editBtn.title = "Edit";
-    editBtn.ariaLabel = "Edit";
-    editBtn.textContent = "✏️";
     const delBtn = document.createElement("button");
     delBtn.className = "icon small danger";
     delBtn.type = "button";
     delBtn.title = "Delete";
     delBtn.ariaLabel = "Delete";
     delBtn.textContent = "🗑️";
-    actions.appendChild(editBtn);
     actions.appendChild(delBtn);
 
     el.appendChild(meta);
     el.appendChild(amt);
     el.appendChild(actions);
 
-    editBtn.addEventListener("click", () => {
+    // Open edit on row click
+    el.addEventListener("click", () => {
       populateCategories();
       editId = t.id;
       const modalTitle = document.getElementById("modalTitle");
@@ -445,7 +439,8 @@ function renderList() {
         description: t.description || "",
       });
     });
-    delBtn.addEventListener("click", () => {
+    delBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
       if (confirm("Delete this transaction?")) {
         data = data.filter((x) => x.id !== t.id);
         save();
