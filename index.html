@@ -14,9 +14,29 @@
       <button id="backBtn" class="icon"></button>
       <h1 id="screenTitle">Home</h1>
       <div style="display:flex; gap:8px; align-items:center">
-        <button id="exportBtn" class="secondary" aria-label="Export data">Export</button>
-        <button id="importBtn" class="secondary" aria-label="Import data">Import</button>
-        <button id="addBtn" class="primary">+ Add</button>
+        <button id="exportBtn" class="icon" title="Export" aria-label="Export data">
+          <!-- export (square.and.arrow.down) -->
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 3v10"/>
+            <path d="m8 9 4 4 4-4"/>
+            <path d="M4 14v4a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3v-4"/>
+          </svg>
+        </button>
+        <button id="importBtn" class="icon" title="Import" aria-label="Import data">
+          <!-- import (square.and.arrow.up) -->
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 21V11"/>
+            <path d="m16 15-4-4-4 4"/>
+            <path d="M20 10V6a3 3 0 0 0-3-3H7A3 3 0 0 0 4 6v4"/>
+          </svg>
+        </button>
+        <button id="addBtn" class="icon" title="Add" aria-label="Add transaction">
+          <!-- plus.circle -->
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="9"/>
+            <path d="M12 8v8M8 12h8"/>
+          </svg>
+        </button>
       </div>
     </header>
 

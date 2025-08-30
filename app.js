@@ -56,6 +56,46 @@ function uid() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 }
 
+// Date-time helpers
+function toLocalInputValue(dt) {
+  const d = dt instanceof Date ? dt : new Date(dt);
+  if (isNaN(d.getTime())) return "";
+  const pad = (n) => String(n).padStart(2, "0");
+  const yyyy = d.getFullYear();
+  const mm = pad(d.getMonth() + 1);
+  const dd = pad(d.getDate());
+  const hh = pad(d.getHours());
+  const mi = pad(d.getMinutes());
+  return `${yyyy}-${mm}-${dd}T${hh}:${mi}`;
+}
+
+function formatDateTimeDisplay(dt) {
+  const d = new Date(dt);
+  if (isNaN(d.getTime())) return dt || "";
+  return d.toLocaleString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+// Date-only helpers
+function toDateInputValue(dt) {
+  const d = new Date(dt);
+  if (!isNaN(d.getTime())) return d.toISOString().slice(0, 10);
+  if (typeof dt === "string" && dt.length >= 10) return dt.slice(0, 10);
+  return new Date().toISOString().slice(0, 10);
+}
+
+function formatDateDisplay(dt) {
+  const d = new Date(dt);
+  if (!isNaN(d.getTime())) return d.toLocaleDateString();
+  if (typeof dt === "string") return dt;
+  return "";
+}
+
 // ---------- Import / Export ----------
 function normalizeTx(raw) {
   if (!raw || typeof raw !== "object") return null;
@@ -75,6 +115,14 @@ function normalizeTx(raw) {
   if (isNaN(d.getTime())) t.date = new Date().toISOString().slice(0, 10);
   // description
   if (typeof t.description !== "string") t.description = "";
+  // createdAt
+  let ca = t.createdAt;
+  let ts = Number(ca);
+  if (!isFinite(ts)) {
+    const parsed = Date.parse(ca);
+    ts = isNaN(parsed) ? Date.now() : parsed;
+  }
+  t.createdAt = ts;
   return {
     id: t.id,
     amount: t.amount,
@@ -82,6 +130,7 @@ function normalizeTx(raw) {
     category: t.category,
     date: t.date,
     description: t.description,
+    createdAt: t.createdAt,
   };
 }
 
@@ -239,14 +288,18 @@ function switchTab(name) {
     tabHome.classList.add("active");
     tabSummary.classList.remove("active");
     screenTitle.textContent = "Home";
-    addBtn.style.display = "";
+    if (addBtn) addBtn.style.display = "";
+    if (exportBtn) exportBtn.style.display = "";
+    if (importBtn) importBtn.style.display = "";
   } else {
     homeTabEl.classList.add("hidden");
     summaryTabEl.classList.remove("hidden");
     tabHome.classList.remove("active");
     tabSummary.classList.add("active");
     screenTitle.textContent = "Summary";
-    addBtn.style.display = "none";
+    if (addBtn) addBtn.style.display = "none";
+    if (exportBtn) exportBtn.style.display = "none";
+    if (importBtn) importBtn.style.display = "none";
     // ensure chart reflects latest data
     renderDonut();
   }
@@ -259,7 +312,11 @@ function renderList() {
   const q = searchInput.value.trim().toLowerCase();
   const list = data
     .slice()
-    .sort((a, b) => new Date(b.date) - new Date(a.date))
+    .sort((a, b) => {
+      const ab = isFinite(Number(b.createdAt)) ? Number(b.createdAt) : new Date(b.date).getTime();
+      const aa = isFinite(Number(a.createdAt)) ? Number(a.createdAt) : new Date(a.date).getTime();
+      return ab - aa;
+    })
     .filter((t) => {
       if (ft !== "all" && t.type !== ft) return false;
       if (fc !== "all" && t.category !== fc) return false;
@@ -290,7 +347,7 @@ function renderList() {
     title.textContent = t.description || t.category || "Transaction";
     const cat = document.createElement("div");
     cat.className = "category";
-    cat.textContent = t.category + " · " + t.date;
+    cat.textContent = t.category + " · " + formatDateDisplay(t.date);
     info.appendChild(title);
     info.appendChild(cat);
     meta.appendChild(box);
@@ -367,7 +424,7 @@ function openModal(defaults) {
     $("amount").value = defaults.amount;
     $("type").value = defaults.type;
     $("category").value = defaults.category;
-    $("date").value = defaults.date;
+    $("date").value = toDateInputValue(defaults.date);
     $("description").value = defaults.description || "";
   } else {
     txForm.reset();
@@ -444,6 +501,7 @@ txForm.addEventListener("submit", (e) => {
       category,
       date,
       description,
+      createdAt: Date.now(),
     };
     // if amount negative and type expense, convert accordingly - UI expects positive and type denotes sign
     data.push(tx);
