@@ -29,7 +29,25 @@ const txForm = $("txForm");
 const categorySelect = $("category");
 const filterCategory = $("filterCategory");
 const filterType = $("filterType");
+const customDateRange = $("customDateRange");
+const startDate = $("startDate");
+const endDate = $("endDate");
 const searchInput = $("search");
+// Date filter buttons
+const filterAllTime = $("filterAllTime");
+const filterThisMonth = $("filterThisMonth");
+const filterPrevMonth = $("filterPrevMonth");
+const filterCustom = $("filterCustom");
+// Summary page date filter buttons
+const summaryFilterAllTime = $("summaryFilterAllTime");
+const summaryFilterThisMonth = $("summaryFilterThisMonth");
+const summaryFilterPrevMonth = $("summaryFilterPrevMonth");
+const summaryFilterCustom = $("summaryFilterCustom");
+const summaryCustomDateRange = $("summaryCustomDateRange");
+const summaryStartDate = $("summaryStartDate");
+const summaryEndDate = $("summaryEndDate");
+let currentDateFilter = "all";
+let summaryDateFilter = "all";
 // Import/Export controls (hidden file input kept)
 const importFileInput = $("importFile");
 // Options menu controls
@@ -131,6 +149,40 @@ function formatDateDisplay(dt) {
   if (!isNaN(d.getTime())) return d.toLocaleDateString();
   if (typeof dt === "string") return dt;
   return "";
+}
+
+// Date filtering helper functions
+function getThisMonthRange() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  const start = new Date(year, month, 1);
+  const end = new Date(year, month + 1, 0);
+  return { start, end };
+}
+
+function getPreviousMonthRange() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  const start = new Date(year, month - 1, 1);
+  const end = new Date(year, month, 0);
+  return { start, end };
+}
+
+function isDateInRange(dateStr, startDate, endDate) {
+  const date = new Date(dateStr);
+  if (isNaN(date.getTime())) return false;
+  
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  
+  // Set time to start/end of day for proper comparison
+  start.setHours(0, 0, 0, 0);
+  end.setHours(23, 59, 59, 999);
+  date.setHours(12, 0, 0, 0); // Set to noon to avoid timezone issues
+  
+  return date >= start && date <= end;
 }
 
 // ---------- Import / Export ----------
@@ -251,7 +303,27 @@ function populateCategories() {
 function computeTotals() {
   let income = 0,
     expense = 0;
+  
+  // Get current date filter settings
+  let dateRange = null;
+  if (currentDateFilter === "thisMonth") {
+    dateRange = getThisMonthRange();
+  } else if (currentDateFilter === "previousMonth") {
+    dateRange = getPreviousMonthRange();
+  } else if (currentDateFilter === "custom") {
+    const start = startDate.value;
+    const end = endDate.value;
+    if (start && end) {
+      dateRange = { start: new Date(start), end: new Date(end) };
+    }
+  }
+  
   for (const t of data) {
+    // Apply date filtering to totals as well
+    if (dateRange && !isDateInRange(t.date, dateRange.start, dateRange.end)) {
+      continue;
+    }
+    
     if (t.type === "income") income += Number(t.amount);
     else expense += Math.abs(Number(t.amount));
   }
@@ -264,14 +336,39 @@ function computeTotals() {
 // Aggregate expenses by category for the donut chart
 function expensesByCategory() {
   const map = new Map();
+  
+  // Get current date filter settings for summary page
+  let dateRange = null;
+  if (summaryDateFilter === "thisMonth") {
+    dateRange = getThisMonthRange();
+  } else if (summaryDateFilter === "previousMonth") {
+    dateRange = getPreviousMonthRange();
+  } else if (summaryDateFilter === "custom") {
+    const start = summaryStartDate.value;
+    const end = summaryEndDate.value;
+    if (start && end) {
+      dateRange = { start: new Date(start), end: new Date(end) };
+    }
+  }
+  
   for (const t of data) {
     if (t.type !== "expense") continue;
+    
+    // Apply date filtering to chart data as well
+    if (dateRange && !isDateInRange(t.date, dateRange.start, dateRange.end)) {
+      continue;
+    }
+    
     const cat = t.category || "Other";
     map.set(cat, (map.get(cat) || 0) + Math.abs(Number(t.amount)));
   }
   const labels = Array.from(map.keys());
   const values = Array.from(map.values());
   return { labels, values };
+}
+
+function catSlug(category) {
+  return category.toLowerCase().replace(/\s+/g, '');
 }
 
 function renderDonut() {
@@ -291,6 +388,20 @@ function renderDonut() {
     "#f97316",
     "#94a3b8",
   ];
+  // Category-specific palette to match list badges (light/dark agnostic for chart)
+  const categoryColors = {
+    groceries: "#22c55e", // green
+    dining: "#f97316", // orange
+    rent: "#64748b", // slate
+    utilities: "#6366f1", // indigo
+    transportation: "#ec4899", // pink
+    shopping: "#a855f7", // purple
+    healthcare: "#10b981", // emerald
+    entertainment: "#eab308", // yellow
+    salary: "#0ea5e9", // sky
+    other: "#9ca3af", // neutral
+  };
+  const colors = labels.map((label, i) => categoryColors[catSlug(label)] || palette[i % palette.length]);
   if (donutChart) {
     donutChart.destroy();
     donutChart = null;
@@ -302,9 +413,7 @@ function renderDonut() {
       datasets: [
         {
           data: values.length ? values : [1],
-          backgroundColor: labels.map(
-            (_, i) => palette[i % palette.length]
-          ) || ["#e5e7eb"],
+          backgroundColor: colors.length ? colors : ["#e5e7eb"],
           borderWidth: 0,
         },
       ],
@@ -324,8 +433,7 @@ function switchTab(name) {
     summaryTabEl.classList.add("hidden");
     tabHome.classList.add("active");
     tabSummary.classList.remove("active");
-    screenTitle.textContent = "Home";
-    if (addBtn) addBtn.style.display = "";
+    screenTitle.textContent = "Expense Tracker";
     if (optionsMenu) optionsMenu.classList.remove("open");
   } else {
     homeTabEl.classList.add("hidden");
@@ -333,7 +441,6 @@ function switchTab(name) {
     tabHome.classList.remove("active");
     tabSummary.classList.add("active");
     screenTitle.textContent = "Summary";
-    if (addBtn) addBtn.style.display = "none";
     if (optionsMenu) optionsMenu.classList.remove("open");
     // ensure chart reflects latest data
     renderDonut();
@@ -345,6 +452,21 @@ function renderList() {
   const ft = filterType.value;
   const fc = filterCategory.value;
   const q = searchInput.value.trim().toLowerCase();
+  
+  // Get date range based on filter selection
+  let dateRange = null;
+  if (currentDateFilter === "thisMonth") {
+    dateRange = getThisMonthRange();
+  } else if (currentDateFilter === "previousMonth") {
+    dateRange = getPreviousMonthRange();
+  } else if (currentDateFilter === "custom") {
+    const start = startDate.value;
+    const end = endDate.value;
+    if (start && end) {
+      dateRange = { start: new Date(start), end: new Date(end) };
+    }
+  }
+  
   const list = data
     .slice()
     .sort((a, b) => {
@@ -372,6 +494,14 @@ function renderList() {
         !(t.category || "").toLowerCase().includes(q)
       )
         return false;
+      
+      // Date filtering
+      if (dateRange) {
+        if (!isDateInRange(t.date, dateRange.start, dateRange.end)) {
+          return false;
+        }
+      }
+      
       return true;
     });
   if (list.length === 0) {
@@ -629,6 +759,77 @@ txForm.addEventListener("submit", (e) => {
   const submitBtn = txForm.querySelector('button[type="submit"]');
   if (submitBtn) submitBtn.textContent = "Save";
   closeModalFn();
+});
+
+// Handle date filter button changes
+function setDateFilter(filter) {
+  currentDateFilter = filter;
+  
+  // Update button states
+  document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+  document.querySelector(`[data-filter="${filter}"]`).classList.add('active');
+  
+  // Show/hide custom date range
+  if (filter === "custom") {
+    customDateRange.classList.remove("hidden");
+  } else {
+    customDateRange.classList.add("hidden");
+  }
+  
+  computeTotals();
+  renderList();
+  if (!summaryTabEl.classList.contains("hidden")) renderDonut();
+}
+
+// Add event listeners for date filter buttons
+filterAllTime.addEventListener("click", () => setDateFilter("all"));
+filterThisMonth.addEventListener("click", () => setDateFilter("thisMonth"));
+filterPrevMonth.addEventListener("click", () => setDateFilter("previousMonth"));
+filterCustom.addEventListener("click", () => setDateFilter("custom"));
+
+// Handle summary page date filter button changes
+function setSummaryDateFilter(filter) {
+  summaryDateFilter = filter;
+  
+  // Update button states for summary page
+  document.querySelectorAll('#summaryTab .filter-btn').forEach(btn => btn.classList.remove('active'));
+  document.querySelector(`#summaryTab [data-filter="${filter}"]`).classList.add('active');
+  
+  // Show/hide custom date range for summary
+  if (filter === "custom") {
+    summaryCustomDateRange.classList.remove("hidden");
+  } else {
+    summaryCustomDateRange.classList.add("hidden");
+  }
+  
+  // Update chart
+  renderDonut();
+}
+
+// Add event listeners for summary page date filter buttons
+summaryFilterAllTime.addEventListener("click", () => setSummaryDateFilter("all"));
+summaryFilterThisMonth.addEventListener("click", () => setSummaryDateFilter("thisMonth"));
+summaryFilterPrevMonth.addEventListener("click", () => setSummaryDateFilter("previousMonth"));
+summaryFilterCustom.addEventListener("click", () => setSummaryDateFilter("custom"));
+
+// Handle summary custom date range changes
+summaryStartDate.addEventListener("change", () => {
+  if (summaryDateFilter === "custom") renderDonut();
+});
+summaryEndDate.addEventListener("change", () => {
+  if (summaryDateFilter === "custom") renderDonut();
+});
+
+// Handle custom date range changes
+startDate.addEventListener("change", () => {
+  computeTotals();
+  renderList();
+  if (!summaryTabEl.classList.contains("hidden")) renderDonut();
+});
+endDate.addEventListener("change", () => {
+  computeTotals();
+  renderList();
+  if (!summaryTabEl.classList.contains("hidden")) renderDonut();
 });
 
 filterType.addEventListener("change", renderList);
