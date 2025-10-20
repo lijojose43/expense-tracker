@@ -91,7 +91,8 @@ body {
 .topbar {
   display: flex;
   align-items: center;
-  gap: 12px;
+  justify-content: center;
+  position: relative;
   padding: 16px 20px;
   border-bottom: 1px solid rgba(2, 6, 23, 0.04);
 }
@@ -99,11 +100,15 @@ body {
   border-bottom-color: rgba(148, 163, 184, 0.08);
 }
 .topbar h1 {
-  flex: 1;
   margin: 0;
-  text-align: center;
   font-size: 16px;
-  margin-left: 40px;
+}
+
+.top-actions {
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
 }
 .icon {
   background: none;
@@ -235,8 +240,8 @@ html:not([data-theme="dark"]) #sunIcon {
   box-shadow: 0 2px 10px rgba(2, 6, 23, 0.06);
 }
 [data-theme="dark"] .card {
-  border-color: rgba(148, 163, 184, 0.12);
-  box-shadow: 0 8px 16px rgba(0,0,0,0.35);
+  border-color: rgba(96, 165, 250, 0.3);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.35), 0 0 0 1px rgba(96, 165, 250, 0.2), 0 0 20px rgba(96, 165, 250, 0.15);
 }
 .card.wide {
   flex-basis: 100%;
@@ -298,14 +303,15 @@ html:not([data-theme="dark"]) .summary .card:nth-child(3) {
 
 .custom-date-range input {
   flex: 1;
-  min-width: 140px;
-  padding: 12px;
+  min-width: 180px;
+  min-height: 44px;
+  padding: 12px 16px;
   border-radius: 8px;
   border: 1px solid rgba(2, 6, 23, 0.12);
   background: var(--card);
   color: inherit;
   cursor: pointer;
-  font-size: inherit;
+  font-size: 16px;
   white-space: nowrap;
   transition: all 0.2s ease;
   text-align: center;
@@ -343,7 +349,8 @@ html:not([data-theme="dark"]) .summary .card:nth-child(3) {
 }
 [data-theme="dark"] .filters select,
 [data-theme="dark"] .filters input {
-  border-color: rgba(148, 163, 184, 0.2);
+  border-color: rgba(96, 165, 250, 0.3);
+  box-shadow: 0 0 0 1px rgba(96, 165, 250, 0.2), 0 0 15px rgba(96, 165, 250, 0.1);
 }
 
 .custom-date-range input:hover {
@@ -368,6 +375,12 @@ html:not([data-theme="dark"]) .summary .card:nth-child(3) {
   box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.18);
 }
 
+/* Calendar icon color in dark mode */
+[data-theme="dark"] .custom-date-range input::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  cursor: pointer;
+}
+
 /* Enhanced placeholder visibility for date inputs */
 .custom-date-range input::placeholder {
   color: rgba(2, 6, 23, 0.6);
@@ -380,7 +393,8 @@ html:not([data-theme="dark"]) .summary .card:nth-child(3) {
 }
 
 [data-theme="dark"] .filter-btn {
-  border-color: rgba(148, 163, 184, 0.2);
+  border-color: rgba(96, 165, 250, 0.3);
+  box-shadow: 0 0 0 1px rgba(96, 165, 250, 0.2), 0 0 15px rgba(96, 165, 250, 0.1);
 }
 
 [data-theme="dark"] .filter-btn:hover {
@@ -440,8 +454,8 @@ textarea:focus {
   transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
 }
 [data-theme="dark"] .tx {
-  border-color: rgba(148, 163, 184, 0.12);
-  box-shadow: 0 8px 16px rgba(0,0,0,0.35);
+  border-color: rgba(96, 165, 250, 0.3);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.35), 0 0 0 1px rgba(96, 165, 250, 0.2), 0 0 20px rgba(96, 165, 250, 0.15);
 }
 .tx:active {
   box-shadow: 0 4px 16px rgba(2, 6, 23, 0.12);

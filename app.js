@@ -69,6 +69,8 @@ const summaryTabEl = $("summaryTab");
 const tabHome = $("tabHome");
 const tabSummary = $("tabSummary");
 let donutChart = null;
+let lineChart = null;
+let currentChartType = 'donut'; // 'donut' or 'line'
 let editId = null; // track transaction being edited
 
 function save() {
@@ -289,7 +291,7 @@ async function importFromFile(file) {
   populateCategories();
   computeTotals();
   renderList();
-  if (!summaryTabEl.classList.contains("hidden")) renderDonut();
+  if (!summaryTabEl.classList.contains("hidden")) renderChart();
   alert("Import successful");
 }
 
@@ -376,6 +378,68 @@ function expensesByCategory() {
   return { labels, values };
 }
 
+// Aggregate expenses by month and category for the line chart
+function expensesByMonth() {
+  const monthMap = new Map();
+  const categorySet = new Set();
+  
+  // Get current date filter settings for summary page
+  let dateRange = null;
+  if (summaryDateFilter === "thisMonth") {
+    dateRange = getThisMonthRange();
+  } else if (summaryDateFilter === "previousMonth") {
+    dateRange = getPreviousMonthRange();
+  } else if (summaryDateFilter === "custom") {
+    const start = summaryStartDate.value;
+    const end = summaryEndDate.value;
+    if (start && end) {
+      dateRange = { start: new Date(start), end: new Date(end) };
+    }
+  }
+  
+  for (const t of data) {
+    // Apply date filtering to chart data as well
+    if (dateRange && !isDateInRange(t.date, dateRange.start, dateRange.end)) {
+      continue;
+    }
+    
+    const date = new Date(t.date);
+    if (isNaN(date.getTime())) continue;
+    
+    const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    const monthLabel = date.toLocaleDateString(undefined, { year: 'numeric', month: 'short' });
+    const category = t.category || "Other";
+    
+    categorySet.add(category);
+    
+    if (!monthMap.has(monthKey)) {
+      monthMap.set(monthKey, { label: monthLabel, categories: new Map() });
+    }
+    
+    const monthData = monthMap.get(monthKey);
+    if (!monthData.categories.has(category)) {
+      monthData.categories.set(category, 0);
+    }
+    
+    monthData.categories.set(category, monthData.categories.get(category) + Math.abs(Number(t.amount)));
+  }
+  
+  // Sort by month key and extract data
+  const sortedEntries = Array.from(monthMap.entries()).sort((a, b) => a[0].localeCompare(b[0]));
+  const labels = sortedEntries.map(([_, data]) => data.label);
+  const categories = Array.from(categorySet);
+  
+  // Create datasets for each category
+  const categoryData = {};
+  categories.forEach(category => {
+    categoryData[category] = sortedEntries.map(([_, monthData]) => 
+      monthData.categories.get(category) || 0
+    );
+  });
+  
+  return { labels, categories, categoryData };
+}
+
 function catSlug(category) {
   return category.toLowerCase().replace(/\s+/g, '');
 }
@@ -415,6 +479,10 @@ function renderDonut() {
     donutChart.destroy();
     donutChart = null;
   }
+  if (lineChart) {
+    lineChart.destroy();
+    lineChart = null;
+  }
   donutChart = new Chart(ctx, {
     type: "doughnut",
     data: {
@@ -434,6 +502,127 @@ function renderDonut() {
       maintainAspectRatio: false,
     },
   });
+  
+  // Add swipe detection to canvas
+  addSwipeDetection(canvas);
+}
+
+function renderLineChart() {
+  const canvas = document.getElementById("categoryDonut");
+  if (!canvas || typeof Chart === "undefined") return;
+  const { labels, categories, categoryData } = expensesByMonth();
+  const ctx = canvas.getContext("2d");
+  
+  if (donutChart) {
+    donutChart.destroy();
+    donutChart = null;
+  }
+  if (lineChart) {
+    lineChart.destroy();
+    lineChart = null;
+  }
+  
+  // Category-specific colors to match the donut chart
+  const categoryColors = {
+    groceries: "#22c55e", // green
+    dining: "#f97316", // orange
+    rent: "#64748b", // slate
+    utilities: "#6366f1", // indigo
+    transportation: "#ec4899", // pink
+    shopping: "#a855f7", // purple
+    healthcare: "#10b981", // emerald
+    entertainment: "#eab308", // yellow
+    salary: "#0ea5e9", // sky
+    other: "#9ca3af", // neutral
+  };
+  
+  const palette = [
+    "#60a5fa", "#34d399", "#f87171", "#fbbf24", "#c084fc",
+    "#fb7185", "#22d3ee", "#a3e635", "#f97316", "#94a3b8"
+  ];
+  
+  // Create datasets for each category
+  const datasets = categories.map((category, index) => {
+    const color = categoryColors[catSlug(category)] || palette[index % palette.length];
+    return {
+      label: category,
+      data: categoryData[category],
+      borderColor: color,
+      backgroundColor: color + '20', // Add transparency
+      borderWidth: 3,
+      fill: false,
+      tension: 0.4,
+    };
+  });
+  
+  lineChart = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels,
+      datasets,
+    },
+    options: {
+      plugins: { 
+        legend: { position: "bottom" },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              return context.dataset.label + ': ₹' + context.parsed.y.toLocaleString();
+            }
+          }
+        }
+      },
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            callback: function(value) {
+              return '₹' + value.toLocaleString();
+            }
+          }
+        }
+      },
+    },
+  });
+  
+  // Add swipe detection to canvas
+  addSwipeDetection(canvas);
+}
+
+function renderChart() {
+  if (currentChartType === 'donut') {
+    renderDonut();
+  } else {
+    renderLineChart();
+  }
+}
+
+function addSwipeDetection(canvas) {
+  let startX = 0;
+  let startY = 0;
+  
+  canvas.addEventListener('touchstart', (e) => {
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+  }, { passive: true });
+  
+  canvas.addEventListener('touchend', (e) => {
+    if (!e.changedTouches || e.changedTouches.length === 0) return;
+    
+    const endX = e.changedTouches[0].clientX;
+    const endY = e.changedTouches[0].clientY;
+    const deltaX = endX - startX;
+    const deltaY = endY - startY;
+    
+    // Check if it's a horizontal swipe (more horizontal than vertical movement)
+    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 50) {
+      // Switch chart type
+      currentChartType = currentChartType === 'donut' ? 'line' : 'donut';
+      renderChart();
+    }
+  }, { passive: true });
 }
 
 function switchTab(name) {
@@ -452,7 +641,7 @@ function switchTab(name) {
     screenTitle.textContent = "Summary";
     if (optionsMenu) optionsMenu.classList.remove("open");
     // ensure chart reflects latest data
-    renderDonut();
+    renderChart();
   }
 }
 
@@ -592,7 +781,7 @@ function renderList() {
           populateCategories();
           computeTotals();
           renderList();
-          if (!summaryTabEl.classList.contains("hidden")) renderDonut();
+          if (!summaryTabEl.classList.contains("hidden")) renderChart();
           return; // element removed; do not animate back
         }
       }
@@ -656,9 +845,6 @@ addBtn.addEventListener("click", () => {
   const submitBtn = txForm.querySelector('button[type="submit"]');
   if (submitBtn) submitBtn.textContent = "Save";
   openModal();
-});
-$("backBtn").addEventListener("click", () => {
-  alert("Back pressed — integrate with routing if needed.");
 });
 closeModal.addEventListener("click", closeModalFn);
 // Options menu events
@@ -762,7 +948,7 @@ txForm.addEventListener("submit", (e) => {
   computeTotals();
   renderList();
   // update chart if on summary tab
-  if (!summaryTabEl.classList.contains("hidden")) renderDonut();
+  if (!summaryTabEl.classList.contains("hidden")) renderChart();
   editId = null;
   const modalTitle = document.getElementById("modalTitle");
   if (modalTitle) modalTitle.textContent = "Add Transaction";
@@ -788,7 +974,7 @@ function setDateFilter(filter) {
   
   computeTotals();
   renderList();
-  if (!summaryTabEl.classList.contains("hidden")) renderDonut();
+  if (!summaryTabEl.classList.contains("hidden")) renderChart();
 }
 
 // Add event listeners for date filter buttons
@@ -813,7 +999,7 @@ function setSummaryDateFilter(filter) {
   }
   
   // Update chart
-  renderDonut();
+  renderChart();
 }
 
 // Add event listeners for summary page date filter buttons
@@ -824,22 +1010,22 @@ summaryFilterCustom.addEventListener("click", () => setSummaryDateFilter("custom
 
 // Handle summary custom date range changes
 summaryStartDate.addEventListener("change", () => {
-  if (summaryDateFilter === "custom") renderDonut();
+  if (summaryDateFilter === "custom") renderChart();
 });
 summaryEndDate.addEventListener("change", () => {
-  if (summaryDateFilter === "custom") renderDonut();
+  if (summaryDateFilter === "custom") renderChart();
 });
 
 // Handle custom date range changes
 startDate.addEventListener("change", () => {
   computeTotals();
   renderList();
-  if (!summaryTabEl.classList.contains("hidden")) renderDonut();
+  if (!summaryTabEl.classList.contains("hidden")) renderChart();
 });
 endDate.addEventListener("change", () => {
   computeTotals();
   renderList();
-  if (!summaryTabEl.classList.contains("hidden")) renderDonut();
+  if (!summaryTabEl.classList.contains("hidden")) renderChart();
 });
 
 filterType.addEventListener("change", renderList);
@@ -948,5 +1134,5 @@ document.addEventListener("DOMContentLoaded", () => {
   computeTotals();
   renderList();
   // initial chart render (will no-op if canvas missing)
-  renderDonut();
+  renderChart();
 });
