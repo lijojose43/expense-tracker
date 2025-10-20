@@ -354,6 +354,17 @@ html:not([data-theme="dark"]) .summary .card:nth-child(3) {
   box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.18);
 }
 
+/* Enhanced placeholder visibility for date inputs */
+.custom-date-range input::placeholder {
+  color: rgba(2, 6, 23, 0.6);
+  font-weight: 400;
+}
+
+[data-theme="dark"] .custom-date-range input::placeholder {
+  color: rgba(148, 163, 184, 0.8); /* More visible in dark mode */
+  font-weight: 400;
+}
+
 [data-theme="dark"] .filter-btn {
   border-color: rgba(148, 163, 184, 0.2);
 }
@@ -704,7 +715,7 @@ footer {
 /* Floating Action Button */
 .fab {
   position: fixed;
-  bottom: 120px; /* Moved higher above bottom navbar */
+  bottom: 88px; /* Adjusted for smaller navbar */
   right: 20px;
   width: 56px; /* Restored larger size */
   height: 56px; /* Restored larger size */
@@ -741,7 +752,7 @@ footer {
 /* Additional spacing for devices with safe areas (iPhone) */
 @supports (padding: max(0px)) {
   .fab {
-    bottom: calc(120px + env(safe-area-inset-bottom, 0px));
+    bottom: calc(88px + env(safe-area-inset-bottom, 0px));
     right: calc(20px + env(safe-area-inset-right, 0px));
   }
 }
@@ -954,6 +965,12 @@ footer {
     display: none !important;
     width: 0 !important;
     height: 0 !important;
+  }
+
+  /* Increase width of custom date inputs on mobile */
+  .custom-date-range input {
+    min-width: 180px; /* Wider on mobile */
+    flex: 1;
   }
 
 }
