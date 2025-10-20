@@ -58,7 +58,8 @@ body {
   min-height: 100vh;
   display: block;
   padding: 0;
-  padding-bottom: 96px; /* keep space for bottom bar */
+  padding-bottom: 80px; /* Adjusted space for smaller bottom bar */
+  overflow-x: hidden; /* Prevent horizontal scroll */
 }
 [data-theme="dark"] body,
 [data-theme="dark"] {
@@ -69,10 +70,23 @@ body {
   max-width: none;
   background: transparent;
   border-radius: 0;
-  padding-bottom: 72px;
+  padding-bottom: 60px; /* Adjusted for smaller navbar */
   box-shadow: none;
   position: relative;
   overflow-x: hidden; /* Prevent horizontal scroll in app container */
+}
+
+/* Create scrollbar-free zone above bottom navbar */
+.app::after {
+  content: '';
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60px; /* Height of navbar area */
+  background: transparent;
+  z-index: 899; /* Just below navbar */
+  pointer-events: none;
 }
 .topbar {
   display: flex;
@@ -687,6 +701,8 @@ footer {
   padding-bottom: calc(6px + constant(safe-area-inset-bottom, 0px));
   z-index: 900;
   box-shadow: 0 -2px 12px rgba(2, 6, 23, 0.08);
+  /* Ensure no scrollbar appears over navbar */
+  overflow: hidden;
 }
 [data-theme="dark"] .bottombar {
   box-shadow: 0 -2px 12px rgba(2, 6, 23, 0.6);
