@@ -59,7 +59,7 @@ const importFileInput = $("importFile");
 // Options menu controls
 const optionsBtn = $("optionsBtn");
 const optionsMenu = $("optionsMenu");
-const themeOption = $("themeOption");
+const themeToggle = $("themeToggle");
 const exportOption = $("exportOption");
 const importOption = $("importOption");
 // Tabs and title
@@ -103,14 +103,14 @@ function setThemeMetaColor(theme) {
   meta.setAttribute("content", color);
 }
 function setThemeIcon(theme) {
-  const icon = document.getElementById("themeIcon");
-  if (!icon) return;
-  // Sun (light) vs Moon (dark)
-  if (theme === "light") {
-    icon.innerHTML = '<circle cx="12" cy="12" r="5"></circle><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path>';
-  } else {
-    icon.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 1 0 9.79 9.79z"></path>';
-  }
+  const sunIcon = document.getElementById("sunIcon");
+  const moonIcon = document.getElementById("moonIcon");
+  
+  if (!sunIcon || !moonIcon) return;
+  
+  // The CSS handles the visibility based on data-theme attribute
+  // This function can be used for any additional icon logic if needed
+  // Icons will automatically show/hide based on the theme via CSS
 }
 function applyTheme(theme) {
   const chosen =
@@ -685,15 +685,14 @@ document.addEventListener("click", (e) => {
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape") closeMenu();
 });
-if (themeOption) {
-  themeOption.addEventListener("click", () => {
+if (themeToggle) {
+  themeToggle.addEventListener("click", () => {
     const current =
       document.documentElement.getAttribute("data-theme") ||
       (systemPrefersDark() ? "dark" : "light");
     const next = current === "dark" ? "light" : "dark";
     localStorage.setItem(THEME_KEY, next);
     applyTheme(next);
-    closeMenu();
   });
 }
 if (exportOption) {

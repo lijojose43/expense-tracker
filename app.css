@@ -70,6 +70,41 @@ body {
   color: inherit;
   cursor: pointer;
 }
+
+/* Theme toggle icon styling */
+.theme-icon {
+  transition: all 0.3s ease;
+  opacity: 1;
+}
+
+.theme-icon.hidden {
+  opacity: 0;
+  transform: rotate(180deg) scale(0.8);
+}
+
+/* Show sun icon in light mode, hide moon */
+html:not([data-theme="dark"]) #sunIcon {
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
+}
+
+html:not([data-theme="dark"]) #moonIcon {
+  opacity: 0;
+  transform: rotate(180deg) scale(0.8);
+  position: absolute;
+}
+
+/* Show moon icon in dark mode, hide sun */
+[data-theme="dark"] #moonIcon {
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
+}
+
+[data-theme="dark"] #sunIcon {
+  opacity: 0;
+  transform: rotate(-180deg) scale(0.8);
+  position: absolute;
+}
 .primary {
   background: var(--accent);
   color: white;
@@ -630,10 +665,10 @@ footer {
 /* Floating Action Button */
 .fab {
   position: fixed;
-  bottom: 88px; /* Above bottom navbar */
+  bottom: 104px; /* Higher above bottom navbar for iPhone safe area */
   right: 20px;
-  width: 56px;
-  height: 56px;
+  width: 48px; /* Smaller size */
+  height: 48px; /* Smaller size */
   border-radius: 50%;
   background: var(--accent);
   color: white;
@@ -662,6 +697,14 @@ footer {
 
 [data-theme="dark"] .fab:hover {
   box-shadow: 0 6px 20px rgba(96, 165, 250, 0.4);
+}
+
+/* Additional spacing for devices with safe areas (iPhone) */
+@supports (padding: max(0px)) {
+  .fab {
+    bottom: calc(104px + env(safe-area-inset-bottom, 0px));
+    right: calc(20px + env(safe-area-inset-right, 0px));
+  }
 }
 
 /* PWA Install Popup */
