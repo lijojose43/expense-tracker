@@ -21,6 +21,20 @@
 * {
   box-sizing: border-box;
 }
+
+/* Hide all scrollbars globally */
+* {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+}
+
+*::-webkit-scrollbar {
+  display: none; /* Safari and Chrome */
+}
+
+html, body {
+  overflow-x: hidden; /* Prevent horizontal scroll */
+}
 body {
   margin: 0;
   background: var(--bg);
@@ -43,6 +57,7 @@ body {
   padding-bottom: 72px;
   box-shadow: none;
   position: relative;
+  overflow-x: hidden; /* Prevent horizontal scroll in app container */
 }
 .topbar {
   display: flex;
@@ -82,25 +97,25 @@ body {
   transform: rotate(180deg) scale(0.8);
 }
 
-/* Show sun icon in light mode, hide moon */
-html:not([data-theme="dark"]) #sunIcon {
+/* Show moon icon in light mode (to switch to dark), hide sun */
+html:not([data-theme="dark"]) #moonIcon {
   opacity: 1;
   transform: rotate(0deg) scale(1);
 }
 
-html:not([data-theme="dark"]) #moonIcon {
+html:not([data-theme="dark"]) #sunIcon {
   opacity: 0;
   transform: rotate(180deg) scale(0.8);
   position: absolute;
 }
 
-/* Show moon icon in dark mode, hide sun */
-[data-theme="dark"] #moonIcon {
+/* Show sun icon in dark mode (to switch to light), hide moon */
+[data-theme="dark"] #sunIcon {
   opacity: 1;
   transform: rotate(0deg) scale(1);
 }
 
-[data-theme="dark"] #sunIcon {
+[data-theme="dark"] #moonIcon {
   opacity: 0;
   transform: rotate(-180deg) scale(0.8);
   position: absolute;
@@ -123,6 +138,7 @@ html:not([data-theme="dark"]) #moonIcon {
 }
 .content {
   padding: 16px;
+  overflow-x: hidden; /* Prevent horizontal scroll in content areas */
 }
 
 /* Options dropdown */
@@ -230,25 +246,6 @@ html:not([data-theme="dark"]) .summary .card:nth-child(3) {
   align-items: center;
   overflow-x: auto;
   padding-bottom: 4px;
-  scrollbar-width: thin;
-  scrollbar-color: var(--muted) transparent;
-}
-
-.filters::-webkit-scrollbar {
-  height: 6px;
-}
-
-.filters::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.filters::-webkit-scrollbar-thumb {
-  background: var(--muted);
-  border-radius: 3px;
-}
-
-.filters::-webkit-scrollbar-thumb:hover {
-  background: var(--accent);
 }
 .filters select,
 .filters input {
@@ -327,6 +324,7 @@ html:not([data-theme="dark"]) .summary .card:nth-child(3) {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  overflow-x: hidden; /* Prevent horizontal scroll in transactions list */
 }
 
 /* Global form controls */
@@ -702,7 +700,7 @@ footer {
 /* Additional spacing for devices with safe areas (iPhone) */
 @supports (padding: max(0px)) {
   .fab {
-    bottom: calc(104px + env(safe-area-inset-bottom, 0px));
+    bottom: calc(88px + env(safe-area-inset-bottom, 0px));
     right: calc(20px + env(safe-area-inset-right, 0px));
   }
 }
