@@ -616,10 +616,14 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
   background: var(--card);
   padding: 10px 28px 23px 28px;
   border-radius: 12px;
+  border: 1px solid rgba(2, 6, 23, 0.06);
+  box-shadow: 0 20px 40px rgba(2, 6, 23, 0.15);
 }
 [data-theme="dark"] .modal-content {
   /* Help native controls (select dropdown) render with dark palette */
   color-scheme: dark;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
 }
 .modal-content header {
   display: flex;
