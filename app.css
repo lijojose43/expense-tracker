@@ -664,6 +664,157 @@ footer {
   box-shadow: 0 6px 20px rgba(96, 165, 250, 0.4);
 }
 
+/* PWA Install Popup */
+.pwa-popup {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(2, 6, 23, 0.5);
+  backdrop-filter: blur(8px);
+  z-index: 1200;
+  padding: 20px;
+}
+
+.pwa-popup.hide {
+  display: none;
+}
+
+.pwa-popup-content {
+  background: var(--card);
+  border-radius: 16px;
+  box-shadow: 0 20px 40px rgba(2, 6, 23, 0.2);
+  max-width: 400px;
+  width: 100%;
+  overflow: hidden;
+  border: 1px solid rgba(2, 6, 23, 0.1);
+}
+
+[data-theme="dark"] .pwa-popup-content {
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+  border-color: rgba(148, 163, 184, 0.2);
+}
+
+.pwa-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 20px 0 20px;
+}
+
+.pwa-icon {
+  width: 48px;
+  height: 48px;
+  background: var(--accent);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.pwa-close {
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background 0.2s ease;
+}
+
+.pwa-close:hover {
+  background: rgba(2, 6, 23, 0.05);
+}
+
+[data-theme="dark"] .pwa-close:hover {
+  background: rgba(148, 163, 184, 0.1);
+}
+
+.pwa-body {
+  padding: 20px;
+}
+
+.pwa-body h3 {
+  margin: 0 0 8px 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: inherit;
+}
+
+.pwa-body p {
+  margin: 0 0 16px 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.pwa-features {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pwa-feature {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.pwa-feature svg {
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.pwa-actions {
+  display: flex;
+  gap: 12px;
+  padding: 0 20px 20px 20px;
+}
+
+.pwa-install-btn {
+  flex: 1;
+  background: var(--accent);
+  color: white;
+  border: none;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.pwa-install-btn:hover {
+  background: #1c7ed6;
+}
+
+.pwa-later-btn {
+  flex: 1;
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid rgba(2, 6, 23, 0.12);
+  padding: 12px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pwa-later-btn:hover {
+  background: rgba(2, 6, 23, 0.04);
+  color: inherit;
+}
+
+[data-theme="dark"] .pwa-later-btn {
+  border-color: rgba(148, 163, 184, 0.2);
+}
+
+[data-theme="dark"] .pwa-later-btn:hover {
+  background: rgba(148, 163, 184, 0.1);
+}
+
 /* Mobile refinements (e.g., iPhone 12) */
 @media (max-width: 420px) {
   /* Improve tap targets and avoid iOS zooming */

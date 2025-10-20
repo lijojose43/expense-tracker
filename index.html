@@ -120,6 +120,50 @@
   <!-- Hidden file input for importing JSON -->
   <input id="importFile" type="file" accept="application/json" style="display:none" />
 
+  <!-- PWA Install Popup -->
+  <div id="pwaInstallPopup" class="pwa-popup hide">
+    <div class="pwa-popup-content">
+      <div class="pwa-header">
+        <div class="pwa-icon">
+          <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+            <polyline points="3.27,6.96 12,12.01 20.73,6.96"/>
+            <line x1="12" y1="22.08" x2="12" y2="12"/>
+          </svg>
+        </div>
+        <button id="pwaCloseBtn" class="pwa-close">✕</button>
+      </div>
+      <div class="pwa-body">
+        <h3>Install Expense Tracker</h3>
+        <p>Get quick access and a better experience by installing this app on your device.</p>
+        <div class="pwa-features">
+          <div class="pwa-feature">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+            <span>Works offline</span>
+          </div>
+          <div class="pwa-feature">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+            </svg>
+            <span>Fast & reliable</span>
+          </div>
+          <div class="pwa-feature">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            </svg>
+            <span>Home screen access</span>
+          </div>
+        </div>
+      </div>
+      <div class="pwa-actions">
+        <button id="pwaInstallBtn" class="pwa-install-btn">Install App</button>
+        <button id="pwaLaterBtn" class="pwa-later-btn">Maybe Later</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Add / Edit Modal -->
   <div id="modal" class="modal hide" role="dialog" aria-modal="true">
     <div class="modal-content">
@@ -134,7 +178,7 @@
         <label>Date</label>
         <input id="date" type="date" required/>
         <label>Description (optional)</label>
-        <input id="description" type="text" placeholder="Grocery, Salary..." />
+        <textarea id="description" rows="5" placeholder="Grocery, Salary..."></textarea>
         <div class="actions">
           <button type="submit" class="primary">Save</button>
         </div>

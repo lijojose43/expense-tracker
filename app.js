@@ -48,6 +48,12 @@ const summaryStartDate = $("summaryStartDate");
 const summaryEndDate = $("summaryEndDate");
 let currentDateFilter = "all";
 let summaryDateFilter = "all";
+// PWA Install
+let deferredPrompt;
+const pwaInstallPopup = $("pwaInstallPopup");
+const pwaInstallBtn = $("pwaInstallBtn");
+const pwaLaterBtn = $("pwaLaterBtn");
+const pwaCloseBtn = $("pwaCloseBtn");
 // Import/Export controls (hidden file input kept)
 const importFileInput = $("importFile");
 // Options menu controls
@@ -71,7 +77,10 @@ function save() {
 
 function formatMoney(n) {
   const sign = n < 0 ? "-" : "";
-  return sign + "₹" + Math.abs(n).toFixed(2);
+  const amount = Math.abs(n).toFixed(2);
+  // Add comma separation for thousands
+  const formattedAmount = amount.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  return sign + "₹" + formattedAmount;
 }
 
 function uid() {
@@ -530,10 +539,12 @@ function renderList() {
     meta.appendChild(info);
     const amt = document.createElement("div");
     amt.className = "amount " + (t.type === "expense" ? "expense" : "income");
+    const amountValue = Math.abs(Number(t.amount)).toFixed(2);
+    const formattedAmount = amountValue.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     amt.textContent =
       (t.type === "expense" ? "-" : "+") +
       "₹" +
-      Math.abs(Number(t.amount)).toFixed(2);
+      formattedAmount;
     const actions = document.createElement("div");
     actions.className = "txActions"; // kept for layout spacing; no buttons inside
 
@@ -835,6 +846,101 @@ endDate.addEventListener("change", () => {
 filterType.addEventListener("change", renderList);
 filterCategory.addEventListener("change", renderList);
 searchInput.addEventListener("input", renderList);
+
+// PWA Install functionality
+function showPWAInstallPopup() {
+  if (pwaInstallPopup) {
+    pwaInstallPopup.classList.remove("hide");
+  }
+}
+
+function hidePWAInstallPopup() {
+  if (pwaInstallPopup) {
+    pwaInstallPopup.classList.add("hide");
+  }
+}
+
+function checkPWAInstallPrompt() {
+  // Check if user has already dismissed the popup recently
+  const lastDismissed = localStorage.getItem("pwa-install-dismissed");
+  const now = Date.now();
+  const oneWeek = 7 * 24 * 60 * 60 * 1000; // 1 week in milliseconds
+  
+  if (lastDismissed && (now - parseInt(lastDismissed)) < oneWeek) {
+    return; // Don't show popup if dismissed within last week
+  }
+  
+  // Check if already installed (running in standalone mode)
+  if (window.matchMedia('(display-mode: standalone)').matches) {
+    return; // Already installed
+  }
+  
+  // Show popup after 30 seconds if install prompt is available
+  if (deferredPrompt) {
+    setTimeout(showPWAInstallPopup, 30000);
+  }
+}
+
+// Listen for the beforeinstallprompt event
+window.addEventListener('beforeinstallprompt', (e) => {
+  // Prevent the mini-infobar from appearing on mobile
+  e.preventDefault();
+  // Save the event so it can be triggered later
+  deferredPrompt = e;
+  // Check if we should show our custom install popup
+  checkPWAInstallPrompt();
+});
+
+// Handle install button click
+if (pwaInstallBtn) {
+  pwaInstallBtn.addEventListener('click', async () => {
+    if (!deferredPrompt) {
+      // Fallback for browsers that don't support beforeinstallprompt
+      alert('To install this app:\n\n• Chrome/Edge: Click the install icon in the address bar\n• Safari: Tap Share → Add to Home Screen\n• Firefox: Menu → Install this site as an app');
+      hidePWAInstallPopup();
+      return;
+    }
+    
+    // Show the install prompt
+    deferredPrompt.prompt();
+    
+    // Wait for the user to respond to the prompt
+    const { outcome } = await deferredPrompt.userChoice;
+    
+    if (outcome === 'accepted') {
+      console.log('User accepted the install prompt');
+    } else {
+      console.log('User dismissed the install prompt');
+    }
+    
+    // Clear the deferredPrompt
+    deferredPrompt = null;
+    hidePWAInstallPopup();
+  });
+}
+
+// Handle "Maybe Later" button click
+if (pwaLaterBtn) {
+  pwaLaterBtn.addEventListener('click', () => {
+    localStorage.setItem("pwa-install-dismissed", Date.now().toString());
+    hidePWAInstallPopup();
+  });
+}
+
+// Handle close button click
+if (pwaCloseBtn) {
+  pwaCloseBtn.addEventListener('click', () => {
+    localStorage.setItem("pwa-install-dismissed", Date.now().toString());
+    hidePWAInstallPopup();
+  });
+}
+
+// Listen for successful app installation
+window.addEventListener('appinstalled', () => {
+  console.log('PWA was installed');
+  hidePWAInstallPopup();
+  deferredPrompt = null;
+});
 
 document.addEventListener("DOMContentLoaded", () => {
   // initialize theme
