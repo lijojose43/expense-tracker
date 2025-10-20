@@ -30,10 +30,25 @@
 
 *::-webkit-scrollbar {
   display: none; /* Safari and Chrome */
+  width: 0 !important;
+  height: 0 !important;
+}
+
+*::-webkit-scrollbar-track {
+  display: none !important;
+}
+
+*::-webkit-scrollbar-thumb {
+  display: none !important;
+}
+
+*::-webkit-scrollbar-corner {
+  display: none !important;
 }
 
 html, body {
   overflow-x: hidden; /* Prevent horizontal scroll */
+  -webkit-overflow-scrolling: touch; /* iOS smooth scrolling */
 }
 body {
   margin: 0;
@@ -622,13 +637,13 @@ footer {
   display: flex;
   justify-content: space-around;
   gap: 8px;
-  padding: 6px 12px; /* Reduced padding for smaller navbar */
+  padding: 8px 12px; /* Restored original padding */
   /* Safe areas for iPhone */
-  padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px));
+  padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
   padding-left: calc(12px + env(safe-area-inset-left, 0px));
   padding-right: calc(12px + env(safe-area-inset-right, 0px));
   /* Legacy Safari fallback */
-  padding-bottom: calc(6px + constant(safe-area-inset-bottom, 0px));
+  padding-bottom: calc(8px + constant(safe-area-inset-bottom, 0px));
   z-index: 900;
   box-shadow: 0 -2px 12px rgba(2, 6, 23, 0.08);
 }
@@ -640,17 +655,17 @@ footer {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px; /* Reduced gap for smaller navbar */
+  gap: 4px; /* Restored original gap */
   background: transparent;
   border: none;
-  padding: 8px 6px; /* Reduced padding for smaller navbar */
-  border-radius: 8px;
+  padding: 10px 8px; /* Restored original padding */
+  border-radius: 10px;
   color: var(--muted);
   cursor: pointer;
-  min-height: 40px; /* Slightly smaller but still accessible */
+  min-height: 44px; /* Apple HIG minimum touch target */
 }
 .bottombar .tab span {
-  font-size: 11px; /* Smaller text for compact navbar */
+  font-size: 13px; /* Restored original font size */
 }
 .bottombar .tab.active {
   background: rgba(30, 144, 255, 0.1);
@@ -663,7 +678,7 @@ footer {
 /* Floating Action Button */
 .fab {
   position: fixed;
-  bottom: 104px; /* Higher above bottom navbar for iPhone safe area */
+  bottom: 120px; /* Moved higher above bottom navbar */
   right: 20px;
   width: 56px; /* Restored larger size */
   height: 56px; /* Restored larger size */
@@ -700,7 +715,7 @@ footer {
 /* Additional spacing for devices with safe areas (iPhone) */
 @supports (padding: max(0px)) {
   .fab {
-    bottom: calc(88px + env(safe-area-inset-bottom, 0px));
+    bottom: calc(120px + env(safe-area-inset-bottom, 0px));
     right: calc(20px + env(safe-area-inset-right, 0px));
   }
 }
@@ -875,25 +890,44 @@ footer {
     background-color: #fff;
   }
 
-  /* Make bottom navbar even more compact on iPhone */
-  .bottombar {
-    padding: 4px 12px; /* Even more compact on mobile */
-    padding-bottom: calc(4px + env(safe-area-inset-bottom, 0px));
-    padding-bottom: calc(4px + constant(safe-area-inset-bottom, 0px));
+  /* Force hide scrollbars on mobile/iPhone */
+  * {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+  
+  *::-webkit-scrollbar {
+    display: none !important;
+    width: 0px !important;
+    height: 0px !important;
+    background: transparent !important;
+  }
+  
+  *::-webkit-scrollbar-track {
+    display: none !important;
+    background: transparent !important;
+  }
+  
+  *::-webkit-scrollbar-thumb {
+    display: none !important;
+    background: transparent !important;
+  }
+  
+  /* Additional iOS-specific scrollbar hiding */
+  body, html, .app, .content, .filters, .transactions {
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none !important;
+  }
+  
+  body::-webkit-scrollbar,
+  html::-webkit-scrollbar,
+  .app::-webkit-scrollbar,
+  .content::-webkit-scrollbar,
+  .filters::-webkit-scrollbar,
+  .transactions::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
   }
 
-  .bottombar .tab {
-    padding: 6px 4px; /* More compact tab padding */
-    min-height: 36px; /* Smaller minimum height for mobile */
-    gap: 1px; /* Minimal gap between icon and text */
-  }
-
-  .bottombar .tab span {
-    font-size: 10px; /* Even smaller text on mobile */
-  }
-
-  /* Adjust FAB position for smaller navbar */
-  .fab {
-    bottom: 88px; /* Adjusted for smaller navbar */
-  }
 }
