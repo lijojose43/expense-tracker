@@ -278,15 +278,23 @@ html:not([data-theme="dark"]) .summary .card:nth-child(3) {
   gap: 8px;
   margin-bottom: 12px;
   align-items: center;
+  overflow-x: auto;
+  padding-bottom: 4px;
 }
 
 .custom-date-range input {
   flex: 1;
-  padding: 8px;
+  min-width: 140px;
+  padding: 12px;
   border-radius: 8px;
   border: 1px solid rgba(2, 6, 23, 0.12);
   background: var(--card);
   color: inherit;
+  cursor: pointer;
+  font-size: inherit;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  text-align: center;
 }
 
 .date-filter-buttons {
@@ -324,8 +332,26 @@ html:not([data-theme="dark"]) .summary .card:nth-child(3) {
   border-color: rgba(148, 163, 184, 0.2);
 }
 
+.custom-date-range input:hover {
+  background: rgba(2, 6, 23, 0.04);
+}
+
+.custom-date-range input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.25);
+}
+
 [data-theme="dark"] .custom-date-range input {
   border-color: rgba(148, 163, 184, 0.2);
+}
+
+[data-theme="dark"] .custom-date-range input:hover {
+  background: rgba(148, 163, 184, 0.1);
+}
+
+[data-theme="dark"] .custom-date-range input:focus {
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.18);
 }
 
 [data-theme="dark"] .filter-btn {
@@ -636,14 +662,14 @@ footer {
   border-top: 1px solid rgba(2, 6, 23, 0.06);
   display: flex;
   justify-content: space-around;
-  gap: 8px;
-  padding: 8px 12px; /* Restored original padding */
+  gap: 6px;
+  padding: 6px 12px; /* Smaller padding */
   /* Safe areas for iPhone */
-  padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+  padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px));
   padding-left: calc(12px + env(safe-area-inset-left, 0px));
   padding-right: calc(12px + env(safe-area-inset-right, 0px));
   /* Legacy Safari fallback */
-  padding-bottom: calc(8px + constant(safe-area-inset-bottom, 0px));
+  padding-bottom: calc(6px + constant(safe-area-inset-bottom, 0px));
   z-index: 900;
   box-shadow: 0 -2px 12px rgba(2, 6, 23, 0.08);
 }
@@ -655,17 +681,17 @@ footer {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px; /* Restored original gap */
+  gap: 3px; /* Smaller gap */
   background: transparent;
   border: none;
-  padding: 10px 8px; /* Restored original padding */
-  border-radius: 10px;
+  padding: 8px 6px; /* Smaller padding */
+  border-radius: 8px;
   color: var(--muted);
   cursor: pointer;
-  min-height: 44px; /* Apple HIG minimum touch target */
+  min-height: 40px; /* Slightly smaller but still accessible */
 }
 .bottombar .tab span {
-  font-size: 13px; /* Restored original font size */
+  font-size: 12px; /* Slightly smaller font */
 }
 .bottombar .tab.active {
   background: rgba(30, 144, 255, 0.1);
