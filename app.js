@@ -26,6 +26,7 @@ const modal = $("modal");
 const addBtn = $("addBtn");
 const closeModal = $("closeModal");
 const txForm = $("txForm");
+const cancelBtn = $("cancelBtn");
 const categorySelect = $("category");
 const filterCategory = $("filterCategory");
 const filterType = $("filterType");
@@ -669,6 +670,7 @@ addBtn.addEventListener("click", () => {
   openModal();
 });
 closeModal.addEventListener("click", closeModalFn);
+if (cancelBtn) cancelBtn.addEventListener("click", closeModalFn);
 // Options menu events
 function closeMenu() {
   if (optionsMenu) optionsMenu.classList.remove("open");
