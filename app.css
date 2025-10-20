@@ -624,13 +624,13 @@ footer {
   display: flex;
   justify-content: space-around;
   gap: 8px;
-  padding: 8px 12px;
+  padding: 6px 12px; /* Reduced padding for smaller navbar */
   /* Safe areas for iPhone */
-  padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+  padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px));
   padding-left: calc(12px + env(safe-area-inset-left, 0px));
   padding-right: calc(12px + env(safe-area-inset-right, 0px));
   /* Legacy Safari fallback */
-  padding-bottom: calc(8px + constant(safe-area-inset-bottom, 0px));
+  padding-bottom: calc(6px + constant(safe-area-inset-bottom, 0px));
   z-index: 900;
   box-shadow: 0 -2px 12px rgba(2, 6, 23, 0.08);
 }
@@ -642,17 +642,17 @@ footer {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 2px; /* Reduced gap for smaller navbar */
   background: transparent;
   border: none;
-  padding: 10px 8px; /* increase for larger tap targets */
-  border-radius: 10px;
+  padding: 8px 6px; /* Reduced padding for smaller navbar */
+  border-radius: 8px;
   color: var(--muted);
   cursor: pointer;
-  min-height: 44px; /* Apple HIG minimum touch target */
+  min-height: 40px; /* Slightly smaller but still accessible */
 }
 .bottombar .tab span {
-  font-size: 13px;
+  font-size: 11px; /* Smaller text for compact navbar */
 }
 .bottombar .tab.active {
   background: rgba(30, 144, 255, 0.1);
@@ -667,8 +667,8 @@ footer {
   position: fixed;
   bottom: 104px; /* Higher above bottom navbar for iPhone safe area */
   right: 20px;
-  width: 48px; /* Smaller size */
-  height: 48px; /* Smaller size */
+  width: 56px; /* Restored larger size */
+  height: 56px; /* Restored larger size */
   border-radius: 50%;
   background: var(--accent);
   color: white;
@@ -875,5 +875,27 @@ footer {
     -webkit-appearance: none;
     appearance: none;
     background-color: #fff;
+  }
+
+  /* Make bottom navbar even more compact on iPhone */
+  .bottombar {
+    padding: 4px 12px; /* Even more compact on mobile */
+    padding-bottom: calc(4px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(4px + constant(safe-area-inset-bottom, 0px));
+  }
+
+  .bottombar .tab {
+    padding: 6px 4px; /* More compact tab padding */
+    min-height: 36px; /* Smaller minimum height for mobile */
+    gap: 1px; /* Minimal gap between icon and text */
+  }
+
+  .bottombar .tab span {
+    font-size: 10px; /* Even smaller text on mobile */
+  }
+
+  /* Adjust FAB position for smaller navbar */
+  .fab {
+    bottom: 88px; /* Adjusted for smaller navbar */
   }
 }
