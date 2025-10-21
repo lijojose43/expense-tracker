@@ -1017,8 +1017,37 @@ footer {
 
   /* Increase width of custom date inputs on mobile */
   .custom-date-range input {
-    min-width: 180px; /* Wider on mobile */
-    flex: 1;
+    min-width: 220px; /* Wider on mobile */
+    flex: 1 0 220px;
+    height: 48px;
+    font-size: 17px; /* iOS: >=16px prevents zoom; 17px improves legibility */
   }
 
+}
+
+/* iOS Safari / PWA specific tweaks for date inputs */
+@supports (-webkit-touch-callout: none) {
+  /* Make date inputs look bigger on iPhone */
+  .custom-date-range input[type="date"] {
+    font-size: 17px;
+    min-height: 48px;
+    height: 48px;
+    line-height: 1.2;
+  }
+
+  /* Tweak internal date fields sizing */
+  .custom-date-range input[type="date"]::-webkit-datetime-edit,
+  .custom-date-range input[type="date"]::-webkit-datetime-edit-fields-wrapper,
+  .custom-date-range input[type="date"]::-webkit-datetime-edit-text,
+  .custom-date-range input[type="date"]::-webkit-datetime-edit-month-field,
+  .custom-date-range input[type="date"]::-webkit-datetime-edit-day-field,
+  .custom-date-range input[type="date"]::-webkit-datetime-edit-year-field {
+    padding: 0 2px;
+    font-size: 17px;
+  }
+
+  /* Slightly enlarge the calendar icon for better tap target perception */
+  .custom-date-range input[type="date"]::-webkit-calendar-picker-indicator {
+    transform: scale(1.15);
+  }
 }
