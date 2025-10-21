@@ -58,11 +58,15 @@ body {
   background: var(--bg);
   color: #0f172a;
   -webkit-font-smoothing: antialiased;
-  min-height: 100vh;
+  height: 100vh;
   display: block;
   padding: 0;
   padding-bottom: 80px; /* Adjusted space for smaller bottom bar */
   overflow-x: hidden; /* Prevent horizontal scroll */
+  overflow-y: auto; /* Allow vertical scroll but hide scrollbar */
+  /* Force hide scrollbars on all mobile devices */
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
 }
 [data-theme="dark"] body,
 [data-theme="dark"] {
@@ -81,18 +85,30 @@ body {
 
 /* Forcefully hide scrollbars in installed PWA only */
 @media (display-mode: standalone) {
-  /* Make header fixed to remove any scroll effect under it */
+  /* Make header sticky with safe area support for PWA */
   .topbar {
-    position: fixed;
+    position: -webkit-sticky;
+    position: sticky;
     top: 0;
     left: 0;
     right: 0;
+    z-index: 1000;
     padding-top: calc(16px + env(safe-area-inset-top, 0px));
+    background: var(--bg);
+    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(2, 6, 23, 0.08);
+    box-shadow: 0 1px 3px rgba(2, 6, 23, 0.1);
   }
 
-  /* Add extra top padding so content does not slide under fixed header */
+  [data-theme="dark"] .topbar {
+    border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  }
+
+  /* Add extra top padding for content in PWA mode */
   .content {
-    padding-top: calc(16px + var(--topbar-h));
+    padding-top: 16px;
     padding-bottom: calc(16px + var(--bottombar-h) + env(safe-area-inset-bottom, 0px));
   }
   html, body, .app, .content, .filters, .custom-date-range, .transactions {
@@ -152,16 +168,22 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  position: -webkit-sticky;
   position: sticky;
   top: 0;
-  z-index: 901;
+  z-index: 1000;
   padding: 16px 20px;
-  border-bottom: none;
+  border-bottom: 1px solid rgba(2, 6, 23, 0.08);
   background: var(--bg);
-  min-height: var(--topbar-h);
+  height: var(--topbar-h);
+  /* Enhanced sticky header for all screens */
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  box-shadow: 0 1px 3px rgba(2, 6, 23, 0.1);
 }
 [data-theme="dark"] .topbar {
-  border-bottom: none;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 .topbar h1 {
   margin: 0;
@@ -1128,6 +1150,46 @@ footer {
 
 [data-theme="dark"] .pwa-later-btn:hover {
   background: rgba(148, 163, 184, 0.1);
+}
+
+/* Enhanced mobile PWA scrollbar hiding */
+@media (max-width: 768px) {
+  body {
+    height: 100vh;
+    height: 100dvh; /* Dynamic viewport height for mobile */
+    overflow: hidden;
+  }
+  
+  .app {
+    height: 100vh;
+    height: 100dvh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+  
+  .app::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+  }
+}
+
+/* PWA standalone mode - complete scrollbar elimination */
+@media (display-mode: standalone) {
+  body, html, .app {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+  
+  body::-webkit-scrollbar,
+  html::-webkit-scrollbar,
+  .app::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+  }
 }
 
 /* Mobile refinements (e.g., iPhone 12) */

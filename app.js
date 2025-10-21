@@ -988,7 +988,7 @@ function checkPWAInstallPrompt() {
   // Show popup shortly after load if:
   // - install prompt is available (Android/Chromium), or
   // - on iOS Safari (no beforeinstallprompt), we still show guidance
-  const delayMs = 5000; // 5 seconds after first load
+  const delayMs = 2000; // 2 seconds after first load
   const ua = navigator.userAgent || '';
   const isIOS = /iPhone|iPad|iPod/i.test(ua);
   if (deferredPrompt || isIOS) {
