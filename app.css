@@ -374,10 +374,10 @@ html:not([data-theme="dark"]) .summary .card:nth-child(3) {
 }
 .filters {
   display: flex;
+  flex-direction: column;
   gap: 8px;
   margin-bottom: 12px;
-  align-items: center;
-  overflow-x: auto;
+  overflow-x: hidden;
   padding-bottom: 4px;
 }
 .filters select,
@@ -389,6 +389,20 @@ html:not([data-theme="dark"]) .summary .card:nth-child(3) {
   border: 1px solid rgba(2, 6, 23, 0.12);
   background: var(--card);
   color: inherit;
+}
+
+.filters-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.filters-row::-webkit-scrollbar {
+  display: none;
 }
 
 .custom-date-range {
@@ -421,18 +435,26 @@ html:not([data-theme="dark"]) .summary .card:nth-child(3) {
   display: flex;
   gap: 8px;
   flex-wrap: nowrap;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.date-filter-buttons::-webkit-scrollbar {
+  display: none;
 }
 
 .filter-btn {
-  flex: 1;
-  min-width: 180px;
-  padding: 12px;
+  flex: 0 0 auto;
+  min-width: 120px;
+  padding: 10px 16px;
   border: 1px solid rgba(2, 6, 23, 0.12);
   background: var(--card);
   color: inherit;
   border-radius: 8px;
   cursor: pointer;
-  font-size: inherit;
+  font-size: 14px;
   white-space: nowrap;
   transition: all 0.2s ease;
   text-align: center;
@@ -777,19 +799,29 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
 .modal-content form {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 18px;
   padding-top: 8px;
 }
 
 .modal-content form label {
-  margin-bottom: 2px; /* reduced space between label and its input */
-  margin-top: -8px; /* pull labels closer to previous input */
+  margin-bottom: 6px; /* space between label and its input */
+  margin-top: 0; /* no negative margin - let gap handle spacing */
   font-weight: 500;
   color: inherit;
 }
 
-.modal-content form label:first-of-type {
-  margin-top: 0; /* no negative margin for first label */
+/* Create field groups with proper spacing */
+.modal-content form input,
+.modal-content form select,
+.modal-content form .segmented {
+  margin-bottom: 0;
+}
+
+/* Reduce gap specifically between label and its following input */
+.modal-content form label + input,
+.modal-content form label + select,
+.modal-content form label + .segmented {
+  margin-top: -2px;
 }
 
 /* Segmented control for Type (Expense/Income) */
@@ -1162,6 +1194,26 @@ footer {
   background: rgba(148, 163, 184, 0.1);
 }
 
+/* Additional filter styling for better alignment */
+.filters {
+  align-items: stretch;
+}
+
+.filters-row select,
+.filters-row input {
+  height: 40px;
+  display: flex;
+  align-items: center;
+}
+
+/* Ensure consistent height for filter buttons */
+.filter-btn {
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 /* Enhanced mobile app experience */
 @media (max-width: 768px) {
   body {
@@ -1333,6 +1385,26 @@ footer {
     flex: 1 1 150px;
     height: 48px;
     font-size: 17px; /* iOS: >=16px prevents zoom; 17px improves legibility */
+  }
+
+  /* Ensure filter buttons are properly sized on mobile */
+  .filter-btn {
+    min-width: 100px;
+    padding: 8px 12px;
+    font-size: 13px;
+    height: 40px;
+  }
+
+  /* Make filters row more compact on mobile */
+  .filters-row {
+    gap: 6px;
+  }
+
+  .filters-row select,
+  .filters-row input {
+    min-width: 100px;
+    font-size: 16px; /* Prevent zoom on iOS */
+    height: 40px;
   }
 
 }
