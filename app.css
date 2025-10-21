@@ -49,6 +49,7 @@
 html, body {
   overflow-x: hidden; /* Prevent horizontal scroll */
   -webkit-overflow-scrolling: touch; /* iOS smooth scrolling */
+  overscroll-behavior: none; /* prevent bounce */
 }
 body {
   margin: 0;
@@ -74,6 +75,49 @@ body {
   box-shadow: none;
   position: relative;
   overflow-x: hidden; /* Prevent horizontal scroll in app container */
+}
+
+/* Forcefully hide scrollbars in installed PWA only */
+@media (display-mode: standalone) {
+  html, body, .app, .content, .filters, .custom-date-range, .transactions {
+    scrollbar-width: none !important; /* Firefox */
+    -ms-overflow-style: none !important; /* IE/Edge legacy */
+    overscroll-behavior: none;
+  }
+
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar,
+  .app::-webkit-scrollbar,
+  .content::-webkit-scrollbar,
+  .filters::-webkit-scrollbar,
+  .custom-date-range::-webkit-scrollbar,
+  .transactions::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    background: transparent !important;
+  }
+}
+
+/* Additional iOS PWA hardening */
+@supports (-webkit-touch-callout: none) {
+  html, body, .app, .content, .filters, .custom-date-range, .transactions {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+    overscroll-behavior: none;
+  }
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar,
+  .app::-webkit-scrollbar,
+  .content::-webkit-scrollbar,
+  .filters::-webkit-scrollbar,
+  .custom-date-range::-webkit-scrollbar,
+  .transactions::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    background: transparent !important;
+  }
 }
 
 /* Create scrollbar-free zone above bottom navbar */
@@ -172,6 +216,13 @@ html:not([data-theme="dark"]) #sunIcon {
   padding: 8px 12px;
   border-radius: 8px;
   cursor: pointer;
+}
+[data-theme="dark"] .secondary {
+  color: #e5e7eb; /* light text on dark bg */
+  border-color: rgba(148, 163, 184, 0.5);
+}
+[data-theme="dark"] .secondary:hover {
+  background: rgba(148, 163, 184, 0.1);
 }
 .content {
   padding: 16px;
@@ -552,6 +603,11 @@ html:not([data-theme="dark"]) .iconBox[data-cat="salary"] {
   color: #075985; /* sky-900 */
   border-color: #7dd3fc; /* sky-300 */
 }
+html:not([data-theme="dark"]) .iconBox[data-cat="business"] {
+  background: #f0fdfa; /* teal-50 */
+  color: #115e59; /* teal-800 */
+  border-color: #99f6e4; /* teal-200 */
+}
 html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
   background: #f5f5f5; /* neutral-100 */
   color: #262626; /* neutral-800 */
@@ -612,6 +668,13 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
   color: #d4d4d4; /* neutral-300 */
   border-color: #171717; /* neutral-900 */
 }
+
+/* Dark mode: Business */
+[data-theme="dark"] .iconBox[data-cat="business"] {
+  background: #134e4a; /* teal-900 */
+  color: #99f6e4; /* teal-200 */
+  border-color: #115e59; /* teal-800 */
+}
 .tx .title {
   font-weight: 600;
 }
@@ -635,15 +698,15 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(2, 6, 23, 0.3);
-  backdrop-filter: blur(4px);
+  background: rgba(2, 6, 23, 0.55); /* darker overlay */
+  backdrop-filter: blur(8px); /* stronger blur */
   z-index: 1100;
 }
 .modal.hide {
   display: none;
 }
 .modal-content {
-  width: 360px;
+  width: min(360px, 92vw);
   background: var(--card);
   padding: 10px 28px 23px 28px;
   border-radius: 12px;
@@ -667,6 +730,52 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
   gap: 8px;
   padding-top: 8px;
 }
+
+/* Segmented control for Type (Expense/Income) */
+.segmented {
+  display: flex;
+  gap: 8px;
+}
+.segmented input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.seg-btn {
+  flex: 1;
+  min-width: 120px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(2, 6, 23, 0.12);
+  background: var(--card);
+  color: inherit;
+  text-align: center;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.2s ease;
+}
+.seg-btn:hover {
+  background: rgba(2, 6, 23, 0.04);
+}
+.segmented input[type="radio"]:focus + .seg-btn {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(30, 144, 255, 0.25);
+}
+.segmented input[type="radio"]:checked + .seg-btn {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+[data-theme="dark"] .seg-btn {
+  border-color: rgba(148, 163, 184, 0.2);
+}
+[data-theme="dark"] .seg-btn:hover {
+  background: rgba(148, 163, 184, 0.1);
+}
+[data-theme="dark"] .segmented input[type="radio"]:focus + .seg-btn {
+  box-shadow: 0 0 0 3px rgba(30, 144, 255, 0.18);
+}
 .modal-content input,
 .modal-content select {
   padding: 10px;
@@ -688,6 +797,7 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
   justify-content: flex-end;
   padding-top: 8px;
   gap: 12px;
+  flex-wrap: wrap; /* allow buttons to wrap on small screens */
 }
 footer {
   padding: 12px;
@@ -704,6 +814,7 @@ footer {
   padding: 12px 18px;
   min-height: 44px; /* Comfortable touch target */
   border-radius: 10px;
+  flex: 1 1 140px; /* grow and wrap nicely */
 }
 
 /* Tabs / Bottom Navigation */
@@ -958,6 +1069,21 @@ footer {
 
 /* Mobile refinements (e.g., iPhone 12) */
 @media (max-width: 420px) {
+  .modal-content {
+    width: 92vw; /* ensure it fits on very small screens */
+    padding: 12px 16px 20px 16px; /* tighter padding to fit buttons */
+  }
+
+  .modal-content .actions {
+    justify-content: stretch; /* allow full-width buttons when wrapping */
+    flex-wrap: wrap; /* allow buttons to wrap */
+  }
+
+  .modal-content .actions .primary,
+  .modal-content .actions .secondary {
+    flex: 1 1 45%;
+    min-width: 45%; /* ensure buttons don't get too narrow */
+  }
   /* Improve tap targets and avoid iOS zooming */
   .filters select,
   .filters input,
@@ -965,6 +1091,12 @@ footer {
   .modal-content select {
     font-size: 16px; /* iOS: >=16px prevents zoom */
     min-height: 44px; /* Apple HIG minimum touch target */
+    padding: 12px;
+  }
+
+  /* Ensure segmented buttons are comfortable on mobile */
+  .seg-btn {
+    min-height: 44px;
     padding: 12px;
   }
 

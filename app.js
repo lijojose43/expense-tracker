@@ -12,6 +12,7 @@ const defaultCategories = [
   "Healthcare",
   "Entertainment",
   "Salary",
+  "Business",
   "Other",
 ];
 
@@ -86,6 +87,17 @@ function formatMoney(n) {
 
 function uid() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+}
+
+// --- Type (expense/income) radio helpers ---
+function getSelectedType() {
+  const checked = document.querySelector('input[name="type"]:checked');
+  return checked ? checked.value : 'expense';
+}
+
+function setSelectedType(val) {
+  const input = document.querySelector(`input[name="type"][value="${val}"]`);
+  if (input) input.checked = true;
 }
 
 // ---------- Theme handling ----------
@@ -411,6 +423,7 @@ function renderDonut() {
     healthcare: "#10b981", // emerald
     entertainment: "#eab308", // yellow
     salary: "#0ea5e9", // sky
+    business: "#14b8a6", // teal
     other: "#9ca3af", // neutral
   };
   const colors = labels.map((label, i) => categoryColors[catSlug(label)] || palette[i % palette.length]);
@@ -537,7 +550,12 @@ function renderList() {
     meta.className = "meta";
     const box = document.createElement("div");
     box.className = "iconBox";
+    // Set category initial and data attribute for styling
     box.textContent = t.category ? t.category[0] : "T";
+    try {
+      const slug = catSlug(t.category || "other");
+      box.setAttribute("data-cat", slug);
+    } catch (_) {}
     const info = document.createElement("div");
     const title = document.createElement("div");
     title.className = "title";
@@ -646,13 +664,16 @@ function openModal(defaults) {
   modal.classList.remove("hide");
   if (defaults) {
     $("amount").value = defaults.amount;
-    $("type").value = defaults.type;
+    // set radio selection for type
+    setSelectedType(defaults.type);
     $("category").value = defaults.category;
     $("date").value = toDateInputValue(defaults.date);
     $("description").value = defaults.description || "";
   } else {
     txForm.reset();
     $("date").value = new Date().toISOString().slice(0, 10);
+    // default to expense on new entry
+    setSelectedType("expense");
   }
 }
 
@@ -738,7 +759,7 @@ if (tabHome && tabSummary) {
 txForm.addEventListener("submit", (e) => {
   e.preventDefault();
   const amount = Number($("amount").value) || 0;
-  const type = $("type").value;
+  const type = getSelectedType();
   const category = $("category").value || "Other";
   const date = $("date").value;
   const description = $("description").value;
@@ -792,6 +813,10 @@ function setDateFilter(filter) {
   // Show/hide custom date range
   if (filter === "custom") {
     customDateRange.classList.remove("hidden");
+    // if empty, initialize to today's date so range is valid
+    const today = new Date().toISOString().slice(0, 10);
+    if (startDate && !startDate.value) startDate.value = today;
+    if (endDate && !endDate.value) endDate.value = today;
   } else {
     customDateRange.classList.add("hidden");
   }
@@ -818,12 +843,79 @@ function setSummaryDateFilter(filter) {
   // Show/hide custom date range for summary
   if (filter === "custom") {
     summaryCustomDateRange.classList.remove("hidden");
+    const today = new Date().toISOString().slice(0, 10);
+    if (summaryStartDate && !summaryStartDate.value) summaryStartDate.value = today;
+    if (summaryEndDate && !summaryEndDate.value) summaryEndDate.value = today;
   } else {
     summaryCustomDateRange.classList.add("hidden");
   }
   
   // Update chart
   renderChart();
+}
+
+// --- Mobile placeholder support for date inputs ---
+// On many mobile browsers/PWAs, placeholders on input[type="date"] are hidden until a value is set.
+// Workaround: when empty, present as type="text" (placeholder visible). On focus, switch to "date" and open picker.
+function enableMobileDatePlaceholder(input) {
+  if (!input) return;
+  const originalType = "date";
+  const ua = navigator.userAgent || "";
+  const isIOS = /iPhone|iPad|iPod/i.test(ua);
+  const isAndroid = /Android/i.test(ua);
+  const prefersSmallViewport = typeof window !== "undefined" &&
+    (window.matchMedia && window.matchMedia("(max-width: 420px)").matches);
+  const isMobile = isIOS || isAndroid || prefersSmallViewport;
+  if (!isMobile) return; // do not affect desktop UX
+
+  // Initialize as text if empty so placeholder shows
+  if (!input.value) input.type = "text";
+
+  input.addEventListener("focus", () => {
+    // Switch to date and try to show native picker
+    try {
+      input.type = originalType;
+      if (typeof input.showPicker === "function") {
+        // Give the browser a tick to apply the new type
+        setTimeout(() => {
+          try { input.showPicker(); } catch (_) {}
+        }, 0);
+      }
+    } catch (_) {
+      // no-op
+    }
+  });
+
+  input.addEventListener("blur", () => {
+    // If no value selected, revert to text so placeholder remains visible
+    if (!input.value) {
+      try { input.type = "text"; } catch (_) {}
+    }
+  });
+}
+
+function setupMobileDatePlaceholders() {
+  [startDate, endDate, summaryStartDate, summaryEndDate]
+    .filter(Boolean)
+    .forEach(enableMobileDatePlaceholder);
+}
+
+// Set today's date as default for all date inputs
+function setDefaultDatesToday() {
+  const today = new Date().toISOString().slice(0, 10);
+  const inputs = [
+    document.getElementById('date'),
+    startDate,
+    endDate,
+    summaryStartDate,
+    summaryEndDate,
+  ].filter(Boolean);
+  inputs.forEach((el) => {
+    if (!el.value) {
+      try { el.type = 'date'; } catch (_) {}
+      el.value = today;
+    }
+  });
 }
 
 // Add event listeners for summary page date filter buttons
@@ -857,6 +949,14 @@ filterCategory.addEventListener("change", renderList);
 searchInput.addEventListener("input", renderList);
 
 // PWA Install functionality
+function isStandalone() {
+  // Chrome/Edge PWA and iOS Safari added to home screen
+  return (
+    (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ||
+    (typeof navigator !== 'undefined' && 'standalone' in navigator && navigator.standalone === true)
+  );
+}
+
 function showPWAInstallPopup() {
   if (pwaInstallPopup) {
     pwaInstallPopup.classList.remove("hide");
@@ -880,13 +980,18 @@ function checkPWAInstallPrompt() {
   }
   
   // Check if already installed (running in standalone mode)
-  if (window.matchMedia('(display-mode: standalone)').matches) {
+  if (isStandalone()) {
     return; // Already installed
   }
   
-  // Show popup after 30 seconds if install prompt is available
-  if (deferredPrompt) {
-    setTimeout(showPWAInstallPopup, 30000);
+  // Show popup shortly after load if:
+  // - install prompt is available (Android/Chromium), or
+  // - on iOS Safari (no beforeinstallprompt), we still show guidance
+  const delayMs = 5000; // 5 seconds after first load
+  const ua = navigator.userAgent || '';
+  const isIOS = /iPhone|iPad|iPod/i.test(ua);
+  if (deferredPrompt || isIOS) {
+    setTimeout(showPWAInstallPopup, delayMs);
   }
 }
 
@@ -955,8 +1060,14 @@ document.addEventListener("DOMContentLoaded", () => {
   // initialize theme
   applyTheme();
   populateCategories();
+  // ensure date inputs have today's date by default
+  setDefaultDatesToday();
   computeTotals();
   renderList();
   // initial chart render (will no-op if canvas missing)
   renderChart();
+  // initialize mobile placeholder workaround for date inputs
+  setupMobileDatePlaceholders();
+  // attempt to show PWA install popup on first load (covers iOS which lacks beforeinstallprompt)
+  checkPWAInstallPrompt();
 });

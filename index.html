@@ -174,7 +174,12 @@
         <label>Amount</label>
         <input id="amount" type="number" inputmode="decimal" step="0.01" min="0" required placeholder="e.g. 25.00; select type below"/>
         <label>Type</label>
-        <select id="type"><option value="expense">Expense</option><option value="income">Income</option></select>
+        <div id="typeGroup" class="segmented" role="radiogroup" aria-label="Type">
+          <input type="radio" id="typeExpense" name="type" value="expense" checked>
+          <label for="typeExpense" class="seg-btn">Expense</label>
+          <input type="radio" id="typeIncome" name="type" value="income">
+          <label for="typeIncome" class="seg-btn">Income</label>
+        </div>
         <label>Category</label>
         <select id="category"></select>
         <label>Date</label>
