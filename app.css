@@ -745,8 +745,19 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
 .modal-content form {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 20px;
   padding-top: 8px;
+}
+
+.modal-content form label {
+  margin-bottom: 4px;
+  margin-top: -12px; /* pull labels closer to previous input */
+  font-weight: 500;
+  color: inherit;
+}
+
+.modal-content form label:first-of-type {
+  margin-top: 0; /* no negative margin for first label */
 }
 
 /* Segmented control for Type (Expense/Income) */
