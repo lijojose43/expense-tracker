@@ -2,6 +2,11 @@
 // Data: array of {id, amount (number), type: 'expense'|'income', category, date, description}
 const STORAGE_KEY = "expense-tracker-data-v1";
 
+// Mobile app enhancements
+let isRefreshing = false;
+let startY = 0;
+let pullDistance = 0;
+
 const defaultCategories = [
   "Groceries",
   "Dining",
@@ -88,6 +93,159 @@ function formatMoney(n) {
 
 function uid() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+}
+
+// Mobile app enhancement functions
+function hapticFeedback(type = 'light') {
+  if ('vibrate' in navigator) {
+    switch(type) {
+      case 'light':
+        navigator.vibrate(10);
+        break;
+      case 'medium':
+        navigator.vibrate(20);
+        break;
+      case 'heavy':
+        navigator.vibrate([30, 10, 30]);
+        break;
+      case 'success':
+        navigator.vibrate([50, 25, 50]);
+        break;
+      case 'error':
+        navigator.vibrate([100, 50, 100, 50, 100]);
+        break;
+    }
+  }
+}
+
+function showToast(message, type = 'info') {
+  // Create toast element
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+  toast.textContent = message;
+  
+  // Add to DOM
+  document.body.appendChild(toast);
+  
+  // Animate in
+  setTimeout(() => toast.classList.add('show'), 10);
+  
+  // Remove after delay
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => document.body.removeChild(toast), 300);
+  }, 3000);
+}
+
+function addNetworkStatusIndicator() {
+  // Create network status indicator
+  const indicator = document.createElement('div');
+  indicator.className = 'network-status';
+  indicator.innerHTML = '📶 Online';
+  document.body.appendChild(indicator);
+
+  function updateNetworkStatus() {
+    if (navigator.onLine) {
+      indicator.innerHTML = '📶 Online';
+      indicator.className = 'network-status online';
+    } else {
+      indicator.innerHTML = '📵 Offline';
+      indicator.className = 'network-status offline';
+      showToast('You are offline. Data will sync when connection is restored.', 'error');
+    }
+  }
+
+  // Listen for network changes
+  window.addEventListener('online', () => {
+    updateNetworkStatus();
+    showToast('Connection restored', 'success');
+    hapticFeedback('success');
+  });
+
+  window.addEventListener('offline', () => {
+    updateNetworkStatus();
+    hapticFeedback('error');
+  });
+
+  // Initial status
+  updateNetworkStatus();
+}
+
+function addPullToRefresh() {
+  const app = document.querySelector('.app');
+  if (!app) return;
+
+  let pullIndicator = document.createElement('div');
+  pullIndicator.className = 'pull-refresh-indicator';
+  pullIndicator.innerHTML = '↓ Pull to refresh';
+  app.insertBefore(pullIndicator, app.firstChild);
+
+  app.addEventListener('touchstart', (e) => {
+    if (app.scrollTop === 0 && !isRefreshing) {
+      startY = e.touches[0].clientY;
+    }
+  }, { passive: true });
+
+  app.addEventListener('touchmove', (e) => {
+    if (app.scrollTop === 0 && !isRefreshing && startY > 0) {
+      pullDistance = Math.max(0, e.touches[0].clientY - startY);
+      
+      if (pullDistance > 0) {
+        e.preventDefault();
+        const maxPull = 80;
+        const normalizedDistance = Math.min(pullDistance, maxPull);
+        
+        pullIndicator.style.transform = `translateY(${normalizedDistance}px)`;
+        pullIndicator.style.opacity = normalizedDistance / maxPull;
+        
+        if (pullDistance > 60) {
+          pullIndicator.innerHTML = '↑ Release to refresh';
+          pullIndicator.classList.add('ready');
+        } else {
+          pullIndicator.innerHTML = '↓ Pull to refresh';
+          pullIndicator.classList.remove('ready');
+        }
+      }
+    }
+  }, { passive: false });
+
+  app.addEventListener('touchend', () => {
+    if (pullDistance > 60 && !isRefreshing) {
+      triggerRefresh();
+    } else {
+      resetPullIndicator();
+    }
+    startY = 0;
+    pullDistance = 0;
+  });
+
+  function triggerRefresh() {
+    isRefreshing = true;
+    pullIndicator.innerHTML = '⟳ Refreshing...';
+    pullIndicator.classList.add('refreshing');
+    hapticFeedback('medium');
+    
+    // Simulate refresh (recalculate and re-render)
+    setTimeout(() => {
+      computeTotals();
+      renderList();
+      if (!summaryTabEl.classList.contains("hidden")) renderChart();
+      
+      showToast('Data refreshed', 'success');
+      hapticFeedback('success');
+      resetPullIndicator();
+      isRefreshing = false;
+    }, 1000);
+  }
+
+  function resetPullIndicator() {
+    pullIndicator.style.transform = 'translateY(-100%)';
+    pullIndicator.style.opacity = '0';
+    pullIndicator.classList.remove('ready', 'refreshing');
+    setTimeout(() => {
+      pullIndicator.innerHTML = '↓ Pull to refresh';
+    }, 300);
+  }
 }
 
 // --- Type (expense/income) radio helpers ---
@@ -617,13 +775,16 @@ function renderList() {
 
     el.addEventListener("touchend", () => {
       if (swiping && dx <= -80) {
+        hapticFeedback('medium');
         if (confirm("Delete this transaction?")) {
+          hapticFeedback('heavy');
           data = data.filter((x) => x.id !== t.id);
           save();
           populateCategories();
           computeTotals();
           renderList();
           if (!summaryTabEl.classList.contains("hidden")) renderChart();
+          showToast('Transaction deleted', 'error');
           return; // element removed; do not animate back
         }
       }
@@ -683,6 +844,7 @@ function closeModalFn() {
 }
 
 addBtn.addEventListener("click", () => {
+  hapticFeedback('light');
   populateCategories();
   editId = null;
   const modalTitle = document.getElementById("modalTitle");
@@ -719,12 +881,14 @@ document.addEventListener("keydown", (e) => {
 });
 if (themeToggle) {
   themeToggle.addEventListener("click", () => {
+    hapticFeedback('light');
     const current =
       document.documentElement.getAttribute("data-theme") ||
       (systemPrefersDark() ? "dark" : "light");
     const next = current === "dark" ? "light" : "dark";
     localStorage.setItem(THEME_KEY, next);
     applyTheme(next);
+    showToast(`Switched to ${next} theme`, 'info');
   });
 }
 if (exportOption) {
@@ -753,8 +917,14 @@ if (importOption && importFileInput) {
 }
 // Tab events
 if (tabHome && tabSummary) {
-  tabHome.addEventListener("click", () => switchTab("home"));
-  tabSummary.addEventListener("click", () => switchTab("summary"));
+  tabHome.addEventListener("click", () => {
+    hapticFeedback('light');
+    switchTab("home");
+  });
+  tabSummary.addEventListener("click", () => {
+    hapticFeedback('light');
+    switchTab("summary");
+  });
 }
 
 txForm.addEventListener("submit", (e) => {
@@ -795,6 +965,11 @@ txForm.addEventListener("submit", (e) => {
   renderList();
   // update chart if on summary tab
   if (!summaryTabEl.classList.contains("hidden")) renderChart();
+  
+  // Enhanced feedback for transaction save
+  hapticFeedback('success');
+  showToast(editId ? 'Transaction updated' : 'Transaction added', 'success');
+  
   editId = null;
   const modalTitle = document.getElementById("modalTitle");
   if (modalTitle) modalTitle.textContent = "Add Transaction";
@@ -1082,6 +1257,9 @@ document.addEventListener("DOMContentLoaded", () => {
   renderChart();
   // initialize mobile placeholder workaround for date inputs
   setupMobileDatePlaceholders();
+  // initialize mobile app enhancements
+  addPullToRefresh();
+  addNetworkStatusIndicator();
   // attempt to show PWA install popup on first load (covers iOS which lacks beforeinstallprompt)
   checkPWAInstallPrompt();
 });

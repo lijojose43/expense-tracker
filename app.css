@@ -782,8 +782,8 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
 }
 
 .modal-content form label {
-  margin-bottom: 4px;
-  margin-top: -12px; /* pull labels closer to previous input */
+  margin-bottom: 2px; /* reduced space between label and its input */
+  margin-top: -8px; /* pull labels closer to previous input */
   font-weight: 500;
   color: inherit;
 }
@@ -1162,14 +1162,14 @@ footer {
   background: rgba(148, 163, 184, 0.1);
 }
 
-/* Enhanced mobile PWA scrollbar hiding */
+/* Enhanced mobile app experience */
 @media (max-width: 768px) {
   body {
     height: 100vh;
     height: 100dvh; /* Dynamic viewport height for mobile */
     overflow: hidden;
   }
-  
+
   .app {
     height: 100vh;
     height: 100dvh;
@@ -1178,11 +1178,56 @@ footer {
     scrollbar-width: none !important;
     -ms-overflow-style: none !important;
   }
-  
+
   .app::-webkit-scrollbar {
     display: none !important;
     width: 0 !important;
     height: 0 !important;
+  }
+
+  /* Enhanced touch targets */
+  .icon, .tab, .fab, .filter-btn, .menu-item {
+    min-height: 44px;
+    min-width: 44px;
+    transition: all 0.2s ease;
+  }
+
+  /* Improved button feedback */
+  .icon:active, .tab:active, .filter-btn:active, .menu-item:active {
+    transform: scale(0.95);
+    background: rgba(0, 0, 0, 0.1);
+  }
+
+  [data-theme="dark"] .icon:active, 
+  [data-theme="dark"] .tab:active, 
+  [data-theme="dark"] .filter-btn:active, 
+  [data-theme="dark"] .menu-item:active {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  /* Enhanced FAB */
+  .fab {
+    box-shadow: 0 8px 24px rgba(30, 144, 255, 0.4);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .fab:active {
+    transform: scale(0.9);
+    box-shadow: 0 4px 12px rgba(30, 144, 255, 0.6);
+  }
+
+  /* Smooth card interactions */
+  .card, .tx {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .tx:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 8px rgba(2, 6, 23, 0.15);
+  }
+
+  [data-theme="dark"] .tx:active {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
   }
 }
 
@@ -1290,6 +1335,146 @@ footer {
     font-size: 17px; /* iOS: >=16px prevents zoom; 17px improves legibility */
   }
 
+}
+
+/* Toast notifications */
+.toast {
+  position: fixed;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-100px);
+  background: var(--card);
+  color: inherit;
+  padding: 12px 20px;
+  border-radius: 25px;
+  box-shadow: 0 8px 24px rgba(2, 6, 23, 0.15);
+  border: 1px solid rgba(2, 6, 23, 0.1);
+  z-index: 1200;
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.toast-success {
+  background: #10b981;
+  color: white;
+  border-color: #059669;
+}
+
+.toast-error {
+  background: #ef4444;
+  color: white;
+  border-color: #dc2626;
+}
+
+[data-theme="dark"] .toast {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  border-color: rgba(148, 163, 184, 0.2);
+}
+
+/* Pull to refresh indicator */
+.pull-refresh-indicator {
+  position: absolute;
+  top: -60px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-100%);
+  background: var(--card);
+  color: var(--muted);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(2, 6, 23, 0.1);
+  border: 1px solid rgba(2, 6, 23, 0.08);
+  z-index: 999;
+  opacity: 0;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.pull-refresh-indicator.ready {
+  color: var(--accent);
+}
+
+.pull-refresh-indicator.refreshing {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: translateX(-50%) rotate(0deg); }
+  to { transform: translateX(-50%) rotate(360deg); }
+}
+
+[data-theme="dark"] .pull-refresh-indicator {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  border-color: rgba(148, 163, 184, 0.2);
+}
+
+/* Network status indicator */
+.network-status {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  background: var(--card);
+  color: var(--muted);
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(2, 6, 23, 0.1);
+  border: 1px solid rgba(2, 6, 23, 0.08);
+  z-index: 1100;
+  opacity: 0;
+  transform: translateX(100%);
+  transition: all 0.3s ease;
+}
+
+.network-status.online {
+  opacity: 0.7;
+  transform: translateX(0);
+  color: #10b981;
+}
+
+.network-status.offline {
+  opacity: 1;
+  transform: translateX(0);
+  background: #ef4444;
+  color: white;
+  border-color: #dc2626;
+}
+
+[data-theme="dark"] .network-status {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  border-color: rgba(148, 163, 184, 0.2);
+}
+
+/* Loading skeleton for better perceived performance */
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+[data-theme="dark"] .skeleton {
+  background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
+  background-size: 200% 100%;
+}
+
+@keyframes loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Enhanced button press animations */
+.primary:active, .secondary:active {
+  transform: scale(0.98);
+  transition: transform 0.1s ease;
 }
 
 /* iOS Safari / PWA specific tweaks for date inputs */
