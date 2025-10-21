@@ -137,39 +137,6 @@ function showToast(message, type = 'info') {
   }, 3000);
 }
 
-function addNetworkStatusIndicator() {
-  // Create network status indicator
-  const indicator = document.createElement('div');
-  indicator.className = 'network-status';
-  indicator.innerHTML = '📶 Online';
-  document.body.appendChild(indicator);
-
-  function updateNetworkStatus() {
-    if (navigator.onLine) {
-      indicator.innerHTML = '📶 Online';
-      indicator.className = 'network-status online';
-    } else {
-      indicator.innerHTML = '📵 Offline';
-      indicator.className = 'network-status offline';
-      showToast('You are offline. Data will sync when connection is restored.', 'error');
-    }
-  }
-
-  // Listen for network changes
-  window.addEventListener('online', () => {
-    updateNetworkStatus();
-    showToast('Connection restored', 'success');
-    hapticFeedback('success');
-  });
-
-  window.addEventListener('offline', () => {
-    updateNetworkStatus();
-    hapticFeedback('error');
-  });
-
-  // Initial status
-  updateNetworkStatus();
-}
 
 function addPullToRefresh() {
   const app = document.querySelector('.app');
@@ -231,7 +198,6 @@ function addPullToRefresh() {
       renderList();
       if (!summaryTabEl.classList.contains("hidden")) renderChart();
       
-      showToast('Data refreshed', 'success');
       hapticFeedback('success');
       resetPullIndicator();
       isRefreshing = false;
@@ -1259,7 +1225,6 @@ document.addEventListener("DOMContentLoaded", () => {
   setupMobileDatePlaceholders();
   // initialize mobile app enhancements
   addPullToRefresh();
-  addNetworkStatusIndicator();
   // attempt to show PWA install popup on first load (covers iOS which lacks beforeinstallprompt)
   checkPWAInstallPrompt();
 });
