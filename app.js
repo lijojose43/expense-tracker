@@ -56,6 +56,7 @@ const pwaInstallPopup = $("pwaInstallPopup");
 const pwaInstallBtn = $("pwaInstallBtn");
 const pwaLaterBtn = $("pwaLaterBtn");
 const pwaCloseBtn = $("pwaCloseBtn");
+const pwaInstructions = $("pwaInstructions");
 // Import/Export controls (hidden file input kept)
 const importFileInput = $("importFile");
 // Options menu controls
@@ -1009,10 +1010,23 @@ window.addEventListener('beforeinstallprompt', (e) => {
 if (pwaInstallBtn) {
   pwaInstallBtn.addEventListener('click', async () => {
     if (!deferredPrompt) {
-      // Fallback for browsers that don't support beforeinstallprompt
-      alert('To install this app:\n\n• Chrome/Edge: Click the install icon in the address bar\n• Safari: Tap Share → Add to Home Screen\n• Firefox: Menu → Install this site as an app');
-      hidePWAInstallPopup();
-      return;
+      // Fallback: show inline guidance instead of alert
+      if (pwaInstructions) {
+        const ua = navigator.userAgent || '';
+        const isIOS = /iPhone|iPad|iPod/i.test(ua);
+        const isAndroid = /Android/i.test(ua);
+        let html = '';
+        if (isIOS) {
+          html = 'On iPhone/iPad: Tap the Share button and choose <b>Add to Home Screen</b>.';
+        } else if (isAndroid) {
+          html = 'On Android: Use the menu and choose <b>Install app</b> or tap the install icon in the address bar.';
+        } else {
+          html = 'Use your browser\'s menu to <b>Install</b> or <b>Add to Home Screen</b>.';
+        }
+        pwaInstructions.innerHTML = html;
+        pwaInstructions.classList.remove('hide');
+      }
+      return; // keep popup open so instructions remain visible
     }
     
     // Show the install prompt

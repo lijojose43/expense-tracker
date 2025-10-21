@@ -5,6 +5,8 @@
   --accent: #1e90ff;
   --danger: #ef4444;
   --glass: rgba(255, 255, 255, 0.6);
+  --topbar-h: 56px;
+  --bottombar-h: 60px;
   font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto,
     "Helvetica Neue", Arial;
 }
@@ -79,6 +81,20 @@ body {
 
 /* Forcefully hide scrollbars in installed PWA only */
 @media (display-mode: standalone) {
+  /* Make header fixed to remove any scroll effect under it */
+  .topbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    padding-top: calc(16px + env(safe-area-inset-top, 0px));
+  }
+
+  /* Add extra top padding so content does not slide under fixed header */
+  .content {
+    padding-top: calc(16px + var(--topbar-h));
+    padding-bottom: calc(16px + var(--bottombar-h) + env(safe-area-inset-bottom, 0px));
+  }
   html, body, .app, .content, .filters, .custom-date-range, .transactions {
     scrollbar-width: none !important; /* Firefox */
     -ms-overflow-style: none !important; /* IE/Edge legacy */
@@ -142,6 +158,7 @@ body {
   padding: 16px 20px;
   border-bottom: none;
   background: var(--bg);
+  min-height: var(--topbar-h);
 }
 [data-theme="dark"] .topbar {
   border-bottom: none;
@@ -351,13 +368,14 @@ html:not([data-theme="dark"]) .summary .card:nth-child(3) {
   gap: 8px;
   margin-bottom: 12px;
   align-items: center;
-  overflow-x: auto;
+  overflow-x: visible; /* prevent horizontal scroll */
+  flex-wrap: wrap; /* allow inputs to wrap on small screens */
   padding-bottom: 4px;
 }
 
 .custom-date-range input {
   flex: 1;
-  min-width: 180px;
+  min-width: 150px; /* reduced to avoid scroll */
   min-height: 44px;
   padding: 12px 16px;
   border-radius: 8px;
@@ -727,14 +745,14 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
 .modal-content form {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 14px;
   padding-top: 8px;
 }
 
 /* Segmented control for Type (Expense/Income) */
 .segmented {
   display: flex;
-  gap: 8px;
+  gap: 10px;
 }
 .segmented input[type="radio"] {
   position: absolute;
@@ -744,18 +762,35 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
 .seg-btn {
   flex: 1;
   min-width: 120px;
-  padding: 10px 12px;
-  border-radius: 8px;
-  border: 1px solid rgba(2, 6, 23, 0.12);
+  padding: 10px 14px;
+  border-radius: 9999px; /* pill */
+  border: 1px solid rgba(2, 6, 23, 0.14);
   background: var(--card);
   color: inherit;
   text-align: center;
   cursor: pointer;
   user-select: none;
-  transition: all 0.2s ease;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  position: relative;
+}
+.seg-btn::before {
+  content: '';
+  width: 18px;
+  height: 18px;
+  border-radius: 6px;
+  border: 2px solid rgba(2, 6, 23, 0.25);
+  background: transparent;
+  display: inline-block;
 }
 .seg-btn:hover {
   background: rgba(2, 6, 23, 0.04);
+}
+.segmented input[type="radio"]:active + .seg-btn {
+  transform: translateY(0.5px);
 }
 .segmented input[type="radio"]:focus + .seg-btn {
   outline: none;
@@ -763,18 +798,35 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
   box-shadow: 0 0 0 3px rgba(30, 144, 255, 0.25);
 }
 .segmented input[type="radio"]:checked + .seg-btn {
-  background: var(--accent);
-  color: #fff;
+  background: rgba(30, 144, 255, 0.10);
+  color: inherit;
   border-color: var(--accent);
 }
+.segmented input[type="radio"]:checked + .seg-btn::before {
+  content: '✓';
+  color: #fff;
+  background: var(--accent);
+  border-color: var(--accent);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  line-height: 1;
+}
 [data-theme="dark"] .seg-btn {
-  border-color: rgba(148, 163, 184, 0.2);
+  border-color: rgba(148, 163, 184, 0.25);
+}
+[data-theme="dark"] .seg-btn::before {
+  border-color: rgba(148, 163, 184, 0.35);
 }
 [data-theme="dark"] .seg-btn:hover {
-  background: rgba(148, 163, 184, 0.1);
+  background: rgba(148, 163, 184, 0.08);
 }
 [data-theme="dark"] .segmented input[type="radio"]:focus + .seg-btn {
   box-shadow: 0 0 0 3px rgba(30, 144, 255, 0.18);
+}
+[data-theme="dark"] .segmented input[type="radio"]:checked + .seg-btn {
+  background: rgba(30, 144, 255, 0.12);
 }
 .modal-content input,
 .modal-content select {
@@ -1149,8 +1201,8 @@ footer {
 
   /* Increase width of custom date inputs on mobile */
   .custom-date-range input {
-    min-width: 220px; /* Wider on mobile */
-    flex: 1 0 220px;
+    min-width: 150px; /* Reduced to prevent horizontal scroll */
+    flex: 1 1 150px;
     height: 48px;
     font-size: 17px; /* iOS: >=16px prevents zoom; 17px improves legibility */
   }
