@@ -554,6 +554,7 @@ html:not([data-theme="dark"]) .summary .card:nth-child(3) {
   flex-direction: column;
   gap: 12px;
   overflow-x: hidden; /* Prevent horizontal scroll in transactions list */
+  padding-bottom: 20px; /* Extra space to ensure last transaction is visible above footer */
 }
 
 /* Global form controls */
@@ -570,6 +571,19 @@ textarea {
   user-select: text;
   touch-action: manipulation;
 }
+
+/* Hide calendar icon from date inputs */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  display: none;
+  -webkit-appearance: none;
+}
+
+input[type="date"]::-webkit-inner-spin-button,
+input[type="date"]::-webkit-outer-spin-button {
+  display: none;
+  -webkit-appearance: none;
+}
+
 [data-theme="dark"] input:not([type="checkbox"]):not([type="radio"]),
 [data-theme="dark"] select,
 [data-theme="dark"] textarea {
@@ -811,8 +825,8 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
   z-index: 1100;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
-              visibility 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition: opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    visibility 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   /* Ensure the overlay area above the modal is clickable */
   padding-top: var(--topbar-h);
 }
@@ -864,8 +878,7 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  padding: 20px 28px 16px 28px;
-  border-bottom: 1px solid rgba(2, 6, 23, 0.08);
+  padding: 8px 16px 0px 16px;
   position: relative;
 }
 
@@ -876,8 +889,8 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
   background: rgba(0, 0, 0, 0.05);
   border: none;
   border-radius: 50%;
-  width: 32px;
-  height: 32px;
+  width: 15px;
+  height: 15px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -916,9 +929,6 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
 .modal-content header::before:active {
   cursor: grabbing;
 }
-[data-theme="dark"] .modal-content header {
-  border-bottom-color: rgba(148, 163, 184, 0.2);
-}
 [data-theme="dark"] .modal-content header::before {
   background: rgba(148, 163, 184, 0.4);
 }
@@ -926,7 +936,7 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
   display: flex;
   flex-direction: column;
   gap: 18px;
-  padding: 24px 6px calc(28px + env(safe-area-inset-bottom, 0px)) 6px;
+  padding: 0 16px 24px 16px;
   overflow: hidden; /* Prevent scrolling within the form */
 }
 
@@ -940,14 +950,20 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
 /* Create field groups with proper spacing */
 .modal-content form input,
 .modal-content form select,
-.modal-content form .segmented {
+.modal-content form .segmented,
+.modal-content form .amount-category-row,
+.modal-content form .date-description-row,
+.modal-content form .type-checkboxes {
   margin-bottom: 0;
 }
 
 /* Reduce gap specifically between label and its following input */
 .modal-content form label + input,
 .modal-content form label + select,
-.modal-content form label + .segmented {
+.modal-content form label + .segmented,
+.modal-content form label + .amount-category-row,
+.modal-content form label + .date-description-row,
+.modal-content form label + .type-checkboxes {
   margin-top: -2px;
 }
 
@@ -1031,6 +1047,161 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
 [data-theme="dark"] .segmented input[type="radio"]:checked + .seg-btn {
   background: rgba(30, 144, 255, 0.12);
 }
+
+/* Amount and Category Row Layout */
+.amount-category-row {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.amount-field {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.amount-field label {
+  margin-bottom: 6px;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.category-field {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.category-field label {
+  margin-bottom: 6px;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+/* Date and Description Row Layout */
+.date-description-row {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.date-field {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.date-field label {
+  margin-bottom: 6px;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.date-field input {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.description-field {
+  flex: 1.5;
+  display: flex;
+  flex-direction: column;
+  min-width: 0; /* Allow flex item to shrink below content size */
+}
+
+.description-field label {
+  margin-bottom: 6px;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.description-field input {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.type-checkboxes {
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+  justify-content: flex-start;
+  margin-top: 0;
+}
+
+.checkbox-group {
+  display: flex;
+  align-items: center;
+}
+
+.checkbox-group input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--muted);
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.checkbox-custom {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(2, 6, 23, 0.2);
+  border-radius: 3px;
+  background: var(--card);
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.checkbox-group input[type="radio"]:checked + .checkbox-label .checkbox-custom {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.checkbox-group
+  input[type="radio"]:checked
+  + .checkbox-label
+  .checkbox-custom::after {
+  content: "✓";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 10px;
+  font-weight: bold;
+}
+
+.checkbox-group input[type="radio"]:checked + .checkbox-label {
+  color: var(--accent);
+}
+
+.checkbox-label:hover .checkbox-custom {
+  border-color: var(--accent);
+}
+
+/* Dark theme styles */
+[data-theme="dark"] .checkbox-custom {
+  border-color: rgba(148, 163, 184, 0.3);
+}
+
+[data-theme="dark"] .checkbox-label:hover .checkbox-custom {
+  border-color: var(--accent);
+}
 .modal-content input,
 .modal-content select {
   padding: 10px 6px;
@@ -1046,6 +1217,92 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
 .modal-content select option {
   background: var(--card);
   color: inherit;
+}
+
+/* Modern select dropdown styling */
+select {
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 8px center;
+  background-repeat: no-repeat;
+  background-size: 16px;
+  padding-right: 32px;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+[data-theme="dark"] select {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%9ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+}
+
+/* Category dropdown specific styling */
+#category {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+/* Custom scrollbar for select dropdown options */
+select option {
+  padding: 8px 12px;
+  margin: 2px 0;
+}
+
+/* Modern scrollbar styling for webkit browsers */
+select::-webkit-scrollbar {
+  width: 6px;
+}
+
+select::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 3px;
+}
+
+select::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+}
+
+select::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] select::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] select::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+[data-theme="dark"] select::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+/* Enhanced select hover and focus states */
+select:hover {
+  border-color: var(--accent);
+  transition: border-color 0.2s ease;
+}
+
+select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(30, 144, 255, 0.25);
+}
+
+[data-theme="dark"] select:focus {
+  box-shadow: 0 0 0 3px rgba(30, 144, 255, 0.18);
+}
+
+/* Modern option styling */
+select option:hover {
+  background: rgba(30, 144, 255, 0.1);
+}
+
+select option:checked {
+  background: var(--accent);
+  color: white;
 }
 .actions {
   display: flex;
@@ -1479,6 +1736,40 @@ footer {
     padding: 12px;
   }
 
+  /* Mobile-friendly layout - keep amount and category in same row */
+  .amount-category-row {
+    flex-direction: row;
+    gap: 12px;
+  }
+
+  /* Mobile-friendly layout - keep date and description in same row */
+  .date-description-row {
+    flex-direction: row;
+    gap: 12px;
+  }
+
+  .type-checkboxes {
+    flex-direction: row;
+    gap: 16px;
+    margin-top: 8px;
+    justify-content: flex-start;
+  }
+
+  .checkbox-label {
+    min-height: 44px;
+    font-size: 16px;
+  }
+
+  .checkbox-custom {
+    width: 20px;
+    height: 20px;
+  }
+
+  /* Extra bottom padding for transactions on mobile to prevent footer overlap */
+  .transactions {
+    padding-bottom: 30px;
+  }
+
   /* Normalize native select appearance on iOS */
   select {
     -webkit-appearance: none;
@@ -1664,6 +1955,19 @@ footer {
   }
 }
 
+/* Form validation error messages */
+.error-message {
+  color: #ef4444;
+  font-size: 12px;
+  margin-top: 4px;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+[data-theme="dark"] .error-message {
+  color: #fca5a5;
+}
+
 /* Enhanced button press animations */
 .primary:active,
 .secondary:active {
@@ -1692,8 +1996,4 @@ footer {
     font-size: 17px;
   }
 
-  /* Slightly enlarge the calendar icon for better tap target perception */
-  .custom-date-range input[type="date"]::-webkit-calendar-picker-indicator {
-    transform: scale(1.15);
-  }
 }

@@ -870,6 +870,9 @@ function openModal(defaults) {
     modal.classList.add("show");
   }, 10);
   
+  // Clear any existing validation errors
+  clearValidationErrors();
+  
   if (defaults) {
     $("amount").value = defaults.amount;
     // set radio selection for type
@@ -883,6 +886,18 @@ function openModal(defaults) {
     // default to expense on new entry
     setSelectedType("expense");
   }
+  
+  // Focus on amount field after modal animation completes
+  setTimeout(() => {
+    const amountField = $("amount");
+    if (amountField) {
+      amountField.focus();
+      // For mobile devices, also select the text if there's a value
+      if (amountField.value) {
+        amountField.select();
+      }
+    }
+  }, 300); // Wait for modal animation to complete
 }
 
 function closeModalFn() {
@@ -1076,6 +1091,45 @@ if (tabHome && tabSummary) {
   });
 }
 
+// Validation functions
+function validateAmount(amount) {
+  const amountError = $("amountError");
+  if (!amount || amount <= 0) {
+    amountError.textContent = "Amount must be greater than 0";
+    amountError.style.display = "block";
+    return false;
+  }
+  if (amount > 9999999.99) {
+    amountError.textContent = "Amount cannot exceed ₹99,99,999.99 (7 digits)";
+    amountError.style.display = "block";
+    return false;
+  }
+  amountError.style.display = "none";
+  return true;
+}
+
+function validateDate(dateValue) {
+  const dateError = $("dateError");
+  if (!dateValue) {
+    dateError.textContent = "Date is required";
+    dateError.style.display = "block";
+    return false;
+  }
+  
+  const selectedDate = new Date(dateValue);
+  const today = new Date();
+  today.setHours(23, 59, 59, 999); // Set to end of today
+  
+  if (selectedDate > today) {
+    dateError.textContent = "Future dates are not allowed";
+    dateError.style.display = "block";
+    return false;
+  }
+  
+  dateError.style.display = "none";
+  return true;
+}
+
 txForm.addEventListener("submit", (e) => {
   e.preventDefault();
   const amount = Number($("amount").value) || 0;
@@ -1083,6 +1137,15 @@ txForm.addEventListener("submit", (e) => {
   const category = $("category").value || "Other";
   const date = $("date").value;
   const description = $("description").value;
+  
+  // Validate form inputs
+  const isAmountValid = validateAmount(amount);
+  const isDateValid = validateDate(date);
+  
+  if (!isAmountValid || !isDateValid) {
+    hapticFeedback('error');
+    return; // Stop form submission if validation fails
+  }
   if (editId) {
     const idx = data.findIndex((x) => x.id === editId);
     if (idx !== -1) {
@@ -1129,6 +1192,30 @@ txForm.addEventListener("submit", (e) => {
   // Show PWA install modal after successful transaction
   setTimeout(() => checkPWAInstallPrompt(2000), 1000);
 });
+
+// Real-time validation event listeners
+$("amount").addEventListener("input", (e) => {
+  const amount = Number(e.target.value);
+  if (e.target.value) { // Only validate if there's a value
+    validateAmount(amount);
+  } else {
+    $("amountError").style.display = "none";
+  }
+});
+
+$("date").addEventListener("change", (e) => {
+  if (e.target.value) { // Only validate if there's a value
+    validateDate(e.target.value);
+  } else {
+    $("dateError").style.display = "none";
+  }
+});
+
+// Clear error messages when modal opens
+function clearValidationErrors() {
+  $("amountError").style.display = "none";
+  $("dateError").style.display = "none";
+}
 
 // Handle date filter button changes
 function setDateFilter(filter) {

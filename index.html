@@ -173,21 +173,44 @@
     <div class="modal-content">
       <header><h2 id="modalTitle">Add Transaction</h2><button id="closeModal" class="icon">✕</button></header>
       <form id="txForm">
-        <label>Amount</label>
-        <input id="amount" type="number" inputmode="decimal" step="0.01" min="0" required placeholder="e.g. 25.00; select type below"/>
-        <label>Type</label>
-        <div id="typeGroup" class="segmented" role="radiogroup" aria-label="Type">
-          <input type="radio" id="typeExpense" name="type" value="expense" checked>
-          <label for="typeExpense" class="seg-btn">Expense</label>
-          <input type="radio" id="typeIncome" name="type" value="income">
-          <label for="typeIncome" class="seg-btn">Income</label>
+        <div class="type-checkboxes">
+          <div class="checkbox-group">
+            <input type="radio" id="typeExpense" name="type" value="expense" checked>
+            <label for="typeExpense" class="checkbox-label">
+              <span class="checkbox-custom"></span>
+              Expense
+            </label>
+          </div>
+          <div class="checkbox-group">
+            <input type="radio" id="typeIncome" name="type" value="income">
+            <label for="typeIncome" class="checkbox-label">
+              <span class="checkbox-custom"></span>
+              Income
+            </label>
+          </div>
         </div>
-        <label>Category</label>
-        <select id="category"></select>
-        <label>Date</label>
-        <input id="date" type="date" required/>
-        <label>Description (optional)</label>
-        <input id="description" type="text" placeholder="Grocery, Salary..."/>
+        <div class="amount-category-row">
+          <div class="amount-field">
+            <label>Amount</label>
+            <input id="amount" type="number" inputmode="decimal" step="0.01" min="0" max="9999999.99" required placeholder="e.g. 25.00"/>
+          </div>
+          <div class="category-field">
+            <label>Category</label>
+            <select id="category"></select>
+          </div>
+        </div>
+        <div id="amountError" class="error-message" style="display: none;"></div>
+        <div class="date-description-row">
+          <div class="date-field">
+            <label>Date</label>
+            <input id="date" type="date" required/>
+          </div>
+          <div class="description-field">
+            <label>Description</label>
+            <input id="description" type="text" placeholder="Grocery, Salary..."/>
+          </div>
+        </div>
+        <div id="dateError" class="error-message" style="display: none;"></div>
         <div class="actions">
           <button id="cancelBtn" type="button" class="secondary">Cancel</button>
           <button type="submit" class="primary">Save</button>
