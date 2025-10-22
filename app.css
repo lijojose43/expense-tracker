@@ -48,7 +48,8 @@
   display: none !important;
 }
 
-html, body {
+html,
+body {
   overflow-x: hidden; /* Prevent horizontal scroll */
   -webkit-overflow-scrolling: touch; /* iOS smooth scrolling */
   overscroll-behavior: none; /* prevent bounce */
@@ -115,9 +116,17 @@ body {
   /* Add extra top padding for content in PWA mode */
   .content {
     padding-top: 16px;
-    padding-bottom: calc(16px + var(--bottombar-h) + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(
+      16px + var(--bottombar-h) + env(safe-area-inset-bottom, 0px)
+    );
   }
-  html, body, .app, .content, .filters, .custom-date-range, .transactions {
+  html,
+  body,
+  .app,
+  .content,
+  .filters,
+  .custom-date-range,
+  .transactions {
     scrollbar-width: none !important; /* Firefox */
     -ms-overflow-style: none !important; /* IE/Edge legacy */
     overscroll-behavior: none;
@@ -139,7 +148,13 @@ body {
 
 /* Additional iOS PWA hardening */
 @supports (-webkit-touch-callout: none) {
-  html, body, .app, .content, .filters, .custom-date-range, .transactions {
+  html,
+  body,
+  .app,
+  .content,
+  .filters,
+  .custom-date-range,
+  .transactions {
     scrollbar-width: none !important;
     -ms-overflow-style: none !important;
     overscroll-behavior: none;
@@ -160,7 +175,7 @@ body {
 
 /* Create scrollbar-free zone above bottom navbar */
 .app::after {
-  content: '';
+  content: "";
   position: fixed;
   bottom: 0;
   left: 0;
@@ -289,7 +304,7 @@ html:not([data-theme="dark"]) #sunIcon {
   z-index: 1000;
 }
 [data-theme="dark"] .menu-panel {
-  box-shadow: 0 12px 30px rgba(0,0,0,0.5);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
   border-color: rgba(148, 163, 184, 0.12);
 }
 .menu-panel.open {
@@ -340,7 +355,8 @@ html:not([data-theme="dark"]) #sunIcon {
 }
 [data-theme="dark"] .card {
   border-color: rgba(30, 144, 255, 0.3);
-  box-shadow: 0 8px 16px rgba(0,0,0,0.35), 0 0 0 1px rgba(30, 144, 255, 0.2), 0 0 20px rgba(30, 144, 255, 0.15);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(30, 144, 255, 0.2),
+    0 0 20px rgba(30, 144, 255, 0.15);
 }
 .card.wide {
   flex-basis: 100%;
@@ -472,7 +488,8 @@ html:not([data-theme="dark"]) .summary .card:nth-child(3) {
 [data-theme="dark"] .filters select,
 [data-theme="dark"] .filters input {
   border-color: rgba(30, 144, 255, 0.3);
-  box-shadow: 0 0 0 1px rgba(30, 144, 255, 0.2), 0 0 15px rgba(30, 144, 255, 0.1);
+  box-shadow: 0 0 0 1px rgba(30, 144, 255, 0.2),
+    0 0 15px rgba(30, 144, 255, 0.1);
 }
 
 .custom-date-range input:hover {
@@ -498,7 +515,9 @@ html:not([data-theme="dark"]) .summary .card:nth-child(3) {
 }
 
 /* Calendar icon color in dark mode */
-[data-theme="dark"] .custom-date-range input::-webkit-calendar-picker-indicator {
+[data-theme="dark"]
+  .custom-date-range
+  input::-webkit-calendar-picker-indicator {
   filter: invert(1);
   cursor: pointer;
 }
@@ -516,7 +535,8 @@ html:not([data-theme="dark"]) .summary .card:nth-child(3) {
 
 [data-theme="dark"] .filter-btn {
   border-color: rgba(30, 144, 255, 0.3);
-  box-shadow: 0 0 0 1px rgba(30, 144, 255, 0.2), 0 0 15px rgba(30, 144, 255, 0.1);
+  box-shadow: 0 0 0 1px rgba(30, 144, 255, 0.2),
+    0 0 15px rgba(30, 144, 255, 0.1);
 }
 
 [data-theme="dark"] .filter-btn:hover {
@@ -584,17 +604,19 @@ textarea:focus {
   background: var(--card);
   border: 1px solid rgba(2, 6, 23, 0.06);
   box-shadow: 0 2px 10px rgba(2, 6, 23, 0.06);
-  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease,
+    background-color 0.2s ease;
 }
 [data-theme="dark"] .tx {
   border-color: rgba(30, 144, 255, 0.3);
-  box-shadow: 0 8px 16px rgba(0,0,0,0.35), 0 0 0 1px rgba(30, 144, 255, 0.2), 0 0 20px rgba(30, 144, 255, 0.15);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(30, 144, 255, 0.2),
+    0 0 20px rgba(30, 144, 255, 0.15);
 }
 .tx:active {
   box-shadow: 0 4px 16px rgba(2, 6, 23, 0.12);
 }
 [data-theme="dark"] .tx:active {
-  box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
 }
 .txActions {
   display: flex;
@@ -787,11 +809,17 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
   background: rgba(2, 6, 23, 0.55); /* darker overlay */
   backdrop-filter: blur(8px); /* stronger blur */
   z-index: 1100;
-  opacity: 1;
-  visibility: visible;
-  transition: opacity 0.3s ease, visibility 0.3s ease;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
+              visibility 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   /* Ensure the overlay area above the modal is clickable */
   padding-top: var(--topbar-h);
+}
+.modal.show {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
 }
 .modal.hide {
   opacity: 0;
@@ -807,8 +835,8 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
   border: 1px solid rgba(2, 6, 23, 0.12);
   border-bottom: none;
   box-shadow: 0 -10px 40px rgba(2, 6, 23, 0.15);
-  transform: translateY(0);
-  transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transform: translateY(100%);
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   /* Position below header - no margin needed since modal has padding-top */
   max-height: calc(100vh - var(--topbar-h));
   overflow-y: auto;
@@ -818,6 +846,9 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
 }
 .modal-content::-webkit-scrollbar {
   display: none;
+}
+.modal.show .modal-content {
+  transform: translateY(0);
 }
 .modal.hide .modal-content {
   transform: translateY(100%);
@@ -869,7 +900,7 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
   background: rgba(255, 255, 255, 0.2);
 }
 .modal-content header::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 12px;
   left: 50%;
@@ -895,7 +926,7 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
   display: flex;
   flex-direction: column;
   gap: 18px;
-  padding: 24px 28px calc(28px + env(safe-area-inset-bottom, 0px)) 28px;
+  padding: 24px 6px calc(28px + env(safe-area-inset-bottom, 0px)) 6px;
 }
 
 .modal-content form label {
@@ -940,7 +971,8 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
   text-align: center;
   cursor: pointer;
   user-select: none;
-  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease,
+    box-shadow 0.2s ease;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -948,7 +980,7 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
   position: relative;
 }
 .seg-btn::before {
-  content: '';
+  content: "";
   width: 18px;
   height: 18px;
   border-radius: 6px;
@@ -968,12 +1000,12 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
   box-shadow: 0 0 0 3px rgba(30, 144, 255, 0.25);
 }
 .segmented input[type="radio"]:checked + .seg-btn {
-  background: rgba(30, 144, 255, 0.10);
+  background: rgba(30, 144, 255, 0.1);
   color: inherit;
   border-color: var(--accent);
 }
 .segmented input[type="radio"]:checked + .seg-btn::before {
-  content: '✓';
+  content: "✓";
   color: #fff;
   background: var(--accent);
   border-color: var(--accent);
@@ -1342,21 +1374,28 @@ footer {
   }
 
   /* Enhanced touch targets */
-  .icon, .tab, .fab, .filter-btn, .menu-item {
+  .icon,
+  .tab,
+  .fab,
+  .filter-btn,
+  .menu-item {
     min-height: 44px;
     min-width: 44px;
     transition: all 0.2s ease;
   }
 
   /* Improved button feedback */
-  .icon:active, .tab:active, .filter-btn:active, .menu-item:active {
+  .icon:active,
+  .tab:active,
+  .filter-btn:active,
+  .menu-item:active {
     transform: scale(0.95);
     background: rgba(0, 0, 0, 0.1);
   }
 
-  [data-theme="dark"] .icon:active, 
-  [data-theme="dark"] .tab:active, 
-  [data-theme="dark"] .filter-btn:active, 
+  [data-theme="dark"] .icon:active,
+  [data-theme="dark"] .tab:active,
+  [data-theme="dark"] .filter-btn:active,
   [data-theme="dark"] .menu-item:active {
     background: rgba(255, 255, 255, 0.1);
   }
@@ -1373,7 +1412,8 @@ footer {
   }
 
   /* Smooth card interactions */
-  .card, .tx {
+  .card,
+  .tx {
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
@@ -1389,11 +1429,13 @@ footer {
 
 /* PWA standalone mode - complete scrollbar elimination */
 @media (display-mode: standalone) {
-  body, html, .app {
+  body,
+  html,
+  .app {
     scrollbar-width: none !important;
     -ms-overflow-style: none !important;
   }
-  
+
   body::-webkit-scrollbar,
   html::-webkit-scrollbar,
   .app::-webkit-scrollbar {
@@ -1448,30 +1490,35 @@ footer {
     scrollbar-width: none !important;
     -ms-overflow-style: none !important;
   }
-  
+
   *::-webkit-scrollbar {
     display: none !important;
     width: 0px !important;
     height: 0px !important;
     background: transparent !important;
   }
-  
+
   *::-webkit-scrollbar-track {
     display: none !important;
     background: transparent !important;
   }
-  
+
   *::-webkit-scrollbar-thumb {
     display: none !important;
     background: transparent !important;
   }
-  
+
   /* Additional iOS-specific scrollbar hiding */
-  body, html, .app, .content, .filters, .transactions {
+  body,
+  html,
+  .app,
+  .content,
+  .filters,
+  .transactions {
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none !important;
   }
-  
+
   body::-webkit-scrollbar,
   html::-webkit-scrollbar,
   .app::-webkit-scrollbar,
@@ -1510,7 +1557,6 @@ footer {
     font-size: 16px; /* Prevent zoom on iOS */
     height: 40px;
   }
-
 }
 
 /* Toast notifications */
@@ -1583,15 +1629,18 @@ footer {
 }
 
 @keyframes spin {
-  from { transform: translateX(-50%) rotate(0deg); }
-  to { transform: translateX(-50%) rotate(360deg); }
+  from {
+    transform: translateX(-50%) rotate(0deg);
+  }
+  to {
+    transform: translateX(-50%) rotate(360deg);
+  }
 }
 
 [data-theme="dark"] .pull-refresh-indicator {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   border-color: rgba(148, 163, 184, 0.2);
 }
-
 
 /* Loading skeleton for better perceived performance */
 .skeleton {
@@ -1606,12 +1655,17 @@ footer {
 }
 
 @keyframes loading {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 /* Enhanced button press animations */
-.primary:active, .secondary:active {
+.primary:active,
+.secondary:active {
   transform: scale(0.98);
   transition: transform 0.1s ease;
 }

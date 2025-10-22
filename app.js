@@ -865,6 +865,11 @@ function renderList() {
 
 function openModal(defaults) {
   modal.classList.remove("hide");
+  // Trigger the slide-up animation
+  setTimeout(() => {
+    modal.classList.add("show");
+  }, 10);
+  
   if (defaults) {
     $("amount").value = defaults.amount;
     // set radio selection for type
@@ -881,12 +886,13 @@ function openModal(defaults) {
 }
 
 function closeModalFn() {
+  modal.classList.remove("show");
   modal.classList.add("hide");
   // Reset modal transform when closing
   const modalContent = document.querySelector('.modal-content');
   if (modalContent) {
-    modalContent.style.transform = 'translateY(0)';
-    modalContent.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+    modalContent.style.transform = '';
+    modalContent.style.transition = '';
   }
 }
 
@@ -999,8 +1005,6 @@ function initModalDragToClose() {
   });
 }
 
-// Initialize drag-to-close when DOM is ready
-initModalDragToClose();
 // Options menu events
 function closeMenu() {
   if (optionsMenu) optionsMenu.classList.remove("open");
@@ -1445,6 +1449,8 @@ document.addEventListener("DOMContentLoaded", () => {
   setupMobileDatePlaceholders();
   // initialize mobile app enhancements
   addPullToRefresh();
+  // initialize modal drag-to-close functionality
+  initModalDragToClose();
   // attempt to show PWA install popup on first load (covers iOS which lacks beforeinstallprompt)
   checkPWAInstallPrompt();
   // start periodic PWA install reminders
