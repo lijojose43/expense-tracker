@@ -839,7 +839,7 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
   transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   /* Position below header - no margin needed since modal has padding-top */
   max-height: calc(100vh - var(--topbar-h));
-  overflow-y: auto;
+  overflow: hidden; /* Prevent all scrolling inside the modal */
   /* Hide scrollbar */
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -927,6 +927,7 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
   flex-direction: column;
   gap: 18px;
   padding: 24px 6px calc(28px + env(safe-area-inset-bottom, 0px)) 6px;
+  overflow: hidden; /* Prevent scrolling within the form */
 }
 
 .modal-content form label {
