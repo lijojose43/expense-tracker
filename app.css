@@ -522,6 +522,13 @@ html:not([data-theme="dark"]) .summary .card:nth-child(3) {
 [data-theme="dark"] .filter-btn:hover {
   background: rgba(148, 163, 184, 0.1);
 }
+
+[data-theme="dark"] .filter-btn.active {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent), 0 0 15px rgba(30, 144, 255, 0.3);
+}
 .transactions {
   display: flex;
   flex-direction: column;
