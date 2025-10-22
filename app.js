@@ -882,6 +882,12 @@ function openModal(defaults) {
 
 function closeModalFn() {
   modal.classList.add("hide");
+  // Reset modal transform when closing
+  const modalContent = document.querySelector('.modal-content');
+  if (modalContent) {
+    modalContent.style.transform = 'translateY(0)';
+    modalContent.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+  }
 }
 
 addBtn.addEventListener("click", () => {
@@ -896,6 +902,105 @@ addBtn.addEventListener("click", () => {
 });
 closeModal.addEventListener("click", closeModalFn);
 if (cancelBtn) cancelBtn.addEventListener("click", closeModalFn);
+
+// Drag to close modal functionality
+let modalStartY = 0;
+let modalCurrentY = 0;
+let modalIsDragging = false;
+let modalDragThreshold = 100; // pixels to drag before closing
+
+function initModalDragToClose() {
+  const modalContent = document.querySelector('.modal-content');
+  const modalHeader = document.querySelector('.modal-content header');
+  
+  if (!modalContent || !modalHeader) return;
+  
+  modalHeader.addEventListener('touchstart', (e) => {
+    modalStartY = e.touches[0].clientY;
+    modalCurrentY = modalStartY;
+    modalIsDragging = true;
+    modalContent.style.transition = 'none';
+  }, { passive: true });
+  
+  modalHeader.addEventListener('touchmove', (e) => {
+    if (!modalIsDragging) return;
+    
+    modalCurrentY = e.touches[0].clientY;
+    const deltaY = modalCurrentY - modalStartY;
+    
+    // Only allow downward drag
+    if (deltaY > 0) {
+      modalContent.style.transform = `translateY(${deltaY}px)`;
+    }
+  }, { passive: true });
+  
+  modalHeader.addEventListener('touchend', () => {
+    if (!modalIsDragging) return;
+    
+    const deltaY = modalCurrentY - modalStartY;
+    modalIsDragging = false;
+    
+    // Reset transition
+    modalContent.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+    
+    if (deltaY > modalDragThreshold) {
+      // Close modal if dragged far enough
+      hapticFeedback('medium');
+      closeModalFn();
+    } else {
+      // Snap back to original position
+      modalContent.style.transform = 'translateY(0)';
+    }
+  }, { passive: true });
+  
+  // Also handle mouse events for desktop
+  modalHeader.addEventListener('mousedown', (e) => {
+    modalStartY = e.clientY;
+    modalCurrentY = modalStartY;
+    modalIsDragging = true;
+    modalContent.style.transition = 'none';
+    
+    const handleMouseMove = (e) => {
+      if (!modalIsDragging) return;
+      
+      modalCurrentY = e.clientY;
+      const deltaY = modalCurrentY - modalStartY;
+      
+      // Only allow downward drag
+      if (deltaY > 0) {
+        modalContent.style.transform = `translateY(${deltaY}px)`;
+      }
+    };
+    
+    const handleMouseUp = () => {
+      if (!modalIsDragging) return;
+      
+      const deltaY = modalCurrentY - modalStartY;
+      modalIsDragging = false;
+      
+      // Reset transition
+      modalContent.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+      
+      if (deltaY > modalDragThreshold) {
+        // Close modal if dragged far enough
+        hapticFeedback('medium');
+        closeModalFn();
+      } else {
+        // Snap back to original position
+        modalContent.style.transform = 'translateY(0)';
+      }
+      
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+    
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  });
+}
+
+// Initialize drag-to-close when DOM is ready
+initModalDragToClose();
 // Options menu events
 function closeMenu() {
   if (optionsMenu) optionsMenu.classList.remove("open");
