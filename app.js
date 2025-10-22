@@ -520,6 +520,78 @@ function catSlug(category) {
   return category.toLowerCase().replace(/\s+/g, '');
 }
 
+// Get modern SVG icon for category
+function getCategoryIcon(category) {
+  const slug = catSlug(category || "other");
+  const iconSize = "20";
+  
+  const icons = {
+    groceries: `<svg viewBox="0 0 24 24" width="${iconSize}" height="${iconSize}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M7 4V2a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v2"/>
+      <path d="M5 4h14l-1 10a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 4Z"/>
+      <path d="M9 8v4"/>
+      <path d="M15 8v4"/>
+    </svg>`,
+    
+    dining: `<svg viewBox="0 0 24 24" width="${iconSize}" height="${iconSize}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/>
+      <path d="M7 2v20"/>
+      <path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Z"/>
+    </svg>`,
+    
+    rent: `<svg viewBox="0 0 24 24" width="${iconSize}" height="${iconSize}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+      <polyline points="9,22 9,12 15,12 15,22"/>
+    </svg>`,
+    
+    utilities: `<svg viewBox="0 0 24 24" width="${iconSize}" height="${iconSize}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+    </svg>`,
+    
+    transportation: `<svg viewBox="0 0 24 24" width="${iconSize}" height="${iconSize}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="7" cy="17" r="2"/>
+      <circle cx="17" cy="17" r="2"/>
+      <path d="M5 17H3a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h9l3 6v4h-2"/>
+      <path d="M9 17h6"/>
+    </svg>`,
+    
+    shopping: `<svg viewBox="0 0 24 24" width="${iconSize}" height="${iconSize}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="8" cy="21" r="1"/>
+      <circle cx="19" cy="21" r="1"/>
+      <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>
+    </svg>`,
+    
+    healthcare: `<svg viewBox="0 0 24 24" width="${iconSize}" height="${iconSize}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M9 12h6"/>
+      <path d="M12 9v6"/>
+      <path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z"/>
+    </svg>`,
+    
+    entertainment: `<svg viewBox="0 0 24 24" width="${iconSize}" height="${iconSize}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polygon points="5,3 19,12 5,21"/>
+    </svg>`,
+    
+    salary: `<svg viewBox="0 0 24 24" width="${iconSize}" height="${iconSize}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="12" y1="1" x2="12" y2="23"/>
+      <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+    </svg>`,
+    
+    business: `<svg viewBox="0 0 24 24" width="${iconSize}" height="${iconSize}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+      <line x1="8" y1="21" x2="16" y2="21"/>
+      <line x1="12" y1="17" x2="12" y2="21"/>
+    </svg>`,
+    
+    other: `<svg viewBox="0 0 24 24" width="${iconSize}" height="${iconSize}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="1"/>
+      <circle cx="19" cy="12" r="1"/>
+      <circle cx="5" cy="12" r="1"/>
+    </svg>`
+  };
+  
+  return icons[slug] || icons.other;
+}
+
 function renderDonut() {
   const canvas = document.getElementById("categoryDonut");
   if (!canvas || typeof Chart === "undefined") return;
@@ -604,6 +676,9 @@ function switchTab(name) {
     // ensure chart reflects latest data
     renderChart();
   }
+  
+  // Check if PWA install modal should be shown after tab switch
+  setTimeout(() => checkPWAInstallPrompt(1000), 500);
 }
 
 function renderList() {
@@ -675,8 +750,8 @@ function renderList() {
     meta.className = "meta";
     const box = document.createElement("div");
     box.className = "iconBox";
-    // Set category initial and data attribute for styling
-    box.textContent = t.category ? t.category[0] : "T";
+    // Set category icon and data attribute for styling
+    box.innerHTML = getCategoryIcon(t.category);
     try {
       const slug = catSlug(t.category || "other");
       box.setAttribute("data-cat", slug);
@@ -942,6 +1017,9 @@ txForm.addEventListener("submit", (e) => {
   const submitBtn = txForm.querySelector('button[type="submit"]');
   if (submitBtn) submitBtn.textContent = "Save";
   closeModalFn();
+  
+  // Show PWA install modal after successful transaction
+  setTimeout(() => checkPWAInstallPrompt(2000), 1000);
 });
 
 // Handle date filter button changes
@@ -966,6 +1044,9 @@ function setDateFilter(filter) {
   computeTotals();
   renderList();
   if (!summaryTabEl.classList.contains("hidden")) renderChart();
+  
+  // Show PWA install modal after filter change
+  setTimeout(() => checkPWAInstallPrompt(1500), 800);
 }
 
 // Add event listeners for date filter buttons
@@ -994,6 +1075,9 @@ function setSummaryDateFilter(filter) {
   
   // Update chart
   renderChart();
+  
+  // Show PWA install modal after summary filter change
+  setTimeout(() => checkPWAInstallPrompt(1500), 800);
 }
 
 // --- Mobile placeholder support for date inputs ---
@@ -1086,8 +1170,14 @@ endDate.addEventListener("change", () => {
   if (!summaryTabEl.classList.contains("hidden")) renderChart();
 });
 
-filterType.addEventListener("change", renderList);
-filterCategory.addEventListener("change", renderList);
+filterType.addEventListener("change", () => {
+  renderList();
+  setTimeout(() => checkPWAInstallPrompt(1000), 500);
+});
+filterCategory.addEventListener("change", () => {
+  renderList();
+  setTimeout(() => checkPWAInstallPrompt(1000), 500);
+});
 searchInput.addEventListener("input", renderList);
 
 // PWA Install functionality
@@ -1111,30 +1201,31 @@ function hidePWAInstallPopup() {
   }
 }
 
-function checkPWAInstallPrompt() {
-  // Check if user has already dismissed the popup recently
-  const lastDismissed = localStorage.getItem("pwa-install-dismissed");
-  const now = Date.now();
-  const oneWeek = 7 * 24 * 60 * 60 * 1000; // 1 week in milliseconds
-  
-  if (lastDismissed && (now - parseInt(lastDismissed)) < oneWeek) {
-    return; // Don't show popup if dismissed within last week
-  }
-  
-  // Check if already installed (running in standalone mode)
+function checkPWAInstallPrompt(delayMs = 2000) {
+  // Don't show if already installed
   if (isStandalone()) {
-    return; // Already installed
+    return;
   }
   
-  // Show popup shortly after load if:
-  // - install prompt is available (Android/Chromium), or
-  // - on iOS Safari (no beforeinstallprompt), we still show guidance
-  const delayMs = 2000; // 2 seconds after first load
+  // Don't show if modal is already visible
+  if (pwaInstallPopup && !pwaInstallPopup.classList.contains("hide")) {
+    return;
+  }
+  
+  // Show popup with a slight delay for better UX
   const ua = navigator.userAgent || '';
   const isIOS = /iPhone|iPad|iPod/i.test(ua);
   if (deferredPrompt || isIOS) {
     setTimeout(showPWAInstallPopup, delayMs);
   }
+}
+
+// Show PWA install modal periodically if not installed
+function startPWAInstallReminder() {
+  // Check every 30 seconds if app is not installed
+  setInterval(() => {
+    checkPWAInstallPrompt(0);
+  }, 30000);
 }
 
 // Listen for the beforeinstallprompt event
@@ -1191,7 +1282,6 @@ if (pwaInstallBtn) {
 // Handle "Maybe Later" button click
 if (pwaLaterBtn) {
   pwaLaterBtn.addEventListener('click', () => {
-    localStorage.setItem("pwa-install-dismissed", Date.now().toString());
     hidePWAInstallPopup();
   });
 }
@@ -1199,7 +1289,6 @@ if (pwaLaterBtn) {
 // Handle close button click
 if (pwaCloseBtn) {
   pwaCloseBtn.addEventListener('click', () => {
-    localStorage.setItem("pwa-install-dismissed", Date.now().toString());
     hidePWAInstallPopup();
   });
 }
@@ -1227,4 +1316,6 @@ document.addEventListener("DOMContentLoaded", () => {
   addPullToRefresh();
   // attempt to show PWA install popup on first load (covers iOS which lacks beforeinstallprompt)
   checkPWAInstallPrompt();
+  // start periodic PWA install reminders
+  startPWAInstallReminder();
 });
