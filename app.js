@@ -1192,6 +1192,16 @@ function isStandalone() {
 function showPWAInstallPopup() {
   if (pwaInstallPopup) {
     pwaInstallPopup.classList.remove("hide");
+    
+    // Reset button state and instructions
+    if (pwaInstallBtn) {
+      pwaInstallBtn.textContent = 'Install App';
+      pwaInstallBtn.onclick = null; // Remove any custom onclick handler
+    }
+    if (pwaInstructions) {
+      pwaInstructions.classList.add('hide');
+      pwaInstructions.innerHTML = '';
+    }
   }
 }
 
@@ -1241,41 +1251,58 @@ window.addEventListener('beforeinstallprompt', (e) => {
 // Handle install button click
 if (pwaInstallBtn) {
   pwaInstallBtn.addEventListener('click', async () => {
-    if (!deferredPrompt) {
-      // Fallback: show inline guidance instead of alert
-      if (pwaInstructions) {
-        const ua = navigator.userAgent || '';
-        const isIOS = /iPhone|iPad|iPod/i.test(ua);
-        const isAndroid = /Android/i.test(ua);
-        let html = '';
-        if (isIOS) {
-          html = 'On iPhone/iPad: Tap the Share button and choose <b>Add to Home Screen</b>.';
-        } else if (isAndroid) {
-          html = 'On Android: Use the menu and choose <b>Install app</b> or tap the install icon in the address bar.';
+    try {
+      if (deferredPrompt) {
+        // Use the native install prompt if available
+        deferredPrompt.prompt();
+        
+        // Wait for the user to respond to the prompt
+        const { outcome } = await deferredPrompt.userChoice;
+        
+        if (outcome === 'accepted') {
+          console.log('User accepted the install prompt');
+          showToast('App installation started!', 'success');
         } else {
-          html = 'Use your browser\'s menu to <b>Install</b> or <b>Add to Home Screen</b>.';
+          console.log('User dismissed the install prompt');
+          showToast('Installation cancelled', 'info');
         }
-        pwaInstructions.innerHTML = html;
-        pwaInstructions.classList.remove('hide');
+        
+        // Clear the deferredPrompt and hide popup
+        deferredPrompt = null;
+        hidePWAInstallPopup();
+      } else {
+        // Fallback: show inline guidance for browsers without native prompt
+        if (pwaInstructions) {
+          const ua = navigator.userAgent || '';
+          const isIOS = /iPhone|iPad|iPod/i.test(ua);
+          const isAndroid = /Android/i.test(ua);
+          const isChrome = /Chrome/i.test(ua);
+          const isEdge = /Edge/i.test(ua);
+          
+          let html = '';
+          if (isIOS) {
+            html = '📱 <strong>iPhone/iPad:</strong><br>1. Tap the Share button (⬆️)<br>2. Choose "Add to Home Screen"<br>3. Tap "Add" to install';
+          } else if (isAndroid && isChrome) {
+            html = '📱 <strong>Android Chrome:</strong><br>1. Tap the menu (⋮)<br>2. Choose "Install app" or "Add to Home screen"<br>3. Tap "Install"';
+          } else if (isChrome || isEdge) {
+            html = '💻 <strong>Desktop:</strong><br>1. Look for the install icon (⊕) in the address bar<br>2. Or use browser menu → "Install app"<br>3. Click "Install"';
+          } else {
+            html = '🌐 <strong>Install Instructions:</strong><br>1. Use your browser\'s menu<br>2. Look for "Install app" or "Add to Home Screen"<br>3. Follow the prompts to install';
+          }
+          
+          pwaInstructions.innerHTML = html;
+          pwaInstructions.classList.remove('hide');
+          
+          // Change button text to indicate instructions are shown
+          pwaInstallBtn.textContent = 'Got it!';
+          pwaInstallBtn.onclick = () => hidePWAInstallPopup();
+        }
       }
-      return; // keep popup open so instructions remain visible
+    } catch (error) {
+      console.error('PWA install error:', error);
+      showToast('Installation failed. Try using your browser menu.', 'error');
+      hidePWAInstallPopup();
     }
-    
-    // Show the install prompt
-    deferredPrompt.prompt();
-    
-    // Wait for the user to respond to the prompt
-    const { outcome } = await deferredPrompt.userChoice;
-    
-    if (outcome === 'accepted') {
-      console.log('User accepted the install prompt');
-    } else {
-      console.log('User dismissed the install prompt');
-    }
-    
-    // Clear the deferredPrompt
-    deferredPrompt = null;
-    hidePWAInstallPopup();
   });
 }
 
