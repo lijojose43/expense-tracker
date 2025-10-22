@@ -929,7 +929,6 @@ if (themeToggle) {
     const next = current === "dark" ? "light" : "dark";
     localStorage.setItem(THEME_KEY, next);
     applyTheme(next);
-    showToast(`Switched to ${next} theme`, 'info');
   });
 }
 if (exportOption) {
