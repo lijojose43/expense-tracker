@@ -68,7 +68,7 @@ body {
   height: 100vh;
   display: block;
   padding: 0;
-  padding-bottom: 80px; /* Adjusted space for smaller bottom bar */
+  padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)); /* Adjusted space for bottom bar with safe areas */
   overflow-x: hidden; /* Prevent horizontal scroll */
   overflow-y: auto; /* Allow vertical scroll but hide scrollbar */
   /* Force hide scrollbars on all mobile devices */
@@ -84,7 +84,7 @@ body {
   max-width: none;
   background: transparent;
   border-radius: 0;
-  padding-bottom: 60px; /* Adjusted for smaller navbar */
+  padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px)); /* Adjusted for navbar with safe areas */
   box-shadow: none;
   position: relative;
   overflow-x: hidden; /* Prevent horizontal scroll in app container */
@@ -1120,7 +1120,7 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
 }
 
 .description-field {
-  flex: 1.5;
+  flex: 1;
   display: flex;
   flex-direction: column;
   min-width: 0; /* Allow flex item to shrink below content size */
@@ -1368,9 +1368,14 @@ footer {
   justify-content: space-around;
   box-shadow: 0 -2px 12px rgba(2, 6, 23, 0.1);
   z-index: 1000;
+  /* Enhanced safe area support for iPhone PWA */
   padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
   /* Allow center button to extend upward */
   overflow: visible;
+  /* Ensure proper height calculation with safe areas */
+  min-height: calc(60px + env(safe-area-inset-bottom, 0px));
 }
 [data-theme="dark"] .bottombar {
   box-shadow: 0 -2px 12px rgba(2, 6, 23, 0.6);
@@ -1439,10 +1444,38 @@ footer {
 /* Old Floating Action Button - Now replaced by center button */
 /* .fab styles removed - using .fab-center in bottom navigation instead */
 
-/* Additional spacing for devices with safe areas (iPhone) */
+/* Enhanced iPhone PWA support */
 @supports (padding: max(0px)) {
   .bottombar {
-    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 0px);
+    /* Ensure proper safe area handling */
+    padding-bottom: max(env(safe-area-inset-bottom, 0px), 0px);
+    height: calc(60px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* Specific PWA display mode support */
+@media (display-mode: standalone) {
+  .bottombar {
+    /* Enhanced PWA support with proper safe areas */
+    padding-bottom: max(env(safe-area-inset-bottom, 0px), 8px);
+    height: calc(60px + env(safe-area-inset-bottom, 0px));
+    background: var(--card);
+    border-top: 1px solid rgba(2, 6, 23, 0.08);
+  }
+  
+  [data-theme="dark"] .bottombar {
+    border-top: 1px solid rgba(148, 163, 184, 0.1);
+  }
+}
+
+/* iOS Safari specific fixes */
+@supports (-webkit-touch-callout: none) {
+  .bottombar {
+    /* iOS-specific safe area handling */
+    padding-bottom: max(env(safe-area-inset-bottom, 0px), 8px);
+    /* Prevent iOS scrolling issues */
+    -webkit-user-select: none;
+    user-select: none;
   }
 }
 

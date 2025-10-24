@@ -879,6 +879,13 @@ function renderList() {
 
 function openModal(defaults) {
   modal.classList.remove("hide");
+  
+  // Immediate focus attempt for mobile devices
+  const amountField = $("amount");
+  if (amountField) {
+    amountField.focus();
+  }
+  
   // Trigger the slide-up animation
   setTimeout(() => {
     modal.classList.add("show");
@@ -922,29 +929,41 @@ function openModal(defaults) {
         (window.matchMedia && window.matchMedia("(max-width: 768px)").matches);
 
       if (isMobile) {
-        // Trigger click to ensure keyboard opens on iOS
-        setTimeout(() => {
-          amountField.click();
-          amountField.focus();
-        }, 50);
+        // More aggressive approach for mobile keyboard activation
+        amountField.click();
+        amountField.focus();
+        
+        // Trigger multiple events to ensure keyboard opens
+        const events = ['touchstart', 'touchend', 'mousedown', 'mouseup', 'click', 'focus'];
+        events.forEach(eventType => {
+          const event = new Event(eventType, { bubbles: true, cancelable: true });
+          amountField.dispatchEvent(event);
+        });
 
-        // Additional attempt for stubborn iOS keyboards
+        // Additional iOS-specific attempts
         if (isIOS) {
           setTimeout(() => {
             amountField.focus();
-            // Programmatically trigger input event to wake up iOS keyboard
-            const event = new Event("touchstart", { bubbles: true });
-            amountField.dispatchEvent(event);
-          }, 100);
+            amountField.click();
+            // Scroll into view to ensure visibility
+            amountField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }, 50);
+          
+          setTimeout(() => {
+            amountField.focus();
+            amountField.select();
+          }, 150);
         }
       }
     }
   };
 
-  // Multiple attempts to ensure focus works on all devices
-  setTimeout(focusAmountField, 100); // Quick attempt
+  // More frequent attempts to ensure focus works on all devices
+  setTimeout(focusAmountField, 50);  // Very quick attempt
+  setTimeout(focusAmountField, 150); // After initial render
   setTimeout(focusAmountField, 300); // After animation
   setTimeout(focusAmountField, 500); // Final attempt for slow devices
+  setTimeout(focusAmountField, 800); // Extra attempt for very slow devices
 }
 
 function closeModalFn() {
