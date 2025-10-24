@@ -899,9 +899,8 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
 
 .modal-content header #closeModal {
   position: absolute;
-  top: 16px;
-  right: 16px;
-  background: rgba(0, 0, 0, 0.05);
+  top: 3px;
+  right: 3px;
   border: none;
   border-radius: 50%;
   width: 15px;
@@ -1362,22 +1361,16 @@ footer {
   left: 0;
   right: 0;
   bottom: 0;
+  height: 60px;
   background: var(--card);
-  border-top: 1px solid rgba(2, 6, 23, 0.06);
   display: flex;
+  align-items: center;
   justify-content: space-around;
-  gap: 6px;
-  padding: 6px 12px; /* Smaller padding */
-  /* Safe areas for iPhone */
-  padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px));
-  padding-left: calc(12px + env(safe-area-inset-left, 0px));
-  padding-right: calc(12px + env(safe-area-inset-right, 0px));
-  /* Legacy Safari fallback */
-  padding-bottom: calc(6px + constant(safe-area-inset-bottom, 0px));
-  z-index: 900;
-  box-shadow: 0 -2px 12px rgba(2, 6, 23, 0.08);
-  /* Ensure no scrollbar appears over navbar */
-  overflow: hidden;
+  box-shadow: 0 -2px 12px rgba(2, 6, 23, 0.1);
+  z-index: 1000;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  /* Allow center button to extend upward */
+  overflow: visible;
 }
 [data-theme="dark"] .bottombar {
   box-shadow: 0 -2px 12px rgba(2, 6, 23, 0.6);
@@ -1403,15 +1396,12 @@ footer {
   background: rgba(30, 144, 255, 0.1);
   color: var(--accent);
 }
-/* Search input removed */
 
-/* Floating Action Button */
-.fab {
-  position: fixed;
-  bottom: 88px; /* Adjusted for smaller navbar */
-  right: 20px;
-  width: 56px; /* Restored larger size */
-  height: 56px; /* Restored larger size */
+/* Center Add Button in Bottom Navigation */
+.fab-center {
+  position: relative;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
   background: var(--accent);
   color: white;
@@ -1421,32 +1411,38 @@ footer {
   align-items: center;
   justify-content: center;
   box-shadow: 0 4px 16px rgba(30, 144, 255, 0.3);
-  transition: all 0.3s ease;
-  z-index: 800;
+  transition: all 0.2s ease;
+  z-index: 1001;
+  /* Position half above the navbar */
+  transform: translateY(-50%);
+  margin: 0 20px; /* Add spacing from tabs */
 }
 
-.fab:hover {
-  transform: scale(1.1);
+.fab-center:hover {
+  transform: translateY(-50%) scale(1.1);
   box-shadow: 0 6px 20px rgba(30, 144, 255, 0.4);
 }
 
-.fab:active {
-  transform: scale(0.95);
+.fab-center:active {
+  transform: translateY(-50%) scale(0.95);
 }
 
-[data-theme="dark"] .fab {
+[data-theme="dark"] .fab-center {
   box-shadow: 0 4px 16px rgba(30, 144, 255, 0.3);
 }
 
-[data-theme="dark"] .fab:hover {
+[data-theme="dark"] .fab-center:hover {
   box-shadow: 0 6px 20px rgba(30, 144, 255, 0.4);
 }
+/* Search input removed */
+
+/* Old Floating Action Button - Now replaced by center button */
+/* .fab styles removed - using .fab-center in bottom navigation instead */
 
 /* Additional spacing for devices with safe areas (iPhone) */
 @supports (padding: max(0px)) {
-  .fab {
-    bottom: calc(88px + env(safe-area-inset-bottom, 0px));
-    right: calc(20px + env(safe-area-inset-right, 0px));
+  .bottombar {
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 0px);
   }
 }
 
@@ -1647,7 +1643,7 @@ footer {
   /* Enhanced touch targets */
   .icon,
   .tab,
-  .fab,
+  .fab-center,
   .filter-btn,
   .menu-item {
     min-height: 44px;
@@ -1671,14 +1667,14 @@ footer {
     background: rgba(255, 255, 255, 0.1);
   }
 
-  /* Enhanced FAB */
-  .fab {
+  /* Enhanced Center FAB */
+  .fab-center {
     box-shadow: 0 8px 24px rgba(30, 144, 255, 0.4);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  .fab:active {
-    transform: scale(0.9);
+  .fab-center:active {
+    transform: translateY(-50%) scale(0.9);
     box-shadow: 0 4px 12px rgba(30, 144, 255, 0.6);
   }
 

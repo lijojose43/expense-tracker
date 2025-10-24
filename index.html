@@ -168,7 +168,7 @@
   <!-- Add / Edit Modal -->
   <div id="modal" class="modal hide" role="dialog" aria-modal="true">
     <div class="modal-content">
-      <header><h2 id="modalTitle">Create Transaction</h2><button id="closeModal" class="icon">✕</button></header>
+      <header><h3 id="modalTitle">Create Transaction</h3><button id="closeModal" class="icon">✕</button></header>
       <form id="txForm">
         <div class="type-checkboxes">
           <div class="checkbox-group">
@@ -216,13 +216,6 @@
     </div>
   </div>
 
-  <!-- Floating Action Button -->
-  <button id="addBtn" class="fab" title="Add" aria-label="Add transaction">
-    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-      <path d="M12 5v14M5 12h14"/>
-    </svg>
-  </button>
-  
   <nav class="bottombar">
     <button id="tabHome" class="tab active" aria-label="Home">
       <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -231,6 +224,14 @@
       </svg>
       <span>Home</span>
     </button>
+    
+    <!-- Center Add Button -->
+    <button id="addBtn" class="fab-center" title="Add" aria-label="Add transaction">
+      <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M12 5v14M5 12h14"/>
+      </svg>
+    </button>
+    
     <button id="tabSummary" class="tab" aria-label="Summary">
       <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M12 20V10"/>
