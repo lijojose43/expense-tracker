@@ -39,7 +39,7 @@ const filterType = $("filterType");
 const customDateRange = $("customDateRange");
 const startDate = $("startDate");
 const endDate = $("endDate");
-const searchInput = $("search");
+// Search input removed
 // Date filter buttons
 const filterAllTime = $("filterAllTime");
 const filterThisMonth = $("filterThisMonth");
@@ -96,87 +96,94 @@ function uid() {
 }
 
 // Mobile app enhancement functions
-function hapticFeedback(type = 'light') {
-  if ('vibrate' in navigator) {
-    switch(type) {
-      case 'light':
+function hapticFeedback(type = "light") {
+  if ("vibrate" in navigator) {
+    switch (type) {
+      case "light":
         navigator.vibrate(10);
         break;
-      case 'medium':
+      case "medium":
         navigator.vibrate(20);
         break;
-      case 'heavy':
+      case "heavy":
         navigator.vibrate([30, 10, 30]);
         break;
-      case 'success':
+      case "success":
         navigator.vibrate([50, 25, 50]);
         break;
-      case 'error':
+      case "error":
         navigator.vibrate([100, 50, 100, 50, 100]);
         break;
     }
   }
 }
 
-function showToast(message, type = 'info') {
+function showToast(message, type = "info") {
   // Create toast element
-  const toast = document.createElement('div');
+  const toast = document.createElement("div");
   toast.className = `toast toast-${type}`;
   toast.textContent = message;
-  
+
   // Add to DOM
   document.body.appendChild(toast);
-  
+
   // Animate in
-  setTimeout(() => toast.classList.add('show'), 10);
-  
+  setTimeout(() => toast.classList.add("show"), 10);
+
   // Remove after delay
   setTimeout(() => {
-    toast.classList.remove('show');
+    toast.classList.remove("show");
     setTimeout(() => document.body.removeChild(toast), 300);
   }, 3000);
 }
 
-
 function addPullToRefresh() {
-  const app = document.querySelector('.app');
+  const app = document.querySelector(".app");
   if (!app) return;
 
-  let pullIndicator = document.createElement('div');
-  pullIndicator.className = 'pull-refresh-indicator';
-  pullIndicator.innerHTML = '↓ Pull to refresh';
+  let pullIndicator = document.createElement("div");
+  pullIndicator.className = "pull-refresh-indicator";
+  pullIndicator.innerHTML = "↓ Pull to refresh";
   app.insertBefore(pullIndicator, app.firstChild);
 
-  app.addEventListener('touchstart', (e) => {
-    if (app.scrollTop === 0 && !isRefreshing) {
-      startY = e.touches[0].clientY;
-    }
-  }, { passive: true });
+  app.addEventListener(
+    "touchstart",
+    (e) => {
+      if (app.scrollTop === 0 && !isRefreshing) {
+        startY = e.touches[0].clientY;
+      }
+    },
+    { passive: true }
+  );
 
-  app.addEventListener('touchmove', (e) => {
-    if (app.scrollTop === 0 && !isRefreshing && startY > 0) {
-      pullDistance = Math.max(0, e.touches[0].clientY - startY);
-      
-      if (pullDistance > 0) {
-        e.preventDefault();
-        const maxPull = 80;
-        const normalizedDistance = Math.min(pullDistance, maxPull);
-        
-        pullIndicator.style.transform = `translateY(${normalizedDistance}px)`;
-        pullIndicator.style.opacity = normalizedDistance / maxPull;
-        
-        if (pullDistance > 60) {
-          pullIndicator.innerHTML = '↑ Release to refresh';
-          pullIndicator.classList.add('ready');
-        } else {
-          pullIndicator.innerHTML = '↓ Pull to refresh';
-          pullIndicator.classList.remove('ready');
+  app.addEventListener(
+    "touchmove",
+    (e) => {
+      if (app.scrollTop === 0 && !isRefreshing && startY > 0) {
+        pullDistance = Math.max(0, e.touches[0].clientY - startY);
+
+        if (pullDistance > 0) {
+          e.preventDefault();
+          const maxPull = 80;
+          const normalizedDistance = Math.min(pullDistance, maxPull);
+
+          pullIndicator.style.transform = `translateY(${normalizedDistance}px)`;
+          pullIndicator.style.opacity = normalizedDistance / maxPull;
+
+          if (pullDistance > 60) {
+            pullIndicator.innerHTML = "↑ Release to refresh";
+            pullIndicator.classList.add("ready");
+          } else {
+            pullIndicator.innerHTML = "↓ Pull to refresh";
+            pullIndicator.classList.remove("ready");
+          }
         }
       }
-    }
-  }, { passive: false });
+    },
+    { passive: false }
+  );
 
-  app.addEventListener('touchend', () => {
+  app.addEventListener("touchend", () => {
     if (pullDistance > 60 && !isRefreshing) {
       triggerRefresh();
     } else {
@@ -188,28 +195,28 @@ function addPullToRefresh() {
 
   function triggerRefresh() {
     isRefreshing = true;
-    pullIndicator.innerHTML = '⟳ Refreshing...';
-    pullIndicator.classList.add('refreshing');
-    hapticFeedback('medium');
-    
+    pullIndicator.innerHTML = "⟳ Refreshing...";
+    pullIndicator.classList.add("refreshing");
+    hapticFeedback("medium");
+
     // Simulate refresh (recalculate and re-render)
     setTimeout(() => {
       computeTotals();
       renderList();
       if (!summaryTabEl.classList.contains("hidden")) renderChart();
-      
-      hapticFeedback('success');
+
+      hapticFeedback("success");
       resetPullIndicator();
       isRefreshing = false;
     }, 1000);
   }
 
   function resetPullIndicator() {
-    pullIndicator.style.transform = 'translateY(-100%)';
-    pullIndicator.style.opacity = '0';
-    pullIndicator.classList.remove('ready', 'refreshing');
+    pullIndicator.style.transform = "translateY(-100%)";
+    pullIndicator.style.opacity = "0";
+    pullIndicator.classList.remove("ready", "refreshing");
     setTimeout(() => {
-      pullIndicator.innerHTML = '↓ Pull to refresh';
+      pullIndicator.innerHTML = "↓ Pull to refresh";
     }, 300);
   }
 }
@@ -217,7 +224,7 @@ function addPullToRefresh() {
 // --- Type (expense/income) radio helpers ---
 function getSelectedType() {
   const checked = document.querySelector('input[name="type"]:checked');
-  return checked ? checked.value : 'expense';
+  return checked ? checked.value : "expense";
 }
 
 function setSelectedType(val) {
@@ -243,16 +250,18 @@ function setThemeMetaColor(theme) {
 function setThemeIcon(theme) {
   const sunIcon = document.getElementById("sunIcon");
   const moonIcon = document.getElementById("moonIcon");
-  
+
   if (!sunIcon || !moonIcon) return;
-  
+
   // The CSS handles the visibility based on data-theme attribute
   // This function can be used for any additional icon logic if needed
   // Icons will automatically show/hide based on the theme via CSS
 }
 function applyTheme(theme) {
   const chosen =
-    theme || localStorage.getItem(THEME_KEY) || (systemPrefersDark() ? "dark" : "light");
+    theme ||
+    localStorage.getItem(THEME_KEY) ||
+    (systemPrefersDark() ? "dark" : "light");
   document.documentElement.setAttribute("data-theme", chosen);
   setThemeMetaColor(chosen);
   setThemeIcon(chosen);
@@ -320,15 +329,15 @@ function getPreviousMonthRange() {
 function isDateInRange(dateStr, startDate, endDate) {
   const date = new Date(dateStr);
   if (isNaN(date.getTime())) return false;
-  
+
   const start = new Date(startDate);
   const end = new Date(endDate);
-  
+
   // Set time to start/end of day for proper comparison
   start.setHours(0, 0, 0, 0);
   end.setHours(23, 59, 59, 999);
   date.setHours(12, 0, 0, 0); // Set to noon to avoid timezone issues
-  
+
   return date >= start && date <= end;
 }
 
@@ -345,7 +354,8 @@ function normalizeTx(raw) {
   // type
   t.type = t.type === "income" ? "income" : "expense";
   // category
-  if (typeof t.category !== "string" || !t.category.trim()) t.category = "Other";
+  if (typeof t.category !== "string" || !t.category.trim())
+    t.category = "Other";
   // date
   const d = new Date(t.date);
   if (isNaN(d.getTime())) t.date = new Date().toISOString().slice(0, 10);
@@ -407,7 +417,8 @@ async function importFromFile(file) {
     : json && Array.isArray(json.items)
     ? json.items
     : null;
-  if (!items) throw new Error("Invalid file format: expected an array or {items: []}");
+  if (!items)
+    throw new Error("Invalid file format: expected an array or {items: []}");
   const cleaned = items.map(normalizeTx).filter(Boolean);
   if (cleaned.length === 0) throw new Error("No valid transactions found");
 
@@ -450,7 +461,7 @@ function populateCategories() {
 function computeTotals() {
   let income = 0,
     expense = 0;
-  
+
   // Get current date filter settings
   let dateRange = null;
   if (currentDateFilter === "thisMonth") {
@@ -464,13 +475,13 @@ function computeTotals() {
       dateRange = { start: new Date(start), end: new Date(end) };
     }
   }
-  
+
   for (const t of data) {
     // Apply date filtering to totals as well
     if (dateRange && !isDateInRange(t.date, dateRange.start, dateRange.end)) {
       continue;
     }
-    
+
     if (t.type === "income") income += Number(t.amount);
     else expense += Math.abs(Number(t.amount));
   }
@@ -483,7 +494,7 @@ function computeTotals() {
 // Aggregate expenses by category for the donut chart
 function expensesByCategory() {
   const map = new Map();
-  
+
   // Get current date filter settings for summary page
   let dateRange = null;
   if (summaryDateFilter === "thisMonth") {
@@ -497,15 +508,15 @@ function expensesByCategory() {
       dateRange = { start: new Date(start), end: new Date(end) };
     }
   }
-  
+
   for (const t of data) {
     if (t.type !== "expense") continue;
-    
+
     // Apply date filtering to chart data as well
     if (dateRange && !isDateInRange(t.date, dateRange.start, dateRange.end)) {
       continue;
     }
-    
+
     const cat = t.category || "Other";
     map.set(cat, (map.get(cat) || 0) + Math.abs(Number(t.amount)));
   }
@@ -517,14 +528,14 @@ function expensesByCategory() {
 // Line chart removed
 
 function catSlug(category) {
-  return category.toLowerCase().replace(/\s+/g, '');
+  return category.toLowerCase().replace(/\s+/g, "");
 }
 
 // Get modern SVG icon for category
 function getCategoryIcon(category) {
   const slug = catSlug(category || "other");
   const iconSize = "20";
-  
+
   const icons = {
     groceries: `<svg viewBox="0 0 24 24" width="${iconSize}" height="${iconSize}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M7 4V2a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v2"/>
@@ -532,63 +543,63 @@ function getCategoryIcon(category) {
       <path d="M9 8v4"/>
       <path d="M15 8v4"/>
     </svg>`,
-    
+
     dining: `<svg viewBox="0 0 24 24" width="${iconSize}" height="${iconSize}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/>
       <path d="M7 2v20"/>
       <path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Z"/>
     </svg>`,
-    
+
     rent: `<svg viewBox="0 0 24 24" width="${iconSize}" height="${iconSize}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
       <polyline points="9,22 9,12 15,12 15,22"/>
     </svg>`,
-    
+
     utilities: `<svg viewBox="0 0 24 24" width="${iconSize}" height="${iconSize}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
     </svg>`,
-    
+
     transportation: `<svg viewBox="0 0 24 24" width="${iconSize}" height="${iconSize}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <circle cx="7" cy="17" r="2"/>
       <circle cx="17" cy="17" r="2"/>
       <path d="M5 17H3a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h9l3 6v4h-2"/>
       <path d="M9 17h6"/>
     </svg>`,
-    
+
     shopping: `<svg viewBox="0 0 24 24" width="${iconSize}" height="${iconSize}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <circle cx="8" cy="21" r="1"/>
       <circle cx="19" cy="21" r="1"/>
       <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>
     </svg>`,
-    
+
     healthcare: `<svg viewBox="0 0 24 24" width="${iconSize}" height="${iconSize}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M9 12h6"/>
       <path d="M12 9v6"/>
       <path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z"/>
     </svg>`,
-    
+
     entertainment: `<svg viewBox="0 0 24 24" width="${iconSize}" height="${iconSize}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <polygon points="5,3 19,12 5,21"/>
     </svg>`,
-    
+
     salary: `<svg viewBox="0 0 24 24" width="${iconSize}" height="${iconSize}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <line x1="12" y1="1" x2="12" y2="23"/>
       <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
     </svg>`,
-    
+
     business: `<svg viewBox="0 0 24 24" width="${iconSize}" height="${iconSize}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
       <line x1="8" y1="21" x2="16" y2="21"/>
       <line x1="12" y1="17" x2="12" y2="21"/>
     </svg>`,
-    
+
     other: `<svg viewBox="0 0 24 24" width="${iconSize}" height="${iconSize}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <circle cx="12" cy="12" r="1"/>
       <circle cx="19" cy="12" r="1"/>
       <circle cx="5" cy="12" r="1"/>
-    </svg>`
+    </svg>`,
   };
-  
+
   return icons[slug] || icons.other;
 }
 
@@ -623,7 +634,9 @@ function renderDonut() {
     business: "#14b8a6", // teal
     other: "#9ca3af", // neutral
   };
-  const colors = labels.map((label, i) => categoryColors[catSlug(label)] || palette[i % palette.length]);
+  const colors = labels.map(
+    (label, i) => categoryColors[catSlug(label)] || palette[i % palette.length]
+  );
   if (donutChart) {
     donutChart.destroy();
     donutChart = null;
@@ -676,7 +689,7 @@ function switchTab(name) {
     // ensure chart reflects latest data
     renderChart();
   }
-  
+
   // Check if PWA install modal should be shown after tab switch
   setTimeout(() => checkPWAInstallPrompt(1000), 500);
 }
@@ -685,8 +698,8 @@ function renderList() {
   transactionsEl.innerHTML = "";
   const ft = filterType.value;
   const fc = filterCategory.value;
-  const q = searchInput.value.trim().toLowerCase();
-  
+  // Search functionality removed
+
   // Get date range based on filter selection
   let dateRange = null;
   if (currentDateFilter === "thisMonth") {
@@ -700,7 +713,7 @@ function renderList() {
       dateRange = { start: new Date(start), end: new Date(end) };
     }
   }
-  
+
   const list = data
     .slice()
     .sort((a, b) => {
@@ -722,20 +735,15 @@ function renderList() {
     .filter((t) => {
       if (ft !== "all" && t.type !== ft) return false;
       if (fc !== "all" && t.category !== fc) return false;
-      if (
-        q &&
-        !(t.description || "").toLowerCase().includes(q) &&
-        !(t.category || "").toLowerCase().includes(q)
-      )
-        return false;
-      
+      // Search filter removed
+
       // Date filtering
       if (dateRange) {
         if (!isDateInRange(t.date, dateRange.start, dateRange.end)) {
           return false;
         }
       }
-      
+
       return true;
     });
   if (list.length === 0) {
@@ -772,9 +780,7 @@ function renderList() {
     const amountValue = Math.abs(Number(t.amount)).toFixed(2);
     const formattedAmount = amountValue.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     amt.textContent =
-      (t.type === "expense" ? "-" : "+") +
-      "₹" +
-      formattedAmount;
+      (t.type === "expense" ? "-" : "+") + "₹" + formattedAmount;
     const actions = document.createElement("div");
     actions.className = "txActions"; // kept for layout spacing; no buttons inside
 
@@ -794,38 +800,46 @@ function renderList() {
       setTimeout(() => (el.style.transition = ""), 220);
     }
 
-    el.addEventListener("touchstart", (e) => {
-      if (!e.touches || e.touches.length === 0) return;
-      startX = e.touches[0].clientX;
-      dx = 0;
-      swiping = false;
-      moved = false;
-      el.style.transition = ""; // disable during drag
-    }, { passive: true });
+    el.addEventListener(
+      "touchstart",
+      (e) => {
+        if (!e.touches || e.touches.length === 0) return;
+        startX = e.touches[0].clientX;
+        dx = 0;
+        swiping = false;
+        moved = false;
+        el.style.transition = ""; // disable during drag
+      },
+      { passive: true }
+    );
 
-    el.addEventListener("touchmove", (e) => {
-      if (!e.touches || e.touches.length === 0) return;
-      dx = e.touches[0].clientX - startX; // negative when moving left
-      if (dx < -10) swiping = true;
-      if (Math.abs(dx) > 6) moved = true;
-      if (swiping) {
-        const limited = Math.max(dx, -120);
-        el.style.transform = `translateX(${limited}px)`;
-      }
-    }, { passive: true });
+    el.addEventListener(
+      "touchmove",
+      (e) => {
+        if (!e.touches || e.touches.length === 0) return;
+        dx = e.touches[0].clientX - startX; // negative when moving left
+        if (dx < -10) swiping = true;
+        if (Math.abs(dx) > 6) moved = true;
+        if (swiping) {
+          const limited = Math.max(dx, -120);
+          el.style.transform = `translateX(${limited}px)`;
+        }
+      },
+      { passive: true }
+    );
 
     el.addEventListener("touchend", () => {
       if (swiping && dx <= -80) {
-        hapticFeedback('medium');
+        hapticFeedback("medium");
         if (confirm("Delete this transaction?")) {
-          hapticFeedback('heavy');
+          hapticFeedback("heavy");
           data = data.filter((x) => x.id !== t.id);
           save();
           populateCategories();
           computeTotals();
           renderList();
           if (!summaryTabEl.classList.contains("hidden")) renderChart();
-          showToast('Transaction deleted', 'error');
+          showToast("Transaction deleted", "error");
           return; // element removed; do not animate back
         }
       }
@@ -869,10 +883,10 @@ function openModal(defaults) {
   setTimeout(() => {
     modal.classList.add("show");
   }, 10);
-  
+
   // Clear any existing validation errors
   clearValidationErrors();
-  
+
   if (defaults) {
     $("amount").value = defaults.amount;
     // set radio selection for type
@@ -886,37 +900,70 @@ function openModal(defaults) {
     // default to expense on new entry
     setSelectedType("expense");
   }
-  
-  // Focus on amount field after modal animation completes
-  setTimeout(() => {
+
+  // Enhanced focus handling for iPhone and mobile devices
+  const focusAmountField = () => {
     const amountField = $("amount");
     if (amountField) {
+      // Force focus and trigger keyboard on mobile devices
       amountField.focus();
+
       // For mobile devices, also select the text if there's a value
       if (amountField.value) {
         amountField.select();
       }
+
+      // Additional iPhone-specific handling
+      const ua = navigator.userAgent || "";
+      const isIOS = /iPhone|iPad|iPod/i.test(ua);
+      const isMobile =
+        isIOS ||
+        /Android/i.test(ua) ||
+        (window.matchMedia && window.matchMedia("(max-width: 768px)").matches);
+
+      if (isMobile) {
+        // Trigger click to ensure keyboard opens on iOS
+        setTimeout(() => {
+          amountField.click();
+          amountField.focus();
+        }, 50);
+
+        // Additional attempt for stubborn iOS keyboards
+        if (isIOS) {
+          setTimeout(() => {
+            amountField.focus();
+            // Programmatically trigger input event to wake up iOS keyboard
+            const event = new Event("touchstart", { bubbles: true });
+            amountField.dispatchEvent(event);
+          }, 100);
+        }
+      }
     }
-  }, 300); // Wait for modal animation to complete
+  };
+
+  // Multiple attempts to ensure focus works on all devices
+  setTimeout(focusAmountField, 100); // Quick attempt
+  setTimeout(focusAmountField, 300); // After animation
+  setTimeout(focusAmountField, 500); // Final attempt for slow devices
 }
 
 function closeModalFn() {
   modal.classList.remove("show");
   modal.classList.add("hide");
   // Reset modal transform when closing
-  const modalContent = document.querySelector('.modal-content');
+  const modalContent = document.querySelector(".modal-content");
   if (modalContent) {
-    modalContent.style.transform = '';
-    modalContent.style.transition = '';
+    modalContent.style.transform = "";
+    modalContent.style.transition = "";
   }
 }
 
 addBtn.addEventListener("click", () => {
-  hapticFeedback('light');
+  hapticFeedback("light");
   populateCategories();
   editId = null;
   const modalTitle = document.getElementById("modalTitle");
-  if (modalTitle) modalTitle.textContent = "Add Transaction";
+  if (modalTitle) modalTitle.textContent = "Create Transaction";
   const submitBtn = txForm.querySelector('button[type="submit"]');
   if (submitBtn) submitBtn.textContent = "Save";
   openModal();
@@ -931,92 +978,106 @@ let modalIsDragging = false;
 let modalDragThreshold = 100; // pixels to drag before closing
 
 function initModalDragToClose() {
-  const modalContent = document.querySelector('.modal-content');
-  const modalHeader = document.querySelector('.modal-content header');
-  
+  const modalContent = document.querySelector(".modal-content");
+  const modalHeader = document.querySelector(".modal-content header");
+
   if (!modalContent || !modalHeader) return;
-  
-  modalHeader.addEventListener('touchstart', (e) => {
-    modalStartY = e.touches[0].clientY;
-    modalCurrentY = modalStartY;
-    modalIsDragging = true;
-    modalContent.style.transition = 'none';
-  }, { passive: true });
-  
-  modalHeader.addEventListener('touchmove', (e) => {
-    if (!modalIsDragging) return;
-    
-    modalCurrentY = e.touches[0].clientY;
-    const deltaY = modalCurrentY - modalStartY;
-    
-    // Only allow downward drag
-    if (deltaY > 0) {
-      modalContent.style.transform = `translateY(${deltaY}px)`;
-    }
-  }, { passive: true });
-  
-  modalHeader.addEventListener('touchend', () => {
-    if (!modalIsDragging) return;
-    
-    const deltaY = modalCurrentY - modalStartY;
-    modalIsDragging = false;
-    
-    // Reset transition
-    modalContent.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-    
-    if (deltaY > modalDragThreshold) {
-      // Close modal if dragged far enough
-      hapticFeedback('medium');
-      closeModalFn();
-    } else {
-      // Snap back to original position
-      modalContent.style.transform = 'translateY(0)';
-    }
-  }, { passive: true });
-  
+
+  modalHeader.addEventListener(
+    "touchstart",
+    (e) => {
+      modalStartY = e.touches[0].clientY;
+      modalCurrentY = modalStartY;
+      modalIsDragging = true;
+      modalContent.style.transition = "none";
+    },
+    { passive: true }
+  );
+
+  modalHeader.addEventListener(
+    "touchmove",
+    (e) => {
+      if (!modalIsDragging) return;
+
+      modalCurrentY = e.touches[0].clientY;
+      const deltaY = modalCurrentY - modalStartY;
+
+      // Only allow downward drag
+      if (deltaY > 0) {
+        modalContent.style.transform = `translateY(${deltaY}px)`;
+      }
+    },
+    { passive: true }
+  );
+
+  modalHeader.addEventListener(
+    "touchend",
+    () => {
+      if (!modalIsDragging) return;
+
+      const deltaY = modalCurrentY - modalStartY;
+      modalIsDragging = false;
+
+      // Reset transition
+      modalContent.style.transition =
+        "transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)";
+
+      if (deltaY > modalDragThreshold) {
+        // Close modal if dragged far enough
+        hapticFeedback("medium");
+        closeModalFn();
+      } else {
+        // Snap back to original position
+        modalContent.style.transform = "translateY(0)";
+      }
+    },
+    { passive: true }
+  );
+
   // Also handle mouse events for desktop
-  modalHeader.addEventListener('mousedown', (e) => {
+  modalHeader.addEventListener("mousedown", (e) => {
     modalStartY = e.clientY;
     modalCurrentY = modalStartY;
     modalIsDragging = true;
-    modalContent.style.transition = 'none';
-    
+    modalContent.style.transition = "none";
+
     const handleMouseMove = (e) => {
       if (!modalIsDragging) return;
-      
+
       modalCurrentY = e.clientY;
       const deltaY = modalCurrentY - modalStartY;
-      
+
       // Only allow downward drag
       if (deltaY > 0) {
         modalContent.style.transform = `translateY(${deltaY}px)`;
       }
     };
-    
+
     const handleMouseUp = () => {
       if (!modalIsDragging) return;
-      
+
       const deltaY = modalCurrentY - modalStartY;
       modalIsDragging = false;
-      
+
       // Reset transition
-      modalContent.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-      
+      modalContent.style.transition =
+        "transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)";
+
       if (deltaY > modalDragThreshold) {
         // Close modal if dragged far enough
-        hapticFeedback('medium');
+        hapticFeedback("medium");
         closeModalFn();
       } else {
         // Snap back to original position
-        modalContent.style.transform = 'translateY(0)';
+        modalContent.style.transform = "translateY(0)";
       }
-      
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
+
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
     };
-    
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
+
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
   });
 }
 
@@ -1046,7 +1107,7 @@ document.addEventListener("keydown", (e) => {
 });
 if (themeToggle) {
   themeToggle.addEventListener("click", () => {
-    hapticFeedback('light');
+    hapticFeedback("light");
     const current =
       document.documentElement.getAttribute("data-theme") ||
       (systemPrefersDark() ? "dark" : "light");
@@ -1082,11 +1143,11 @@ if (importOption && importFileInput) {
 // Tab events
 if (tabHome && tabSummary) {
   tabHome.addEventListener("click", () => {
-    hapticFeedback('light');
+    hapticFeedback("light");
     switchTab("home");
   });
   tabSummary.addEventListener("click", () => {
-    hapticFeedback('light');
+    hapticFeedback("light");
     switchTab("summary");
   });
 }
@@ -1115,17 +1176,17 @@ function validateDate(dateValue) {
     dateError.style.display = "block";
     return false;
   }
-  
+
   const selectedDate = new Date(dateValue);
   const today = new Date();
   today.setHours(23, 59, 59, 999); // Set to end of today
-  
+
   if (selectedDate > today) {
     dateError.textContent = "Future dates are not allowed";
     dateError.style.display = "block";
     return false;
   }
-  
+
   dateError.style.display = "none";
   return true;
 }
@@ -1137,13 +1198,13 @@ txForm.addEventListener("submit", (e) => {
   const category = $("category").value || "Other";
   const date = $("date").value;
   const description = $("description").value;
-  
+
   // Validate form inputs
   const isAmountValid = validateAmount(amount);
   const isDateValid = validateDate(date);
-  
+
   if (!isAmountValid || !isDateValid) {
-    hapticFeedback('error');
+    hapticFeedback("error");
     return; // Stop form submission if validation fails
   }
   if (editId) {
@@ -1177,26 +1238,67 @@ txForm.addEventListener("submit", (e) => {
   renderList();
   // update chart if on summary tab
   if (!summaryTabEl.classList.contains("hidden")) renderChart();
-  
+
   // Enhanced feedback for transaction save
-  hapticFeedback('success');
-  showToast(editId ? 'Transaction updated' : 'Transaction added', 'success');
-  
+  hapticFeedback("success");
+  showToast(editId ? "Transaction updated" : "Transaction added", "success");
+
   editId = null;
   const modalTitle = document.getElementById("modalTitle");
-  if (modalTitle) modalTitle.textContent = "Add Transaction";
+  if (modalTitle) modalTitle.textContent = "Create Transaction";
   const submitBtn = txForm.querySelector('button[type="submit"]');
   if (submitBtn) submitBtn.textContent = "Save";
   closeModalFn();
-  
+
   // Show PWA install modal after successful transaction
   setTimeout(() => checkPWAInstallPrompt(2000), 1000);
 });
 
+// Enhanced mobile focus handling for form fields
+function enhanceMobileFocus(inputElement) {
+  if (!inputElement) return;
+
+  const ua = navigator.userAgent || "";
+  const isIOS = /iPhone|iPad|iPod/i.test(ua);
+  const isMobile =
+    isIOS ||
+    /Android/i.test(ua) ||
+    (window.matchMedia && window.matchMedia("(max-width: 768px)").matches);
+
+  if (isMobile) {
+    inputElement.addEventListener("focus", () => {
+      // Ensure keyboard stays open and field is properly focused
+      setTimeout(() => {
+        inputElement.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 100);
+
+      // Additional iOS handling
+      if (isIOS) {
+        setTimeout(() => {
+          inputElement.click();
+        }, 50);
+      }
+    });
+  }
+}
+
+// Apply enhanced focus to all form inputs (will be called from main DOMContentLoaded)
+function setupEnhancedMobileFocus() {
+  const formInputs = [
+    $("amount"),
+    $("category"),
+    $("date"),
+    $("description"),
+  ].filter(Boolean);
+
+  formInputs.forEach(enhanceMobileFocus);
+}
+
 // Real-time validation event listeners
 $("amount").addEventListener("input", (e) => {
   const amount = Number(e.target.value);
-  if (e.target.value) { // Only validate if there's a value
+  if (e.target.value) {
+    // Only validate if there's a value
     validateAmount(amount);
   } else {
     $("amountError").style.display = "none";
@@ -1204,7 +1306,8 @@ $("amount").addEventListener("input", (e) => {
 });
 
 $("date").addEventListener("change", (e) => {
-  if (e.target.value) { // Only validate if there's a value
+  if (e.target.value) {
+    // Only validate if there's a value
     validateDate(e.target.value);
   } else {
     $("dateError").style.display = "none";
@@ -1220,11 +1323,13 @@ function clearValidationErrors() {
 // Handle date filter button changes
 function setDateFilter(filter) {
   currentDateFilter = filter;
-  
+
   // Update button states
-  document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-  document.querySelector(`[data-filter="${filter}"]`).classList.add('active');
-  
+  document
+    .querySelectorAll(".filter-btn")
+    .forEach((btn) => btn.classList.remove("active"));
+  document.querySelector(`[data-filter="${filter}"]`).classList.add("active");
+
   // Show/hide custom date range
   if (filter === "custom") {
     customDateRange.classList.remove("hidden");
@@ -1235,11 +1340,11 @@ function setDateFilter(filter) {
   } else {
     customDateRange.classList.add("hidden");
   }
-  
+
   computeTotals();
   renderList();
   if (!summaryTabEl.classList.contains("hidden")) renderChart();
-  
+
   // Show PWA install modal after filter change
   setTimeout(() => checkPWAInstallPrompt(1500), 800);
 }
@@ -1253,24 +1358,29 @@ filterCustom.addEventListener("click", () => setDateFilter("custom"));
 // Handle summary page date filter button changes
 function setSummaryDateFilter(filter) {
   summaryDateFilter = filter;
-  
+
   // Update button states for summary page
-  document.querySelectorAll('#summaryTab .filter-btn').forEach(btn => btn.classList.remove('active'));
-  document.querySelector(`#summaryTab [data-filter="${filter}"]`).classList.add('active');
-  
+  document
+    .querySelectorAll("#summaryTab .filter-btn")
+    .forEach((btn) => btn.classList.remove("active"));
+  document
+    .querySelector(`#summaryTab [data-filter="${filter}"]`)
+    .classList.add("active");
+
   // Show/hide custom date range for summary
   if (filter === "custom") {
     summaryCustomDateRange.classList.remove("hidden");
     const today = new Date().toISOString().slice(0, 10);
-    if (summaryStartDate && !summaryStartDate.value) summaryStartDate.value = today;
+    if (summaryStartDate && !summaryStartDate.value)
+      summaryStartDate.value = today;
     if (summaryEndDate && !summaryEndDate.value) summaryEndDate.value = today;
   } else {
     summaryCustomDateRange.classList.add("hidden");
   }
-  
+
   // Update chart
   renderChart();
-  
+
   // Show PWA install modal after summary filter change
   setTimeout(() => checkPWAInstallPrompt(1500), 800);
 }
@@ -1284,8 +1394,10 @@ function enableMobileDatePlaceholder(input) {
   const ua = navigator.userAgent || "";
   const isIOS = /iPhone|iPad|iPod/i.test(ua);
   const isAndroid = /Android/i.test(ua);
-  const prefersSmallViewport = typeof window !== "undefined" &&
-    (window.matchMedia && window.matchMedia("(max-width: 420px)").matches);
+  const prefersSmallViewport =
+    typeof window !== "undefined" &&
+    window.matchMedia &&
+    window.matchMedia("(max-width: 420px)").matches;
   const isMobile = isIOS || isAndroid || prefersSmallViewport;
   if (!isMobile) return; // do not affect desktop UX
 
@@ -1299,7 +1411,9 @@ function enableMobileDatePlaceholder(input) {
       if (typeof input.showPicker === "function") {
         // Give the browser a tick to apply the new type
         setTimeout(() => {
-          try { input.showPicker(); } catch (_) {}
+          try {
+            input.showPicker();
+          } catch (_) {}
         }, 0);
       }
     } catch (_) {
@@ -1310,7 +1424,9 @@ function enableMobileDatePlaceholder(input) {
   input.addEventListener("blur", () => {
     // If no value selected, revert to text so placeholder remains visible
     if (!input.value) {
-      try { input.type = "text"; } catch (_) {}
+      try {
+        input.type = "text";
+      } catch (_) {}
     }
   });
 }
@@ -1325,7 +1441,7 @@ function setupMobileDatePlaceholders() {
 function setDefaultDatesToday() {
   const today = new Date().toISOString().slice(0, 10);
   const inputs = [
-    document.getElementById('date'),
+    document.getElementById("date"),
     startDate,
     endDate,
     summaryStartDate,
@@ -1333,17 +1449,27 @@ function setDefaultDatesToday() {
   ].filter(Boolean);
   inputs.forEach((el) => {
     if (!el.value) {
-      try { el.type = 'date'; } catch (_) {}
+      try {
+        el.type = "date";
+      } catch (_) {}
       el.value = today;
     }
   });
 }
 
 // Add event listeners for summary page date filter buttons
-summaryFilterAllTime.addEventListener("click", () => setSummaryDateFilter("all"));
-summaryFilterThisMonth.addEventListener("click", () => setSummaryDateFilter("thisMonth"));
-summaryFilterPrevMonth.addEventListener("click", () => setSummaryDateFilter("previousMonth"));
-summaryFilterCustom.addEventListener("click", () => setSummaryDateFilter("custom"));
+summaryFilterAllTime.addEventListener("click", () =>
+  setSummaryDateFilter("all")
+);
+summaryFilterThisMonth.addEventListener("click", () =>
+  setSummaryDateFilter("thisMonth")
+);
+summaryFilterPrevMonth.addEventListener("click", () =>
+  setSummaryDateFilter("previousMonth")
+);
+summaryFilterCustom.addEventListener("click", () =>
+  setSummaryDateFilter("custom")
+);
 
 // Handle summary custom date range changes
 summaryStartDate.addEventListener("change", () => {
@@ -1373,29 +1499,32 @@ filterCategory.addEventListener("change", () => {
   renderList();
   setTimeout(() => checkPWAInstallPrompt(1000), 500);
 });
-searchInput.addEventListener("input", renderList);
+// Search input event listener removed
 
 // PWA Install functionality
 function isStandalone() {
   // Chrome/Edge PWA and iOS Safari added to home screen
   return (
-    (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ||
-    (typeof navigator !== 'undefined' && 'standalone' in navigator && navigator.standalone === true)
+    (window.matchMedia &&
+      window.matchMedia("(display-mode: standalone)").matches) ||
+    (typeof navigator !== "undefined" &&
+      "standalone" in navigator &&
+      navigator.standalone === true)
   );
 }
 
 function showPWAInstallPopup() {
   if (pwaInstallPopup) {
     pwaInstallPopup.classList.remove("hide");
-    
+
     // Reset button state and instructions
     if (pwaInstallBtn) {
-      pwaInstallBtn.textContent = 'Install App';
+      pwaInstallBtn.textContent = "Install App";
       pwaInstallBtn.onclick = null; // Remove any custom onclick handler
     }
     if (pwaInstructions) {
-      pwaInstructions.classList.add('hide');
-      pwaInstructions.innerHTML = '';
+      pwaInstructions.classList.add("hide");
+      pwaInstructions.innerHTML = "";
     }
   }
 }
@@ -1411,14 +1540,14 @@ function checkPWAInstallPrompt(delayMs = 2000) {
   if (isStandalone()) {
     return;
   }
-  
+
   // Don't show if modal is already visible
   if (pwaInstallPopup && !pwaInstallPopup.classList.contains("hide")) {
     return;
   }
-  
+
   // Show popup with a slight delay for better UX
-  const ua = navigator.userAgent || '';
+  const ua = navigator.userAgent || "";
   const isIOS = /iPhone|iPad|iPod/i.test(ua);
   if (deferredPrompt || isIOS) {
     setTimeout(showPWAInstallPopup, delayMs);
@@ -1434,7 +1563,7 @@ function startPWAInstallReminder() {
 }
 
 // Listen for the beforeinstallprompt event
-window.addEventListener('beforeinstallprompt', (e) => {
+window.addEventListener("beforeinstallprompt", (e) => {
   // Prevent the mini-infobar from appearing on mobile
   e.preventDefault();
   // Save the event so it can be triggered later
@@ -1445,57 +1574,61 @@ window.addEventListener('beforeinstallprompt', (e) => {
 
 // Handle install button click
 if (pwaInstallBtn) {
-  pwaInstallBtn.addEventListener('click', async () => {
+  pwaInstallBtn.addEventListener("click", async () => {
     try {
       if (deferredPrompt) {
         // Use the native install prompt if available
         deferredPrompt.prompt();
-        
+
         // Wait for the user to respond to the prompt
         const { outcome } = await deferredPrompt.userChoice;
-        
-        if (outcome === 'accepted') {
-          console.log('User accepted the install prompt');
-          showToast('App installation started!', 'success');
+
+        if (outcome === "accepted") {
+          console.log("User accepted the install prompt");
+          showToast("App installation started!", "success");
         } else {
-          console.log('User dismissed the install prompt');
-          showToast('Installation cancelled', 'info');
+          console.log("User dismissed the install prompt");
+          showToast("Installation cancelled", "info");
         }
-        
+
         // Clear the deferredPrompt and hide popup
         deferredPrompt = null;
         hidePWAInstallPopup();
       } else {
         // Fallback: show inline guidance for browsers without native prompt
         if (pwaInstructions) {
-          const ua = navigator.userAgent || '';
+          const ua = navigator.userAgent || "";
           const isIOS = /iPhone|iPad|iPod/i.test(ua);
           const isAndroid = /Android/i.test(ua);
           const isChrome = /Chrome/i.test(ua);
           const isEdge = /Edge/i.test(ua);
-          
-          let html = '';
+
+          let html = "";
           if (isIOS) {
-            html = '📱 <strong>iPhone/iPad:</strong><br>1. Tap the Share button (⬆️)<br>2. Choose "Add to Home Screen"<br>3. Tap "Add" to install';
+            html =
+              '📱 <strong>iPhone/iPad:</strong><br>1. Tap the Share button (⬆️)<br>2. Choose "Add to Home Screen"<br>3. Tap "Add" to install';
           } else if (isAndroid && isChrome) {
-            html = '📱 <strong>Android Chrome:</strong><br>1. Tap the menu (⋮)<br>2. Choose "Install app" or "Add to Home screen"<br>3. Tap "Install"';
+            html =
+              '📱 <strong>Android Chrome:</strong><br>1. Tap the menu (⋮)<br>2. Choose "Install app" or "Add to Home screen"<br>3. Tap "Install"';
           } else if (isChrome || isEdge) {
-            html = '💻 <strong>Desktop:</strong><br>1. Look for the install icon (⊕) in the address bar<br>2. Or use browser menu → "Install app"<br>3. Click "Install"';
+            html =
+              '💻 <strong>Desktop:</strong><br>1. Look for the install icon (⊕) in the address bar<br>2. Or use browser menu → "Install app"<br>3. Click "Install"';
           } else {
-            html = '🌐 <strong>Install Instructions:</strong><br>1. Use your browser\'s menu<br>2. Look for "Install app" or "Add to Home Screen"<br>3. Follow the prompts to install';
+            html =
+              '🌐 <strong>Install Instructions:</strong><br>1. Use your browser\'s menu<br>2. Look for "Install app" or "Add to Home Screen"<br>3. Follow the prompts to install';
           }
-          
+
           pwaInstructions.innerHTML = html;
-          pwaInstructions.classList.remove('hide');
-          
+          pwaInstructions.classList.remove("hide");
+
           // Change button text to indicate instructions are shown
-          pwaInstallBtn.textContent = 'Got it!';
+          pwaInstallBtn.textContent = "Got it!";
           pwaInstallBtn.onclick = () => hidePWAInstallPopup();
         }
       }
     } catch (error) {
-      console.error('PWA install error:', error);
-      showToast('Installation failed. Try using your browser menu.', 'error');
+      console.error("PWA install error:", error);
+      showToast("Installation failed. Try using your browser menu.", "error");
       hidePWAInstallPopup();
     }
   });
@@ -1503,21 +1636,21 @@ if (pwaInstallBtn) {
 
 // Handle "Maybe Later" button click
 if (pwaLaterBtn) {
-  pwaLaterBtn.addEventListener('click', () => {
+  pwaLaterBtn.addEventListener("click", () => {
     hidePWAInstallPopup();
   });
 }
 
 // Handle close button click
 if (pwaCloseBtn) {
-  pwaCloseBtn.addEventListener('click', () => {
+  pwaCloseBtn.addEventListener("click", () => {
     hidePWAInstallPopup();
   });
 }
 
 // Listen for successful app installation
-window.addEventListener('appinstalled', () => {
-  console.log('PWA was installed');
+window.addEventListener("appinstalled", () => {
+  console.log("PWA was installed");
   hidePWAInstallPopup();
   deferredPrompt = null;
 });
@@ -1534,6 +1667,8 @@ document.addEventListener("DOMContentLoaded", () => {
   renderChart();
   // initialize mobile placeholder workaround for date inputs
   setupMobileDatePlaceholders();
+  // initialize enhanced mobile focus for form inputs
+  setupEnhancedMobileFocus();
   // initialize mobile app enhancements
   addPullToRefresh();
   // initialize modal drag-to-close functionality
