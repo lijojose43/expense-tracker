@@ -459,12 +459,31 @@ html:not([data-theme="dark"]) .summary .card:nth-child(3) {
   border: 1px solid rgba(2, 6, 23, 0.12);
   background: var(--card);
   color: inherit;
-  border-radius: 8px;
+  border-radius: 8px; /* ensure same radius on all corners */
+  overflow: hidden; /* make hover/active background respect corners */
+  background-clip: padding-box; /* avoid bleed through rounded corners */
   cursor: pointer;
   font-size: 14px;
   white-space: nowrap;
   transition: all 0.2s ease;
   text-align: center;
+}
+
+/* Keep corner radius consistent across states */
+.filter-btn:hover,
+.filter-btn:active,
+.filter-btn:focus,
+.filter-btn.active {
+  border-radius: 8px;
+}
+
+/* Dark theme: keep radius consistent on all states */
+[data-theme="dark"] .filter-btn,
+[data-theme="dark"] .filter-btn:hover,
+[data-theme="dark"] .filter-btn:active,
+[data-theme="dark"] .filter-btn:focus,
+[data-theme="dark"] .filter-btn.active {
+  border-radius: 8px;
 }
 
 .custom-date-range input::placeholder {
@@ -899,32 +918,32 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
 
 .modal-content header #closeModal {
   position: absolute;
-  top: 3px;
-  right: 3px;
+  top: 10px; /* keep away from top edge */
+  right: 10px; /* keep away from right edge */
   border: none;
-  border-radius: 50%;
-  width: 15px;
-  height: 15px;
+  border-radius: 10px; /* consistent rounded corners */
+  width: 28px; /* larger touch target */
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: background 0.2s ease, box-shadow 0.2s ease;
   color: var(--muted);
   font-size: 16px;
 }
 
 .modal-content header #closeModal:hover {
-  background: rgba(0, 0, 0, 0.1);
+  background: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 0 0 1px rgba(2, 6, 23, 0.06);
 }
 
 [data-theme="dark"] .modal-content header #closeModal {
-  background: rgba(255, 255, 255, 0.1);
   color: var(--muted);
 }
 
 [data-theme="dark"] .modal-content header #closeModal:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.12);
 }
 .modal-content header::before {
   content: "";
@@ -1399,14 +1418,17 @@ footer {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 3px; /* Smaller gap */
   background: transparent;
   border: none;
-  padding: 8px 6px; /* Smaller padding */
-  border-radius: 8px;
+  padding: 0 8px; /* no vertical padding so background covers full height */
+  border-radius: 0; /* full-width/height background */
   color: var(--muted);
   cursor: pointer;
-  min-height: 40px; /* Slightly smaller but still accessible */
+  min-height: auto;
+  height: 100%;
+  align-self: stretch; /* override container alignment to stretch full height */
 }
 .bottombar .tab span {
   font-size: 12px; /* Slightly smaller font */
@@ -1416,9 +1438,20 @@ footer {
   color: var(--accent);
 }
 
+/* Full-width hover background for each side tab */
+.bottombar .tab:hover {
+  background: rgba(30, 144, 255, 0.08);
+}
+
+[data-theme="dark"] .bottombar .tab:hover {
+  background: rgba(30, 144, 255, 0.15);
+}
+
 /* Center Add Button in Bottom Navigation */
 .fab-center {
-  position: relative;
+  position: fixed; /* float over content */
+  right: 20px;
+  bottom: calc(var(--bottombar-h) + 16px + env(safe-area-inset-bottom, 0px));
   width: 56px;
   height: 56px;
   border-radius: 50%;
@@ -1431,19 +1464,16 @@ footer {
   justify-content: center;
   box-shadow: 0 4px 16px rgba(30, 144, 255, 0.3);
   transition: all 0.2s ease;
-  z-index: 1001;
-  /* Position half above the navbar */
-  transform: translateY(-50%);
-  margin: 0 20px; /* Add spacing from tabs */
+  z-index: 1200; /* above bottombar */
 }
 
 .fab-center:hover {
-  transform: translateY(-50%) scale(1.1);
+  transform: scale(1.1);
   box-shadow: 0 6px 20px rgba(30, 144, 255, 0.4);
 }
 
 .fab-center:active {
-  transform: translateY(-50%) scale(0.95);
+  transform: scale(0.95);
 }
 
 [data-theme="dark"] .fab-center {
@@ -1452,95 +1482,6 @@ footer {
 
 [data-theme="dark"] .fab-center:hover {
   box-shadow: 0 6px 20px rgba(30, 144, 255, 0.4);
-}
-
-/* Invisible clickable areas under add button */
-.under-add-nav {
-  position: absolute;
-  bottom: 0;
-  height: 60px;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  z-index: 999; /* Below add button but above other elements */
-  transition: background-color 0.2s ease;
-  /* Remove any default button styling */
-  padding: 0;
-  margin: 0;
-  outline: none;
-  /* Ensure proper touch target size */
-  min-height: 44px;
-}
-
-.under-add-home {
-  left: 0;
-  /* Extend from left edge to center minus add button radius and margin */
-  width: calc(50% - 48px); /* Half width minus add button radius (28px) and margin (20px) */
-}
-
-.under-add-summary {
-  right: 0;
-  /* Extend from center plus add button radius and margin to right edge */
-  width: calc(50% - 48px); /* Half width minus add button radius (28px) and margin (20px) */
-}
-
-/* Optional: Add subtle visual feedback on press and hover */
-.under-add-nav:hover {
-  background: rgba(30, 144, 255, 0.05);
-}
-
-.under-add-nav:active {
-  background: rgba(30, 144, 255, 0.15);
-}
-
-/* Dark theme hover/active states */
-[data-theme="dark"] .under-add-nav:hover {
-  background: rgba(30, 144, 255, 0.08);
-}
-
-[data-theme="dark"] .under-add-nav:active {
-  background: rgba(30, 144, 255, 0.2);
-}
-
-/* Debug mode - uncomment to visualize clickable areas */
-/*
-.under-add-nav {
-  border: 2px dashed rgba(30, 144, 255, 0.3) !important;
-  background: rgba(30, 144, 255, 0.05) !important;
-}
-
-.under-add-home {
-  border-color: rgba(34, 197, 94, 0.5) !important;
-  background: rgba(34, 197, 94, 0.05) !important;
-}
-
-.under-add-summary {
-  border-color: rgba(239, 68, 68, 0.5) !important;
-  background: rgba(239, 68, 68, 0.05) !important;
-}
-*/
-
-/* Ensure proper safe area handling for the invisible nav areas */
-@supports (padding: max(0px)) {
-  .under-add-nav {
-    height: calc(60px + env(safe-area-inset-bottom, 0px));
-    padding-bottom: max(env(safe-area-inset-bottom, 0px), 0px);
-  }
-}
-
-@media (display-mode: standalone) {
-  .under-add-nav {
-    height: calc(60px + env(safe-area-inset-bottom, 0px));
-    padding-bottom: max(env(safe-area-inset-bottom, 0px), 8px);
-  }
-}
-
-@supports (-webkit-touch-callout: none) {
-  .under-add-nav {
-    padding-bottom: max(env(safe-area-inset-bottom, 0px), 8px);
-    -webkit-user-select: none;
-    user-select: none;
-  }
 }
 /* Search input removed */
 

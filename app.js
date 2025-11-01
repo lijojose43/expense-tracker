@@ -1171,24 +1171,6 @@ if (tabHome && tabSummary) {
   });
 }
 
-// Under-add-button navigation events
-const underAddHome = $("underAddHome");
-const underAddSummary = $("underAddSummary");
-
-if (underAddHome) {
-  underAddHome.addEventListener("click", () => {
-    hapticFeedback("light");
-    switchTab("home");
-  });
-}
-
-if (underAddSummary) {
-  underAddSummary.addEventListener("click", () => {
-    hapticFeedback("light");
-    switchTab("summary");
-  });
-}
-
 // Validation functions
 function validateAmount(amount) {
   const amountError = $("amountError");
