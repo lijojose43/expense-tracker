@@ -409,7 +409,7 @@ html:not([data-theme="dark"]) .summary .card:nth-child(3) {
 
 .filters-row {
   display: flex;
-  gap: 8px;
+  gap: 12px;
   align-items: center;
   overflow-x: auto;
   scrollbar-width: none;
@@ -419,6 +419,32 @@ html:not([data-theme="dark"]) .summary .card:nth-child(3) {
 
 .filters-row::-webkit-scrollbar {
   display: none;
+}
+
+/* Summary tab: make date filters a single row with horizontal scroll */
+.date-filter-buttons {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  overflow-x: auto;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+  flex-wrap: nowrap; /* single line */
+}
+
+.date-filter-buttons::-webkit-scrollbar {
+  display: none; /* WebKit */
+}
+
+.date-filter-buttons .filter-btn {
+  flex: 0 0 auto;
+  min-width: 100px; /* match filters-row defaults */
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  font-size: 16px;
 }
 
 /* Ensure filter buttons work within filters-row */
@@ -433,6 +459,17 @@ html:not([data-theme="dark"]) .summary .card:nth-child(3) {
 #filterCategory {
   min-width: 160px; /* Even wider for "All categories" text */
   flex: 1.4; /* Take more space than other filters */
+}
+
+/* Emphasize default selects (All, All categories) with accent border */
+#filterType,
+#filterCategory {
+  border-color: var(--accent);
+}
+
+[data-theme="dark"] #filterType,
+[data-theme="dark"] #filterCategory {
+  border-color: var(--accent);
 }
 
 .custom-date-range {
@@ -505,11 +542,28 @@ html:not([data-theme="dark"]) .summary .card:nth-child(3) {
   background: rgba(148, 163, 184, 0.1);
 }
 
-[data-theme="dark"] .filter-btn.active {
-  background: var(--accent);
-  color: white;
+/* Active state: border-only highlight (no fill change) */
+.filter-btn.active {
+  background: var(--card); /* same as default */
   border-color: var(--accent);
-  box-shadow: 0 0 0 1px var(--accent), 0 0 15px rgba(30, 144, 255, 0.3);
+  color: inherit; /* keep original text color */
+  box-shadow: none;
+}
+
+[data-theme="dark"] .filter-btn.active {
+  background: var(--card); /* same as default */
+  border-color: var(--accent);
+  color: inherit;
+  box-shadow: none;
+}
+
+/* Ensure no background on active+hover */
+.filter-btn.active:hover {
+  background: var(--card);
+}
+
+[data-theme="dark"] .filter-btn.active:hover {
+  background: var(--card);
 }
 .transactions {
   display: flex;
@@ -1046,8 +1100,8 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
   background: transparent;
   display: inline-block;
 }
-.seg-btn:hover {
-  background: rgba(2, 6, 23, 0.04);
+.filter-btn:hover {
+  background: rgba(2, 6, 23, 0.06);
 }
 .segmented input[type="radio"]:active + .seg-btn {
   transform: translateY(0.5px);
@@ -1175,7 +1229,7 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
   display: flex;
   flex-direction: row;
   gap: 16px;
-  justify-content: flex-start;
+  justify-content: space-between; /* push Expense to left and Income to right */
   margin-top: 0;
 }
 
@@ -1434,17 +1488,26 @@ footer {
   font-size: 12px; /* Slightly smaller font */
 }
 .bottombar .tab.active {
-  background: rgba(30, 144, 255, 0.1);
-  color: var(--accent);
+  background: transparent; /* remove highlight */
+  color: var(--accent); /* keep icon/text color change */
 }
 
 /* Full-width hover background for each side tab */
 .bottombar .tab:hover {
-  background: rgba(30, 144, 255, 0.08);
+  background: transparent; /* no hover highlight */
 }
 
 [data-theme="dark"] .bottombar .tab:hover {
-  background: rgba(30, 144, 255, 0.15);
+  background: transparent; /* no hover highlight in dark */
+}
+
+/* Remove press highlight specifically for bottom tabs */
+.bottombar .tab:active {
+  background: transparent;
+}
+
+[data-theme="dark"] .bottombar .tab:active {
+  background: transparent;
 }
 
 /* Center Add Button in Bottom Navigation */
@@ -1744,6 +1807,15 @@ footer {
     background: rgba(255, 255, 255, 0.1);
   }
 
+  /* Do not highlight bottom navbar tabs on press in mobile */
+  .bottombar .tab:active {
+    background: transparent !important;
+  }
+
+  [data-theme="dark"] .bottombar .tab:active {
+    background: transparent !important;
+  }
+
   /* Enhanced Center FAB */
   .fab-center {
     box-shadow: 0 8px 24px rgba(30, 144, 255, 0.4);
@@ -1824,13 +1896,13 @@ footer {
 
   /* Mobile-friendly layout - keep amount and category in same row */
   .amount-category-row {
-    flex-direction: row;
+    flex-direction: column;
     gap: 12px;
   }
 
   /* Mobile-friendly layout - keep date and description in same row */
   .date-description-row {
-    flex-direction: row;
+    flex-direction: column;
     gap: 12px;
   }
 
@@ -1838,7 +1910,7 @@ footer {
     flex-direction: row;
     gap: 16px;
     margin-top: 8px;
-    justify-content: flex-start;
+    justify-content: space-between;
   }
 
   .checkbox-label {
@@ -1919,7 +1991,7 @@ footer {
 
   /* Make filters row more compact on mobile */
   .filters-row {
-    gap: 4px; /* Tighter spacing for single row */
+    gap: 10px; /* Increased spacing on mobile */
   }
 
   .filters-row select {
@@ -1939,6 +2011,18 @@ footer {
     min-width: 70px; /* Even smaller on mobile */
     padding: 12px; /* Consistent 12px padding */
     font-size: 16px; /* Consistent 16px font size */
+  }
+
+  /* Summary tab: compact single-row layout on mobile */
+  .date-filter-buttons {
+    gap: 10px; /* Increased spacing on mobile */
+  }
+
+  .date-filter-buttons .filter-btn {
+    min-width: 70px;
+    padding: 12px;
+    font-size: 16px;
+    height: 40px;
   }
 
 /* Toast notifications */
