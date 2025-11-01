@@ -954,6 +954,14 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
   overflow: hidden; /* Prevent scrolling within the form */
 }
 
+/* Make all modal inputs/selects full width */
+.modal-content form input,
+.modal-content form select,
+.modal-content form textarea {
+  width: 100%;
+  box-sizing: border-box;
+}
+
 .modal-content form label {
   margin-bottom: 6px; /* space between label and its input */
   margin-top: 0; /* no negative margin - let gap handle spacing */
@@ -1067,12 +1075,14 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
   display: flex;
   gap: 16px;
   align-items: flex-start;
+  flex-direction: column; /* stack Amount and Category on separate rows */
 }
 
 .amount-field {
   flex: 1;
   display: flex;
   flex-direction: column;
+  width: 100%;
 }
 
 .amount-field label {
@@ -1085,6 +1095,7 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
   flex: 1;
   display: flex;
   flex-direction: column;
+  width: 100%;
 }
 
 .category-field label {
@@ -1098,6 +1109,7 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
   display: flex;
   gap: 16px;
   align-items: flex-start;
+  flex-direction: column; /* stack Date and Description on separate rows */
 }
 
 .date-field {
@@ -1105,6 +1117,7 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
   display: flex;
   flex-direction: column;
   min-width: 0;
+  width: 100%;
 }
 
 .date-field label {
@@ -1124,6 +1137,7 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
   display: flex;
   flex-direction: column;
   min-width: 0; /* Allow flex item to shrink below content size */
+  width: 100%;
 }
 
 .description-field label {
@@ -1438,6 +1452,95 @@ footer {
 
 [data-theme="dark"] .fab-center:hover {
   box-shadow: 0 6px 20px rgba(30, 144, 255, 0.4);
+}
+
+/* Invisible clickable areas under add button */
+.under-add-nav {
+  position: absolute;
+  bottom: 0;
+  height: 60px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  z-index: 999; /* Below add button but above other elements */
+  transition: background-color 0.2s ease;
+  /* Remove any default button styling */
+  padding: 0;
+  margin: 0;
+  outline: none;
+  /* Ensure proper touch target size */
+  min-height: 44px;
+}
+
+.under-add-home {
+  left: 0;
+  /* Extend from left edge to center minus add button radius and margin */
+  width: calc(50% - 48px); /* Half width minus add button radius (28px) and margin (20px) */
+}
+
+.under-add-summary {
+  right: 0;
+  /* Extend from center plus add button radius and margin to right edge */
+  width: calc(50% - 48px); /* Half width minus add button radius (28px) and margin (20px) */
+}
+
+/* Optional: Add subtle visual feedback on press and hover */
+.under-add-nav:hover {
+  background: rgba(30, 144, 255, 0.05);
+}
+
+.under-add-nav:active {
+  background: rgba(30, 144, 255, 0.15);
+}
+
+/* Dark theme hover/active states */
+[data-theme="dark"] .under-add-nav:hover {
+  background: rgba(30, 144, 255, 0.08);
+}
+
+[data-theme="dark"] .under-add-nav:active {
+  background: rgba(30, 144, 255, 0.2);
+}
+
+/* Debug mode - uncomment to visualize clickable areas */
+/*
+.under-add-nav {
+  border: 2px dashed rgba(30, 144, 255, 0.3) !important;
+  background: rgba(30, 144, 255, 0.05) !important;
+}
+
+.under-add-home {
+  border-color: rgba(34, 197, 94, 0.5) !important;
+  background: rgba(34, 197, 94, 0.05) !important;
+}
+
+.under-add-summary {
+  border-color: rgba(239, 68, 68, 0.5) !important;
+  background: rgba(239, 68, 68, 0.05) !important;
+}
+*/
+
+/* Ensure proper safe area handling for the invisible nav areas */
+@supports (padding: max(0px)) {
+  .under-add-nav {
+    height: calc(60px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: max(env(safe-area-inset-bottom, 0px), 0px);
+  }
+}
+
+@media (display-mode: standalone) {
+  .under-add-nav {
+    height: calc(60px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: max(env(safe-area-inset-bottom, 0px), 8px);
+  }
+}
+
+@supports (-webkit-touch-callout: none) {
+  .under-add-nav {
+    padding-bottom: max(env(safe-area-inset-bottom, 0px), 8px);
+    -webkit-user-select: none;
+    user-select: none;
+  }
 }
 /* Search input removed */
 

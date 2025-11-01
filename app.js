@@ -1171,6 +1171,24 @@ if (tabHome && tabSummary) {
   });
 }
 
+// Under-add-button navigation events
+const underAddHome = $("underAddHome");
+const underAddSummary = $("underAddSummary");
+
+if (underAddHome) {
+  underAddHome.addEventListener("click", () => {
+    hapticFeedback("light");
+    switchTab("home");
+  });
+}
+
+if (underAddSummary) {
+  underAddSummary.addEventListener("click", () => {
+    hapticFeedback("light");
+    switchTab("summary");
+  });
+}
+
 // Validation functions
 function validateAmount(amount) {
   const amountError = $("amountError");
@@ -1548,9 +1566,22 @@ function showPWAInstallPopup() {
   }
 }
 
-function hidePWAInstallPopup() {
+function hidePWAInstallPopup(withDelay = false) {
   if (pwaInstallPopup) {
     pwaInstallPopup.classList.add("hide");
+  }
+  
+  // If dismissed manually, set a 1-minute delay before showing again
+  if (withDelay) {
+    const dismissTime = Date.now();
+    localStorage.setItem('pwa-dismiss-time', dismissTime.toString());
+    console.log('PWA install modal dismissed. Next show scheduled in 1 minute.');
+    
+    // Schedule next show after 1 minute
+    setTimeout(() => {
+      console.log('1-minute delay completed. Checking if PWA install modal should show.');
+      checkPWAInstallPrompt(0);
+    }, 60000); // 60 seconds = 1 minute
   }
 }
 
@@ -1565,7 +1596,21 @@ function checkPWAInstallPrompt(delayMs = 2000) {
     return;
   }
 
-  // Show popup with a slight delay for better UX
+  // Check if we're still within the 1-minute delay period after dismissal
+  const dismissTime = localStorage.getItem('pwa-dismiss-time');
+  if (dismissTime) {
+    const timeSinceDismiss = Date.now() - parseInt(dismissTime);
+    const oneMinute = 60000; // 60 seconds in milliseconds
+    
+    if (timeSinceDismiss < oneMinute) {
+      // Still within delay period, don't show
+      return;
+    } else {
+      // Delay period has passed, clear the dismiss time
+      localStorage.removeItem('pwa-dismiss-time');
+    }
+  }
+
   const ua = navigator.userAgent || "";
   const isIOS = /iPhone|iPad|iPod/i.test(ua);
   if (deferredPrompt || isIOS) {
@@ -1656,14 +1701,14 @@ if (pwaInstallBtn) {
 // Handle "Maybe Later" button click
 if (pwaLaterBtn) {
   pwaLaterBtn.addEventListener("click", () => {
-    hidePWAInstallPopup();
+    hidePWAInstallPopup(true); // true = apply 1-minute delay
   });
 }
 
 // Handle close button click
 if (pwaCloseBtn) {
   pwaCloseBtn.addEventListener("click", () => {
-    hidePWAInstallPopup();
+    hidePWAInstallPopup(true); // true = apply 1-minute delay
   });
 }
 
