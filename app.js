@@ -39,7 +39,6 @@ function closePurchaseModalFn() {
 function submitPurchaseForm() {
   const name = ((purchaseNameInput && purchaseNameInput.value) || "").trim();
   if (!name) {
-    showToast("Product name is required", "error");
     hapticFeedback("error");
     return;
   }
@@ -54,7 +53,6 @@ function submitPurchaseForm() {
   savePurchase();
   renderPurchase();
   hapticFeedback("success");
-  showToast(editPurchaseId ? "Purchase updated" : "Purchase added", "success");
   editPurchaseId = null;
   const title = document.getElementById("purchaseModalTitle");
   if (title) title.textContent = "Add Purchase";
@@ -137,7 +135,6 @@ function renderPurchase() {
           purchaseData = purchaseData.filter((x) => x.id !== item.id);
           savePurchase();
           renderPurchase();
-          showToast("Item deleted", "error");
           return; // element removed; do not animate back
         }
       }
@@ -157,7 +154,6 @@ function renderPurchase() {
         purchaseData = purchaseData.filter((x) => x.id !== item.id);
         savePurchase();
         renderPurchase();
-        showToast("Item deleted", "error");
       }
     });
 
@@ -321,24 +317,6 @@ function hapticFeedback(type = "light") {
   }
 }
 
-function showToast(message, type = "info") {
-  // Create toast element
-  const toast = document.createElement("div");
-  toast.className = `toast toast-${type}`;
-  toast.textContent = message;
-
-  // Add to DOM
-  document.body.appendChild(toast);
-
-  // Animate in
-  setTimeout(() => toast.classList.add("show"), 10);
-
-  // Remove after delay
-  setTimeout(() => {
-    toast.classList.remove("show");
-    setTimeout(() => document.body.removeChild(toast), 300);
-  }, 3000);
-}
 
 function addPullToRefresh() {
   const app = document.querySelector(".app");
@@ -1079,7 +1057,6 @@ function renderList() {
           computeTotals();
           renderList();
           if (!summaryTabEl.classList.contains("hidden")) renderChart();
-          showToast("Transaction deleted", "error");
           return; // element removed; do not animate back
         }
       }
@@ -1536,7 +1513,6 @@ txForm.addEventListener("submit", (e) => {
 
   // Enhanced feedback for transaction save
   hapticFeedback("success");
-  showToast(editId ? "Transaction updated" : "Transaction added", "success");
 
   editId = null;
   const modalTitle = document.getElementById("modalTitle");
@@ -1946,10 +1922,8 @@ if (pwaInstallBtn) {
 
         if (outcome === "accepted") {
           console.log("User accepted the install prompt");
-          showToast("App installation started!", "success");
         } else {
           console.log("User dismissed the install prompt");
-          showToast("Installation cancelled", "info");
         }
 
         // Clear the deferredPrompt and hide popup
@@ -1989,7 +1963,6 @@ if (pwaInstallBtn) {
       }
     } catch (error) {
       console.error("PWA install error:", error);
-      showToast("Installation failed. Try using your browser menu.", "error");
       hidePWAInstallPopup();
     }
   });
@@ -2130,7 +2103,6 @@ function submitExpiryForm() {
   const dateStr = expiryDateInput && expiryDateInput.value;
   const v = validateExpiry(name, dateStr);
   if (!v.ok) {
-    showToast(v.msg, "error");
     hapticFeedback("error");
     return;
   }
@@ -2150,7 +2122,6 @@ function submitExpiryForm() {
   saveExpiry();
   renderExpiry();
   hapticFeedback("success");
-  showToast(editExpiryId ? "Expiry updated" : "Expiry added", "success");
   editExpiryId = null;
   const title = document.getElementById("expiryModalTitle");
   if (title) title.textContent = "Add Expiry Item";
@@ -2318,7 +2289,6 @@ function renderExpiry() {
         expiryData = expiryData.filter((x) => x.id !== item.id);
         saveExpiry();
         renderExpiry();
-        showToast("Item deleted", "error");
       }
     });
 

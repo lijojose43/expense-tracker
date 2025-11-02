@@ -1218,36 +1218,41 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
 }
 
 .modal-content header #closeModal,
-.modal-content header #closeExpiryModal {
+.modal-content header #closeExpiryModal,
+.modal-content header #closePurchaseModal {
   position: absolute;
   top: 10px; /* keep away from top edge */
   right: 10px; /* keep away from right edge */
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: transparent;
   border: none;
-  border-radius: 10px; /* consistent rounded corners */
-  width: 36px; /* larger touch target */
-  height: 36px;
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  transition: background 0.2s ease, box-shadow 0.2s ease;
   color: var(--muted);
+  transition: all 0.2s ease;
   font-size: 20px; /* larger icon glyph */
 }
 
 .modal-content header #closeModal:hover,
-.modal-content header #closeExpiryModal:hover {
+.modal-content header #closeExpiryModal:hover,
+.modal-content header #closePurchaseModal:hover {
   background: transparent;
   box-shadow: none;
 }
 
 [data-theme="dark"] .modal-content header #closeModal,
-[data-theme="dark"] .modal-content header #closeExpiryModal {
+[data-theme="dark"] .modal-content header #closeExpiryModal,
+[data-theme="dark"] .modal-content header #closePurchaseModal {
   color: var(--muted);
 }
 
 [data-theme="dark"] .modal-content header #closeModal:hover,
-[data-theme="dark"] .modal-content header #closeExpiryModal:hover {
+[data-theme="dark"] .modal-content header #closeExpiryModal:hover,
+[data-theme="dark"] .modal-content header #closePurchaseModal:hover {
   background: transparent;
   box-shadow: none;
 }
@@ -2385,46 +2390,6 @@ footer {
     height: 40px;
   }
 
-/* Toast notifications */
-.toast {
-  position: fixed;
-  top: 80px;
-  left: 50%;
-  transform: translateX(-50%) translateY(-100px);
-  background: var(--card);
-  color: inherit;
-  padding: 12px 20px;
-  border-radius: 25px;
-  box-shadow: 0 8px 24px rgba(2, 6, 23, 0.15);
-  border: 1px solid rgba(2, 6, 23, 0.1);
-  z-index: 1200;
-  opacity: 0;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  font-weight: 500;
-  white-space: nowrap;
-}
-
-.toast.show {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
-}
-
-.toast-success {
-  background: #10b981;
-  color: white;
-  border-color: #059669;
-}
-
-.toast-error {
-  background: #ef4444;
-  color: white;
-  border-color: #dc2626;
-}
-
-[data-theme="dark"] .toast {
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-  border-color: rgba(148, 163, 184, 0.2);
-}
 
 /* Pull to refresh indicator */
 .pull-refresh-indicator {
