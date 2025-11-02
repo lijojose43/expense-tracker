@@ -51,6 +51,7 @@
               <span>Import Data</span>
             </button>
           </div>
+
       </div>
     </header>
 
@@ -141,6 +142,12 @@
           <canvas id="categoryDonut" width="360" height="360" aria-label="Spending by Category" role="img"></canvas>
         </div>
       </section>
+    </main>
+
+    <!-- Purchase Tab -->
+    <main id="purchaseTab" class="content hidden">
+      <section class="summary" style="display:none"></section>
+      <section id="purchaseList" class="transactions"><!-- purchase items --></section>
     </main>
 
   </div>
@@ -254,7 +261,7 @@
       </svg>
       <span>Expenses</span>
     </button>
-    
+
     <button id="addBtn" class="fab-center" title="Add" aria-label="Add transaction">
       <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="M12 5v14M5 12h14"/>
@@ -268,6 +275,16 @@
         <path d="M6 20v-4"/>
       </svg>
       <span>Summary</span>
+    </button>
+    
+    <button id="tabPurchase" class="tab" aria-label="Purchases">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6 6h15l-1.5 9h-12z"/>
+        <circle cx="9" cy="20" r="1"/>
+        <circle cx="18" cy="20" r="1"/>
+        <path d="M6 6L5 3H2"/>
+      </svg>
+      <span>Purchase</span>
     </button>
 
     <button id="tabExpiry" class="tab" aria-label="Expiry">
@@ -297,6 +314,23 @@
         </div>
         <div class="actions">
           <button id="cancelExpiryBtn" type="button" class="secondary">Cancel</button>
+          <button type="submit" class="primary">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Add / Edit Purchase Modal -->
+  <div id="purchaseModal" class="modal hide" role="dialog" aria-modal="true">
+    <div class="modal-content">
+      <header><h3 id="purchaseModalTitle">Add Purchase</h3><button id="closePurchaseModal" class="icon">✕</button></header>
+      <form id="purchaseForm">
+        <div class="floating">
+          <input id="purchaseName" type="text" required placeholder=" "/>
+          <label for="purchaseName" class="floating-label">Product name</label>
+        </div>
+        <div class="actions">
+          <button id="cancelPurchaseBtn" type="button" class="secondary">Cancel</button>
           <button type="submit" class="primary">Save</button>
         </div>
       </form>

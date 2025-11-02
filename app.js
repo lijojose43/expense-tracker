@@ -1,7 +1,172 @@
 // Simple Expense Tracker PWA (localStorage)
 // Data: array of {id, amount (number), type: 'expense'|'income', category, date, description}
+
+// ---------- Purchase Feature ----------
+function getPurchaseIconSVG(size = 20) {
+  return `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M6 6h15l-1.5 9h-12z"/>
+    <circle cx="9" cy="20" r="1"/>
+    <circle cx="18" cy="20" r="1"/>
+    <path d="M6 6L5 3H2"/>
+  </svg>`;
+}
+
+function openPurchaseModal(defaults) {
+  if (!purchaseModal) return;
+  purchaseModal.classList.remove("hide");
+  setTimeout(() => purchaseModal.classList.add("show"), 10);
+  editPurchaseId = null;
+  const title = document.getElementById("purchaseModalTitle");
+  const submitBtn = purchaseForm && purchaseForm.querySelector('button[type="submit"]');
+  if (defaults) {
+    if (title) title.textContent = "Edit Purchase";
+    if (submitBtn) submitBtn.textContent = "Update";
+    purchaseNameInput && (purchaseNameInput.value = defaults.name || "");
+    editPurchaseId = defaults.id;
+  } else {
+    if (title) title.textContent = "Add Purchase";
+    if (submitBtn) submitBtn.textContent = "Save";
+    if (purchaseForm) purchaseForm.reset();
+  }
+}
+
+function closePurchaseModalFn() {
+  if (!purchaseModal) return;
+  purchaseModal.classList.remove("show");
+  purchaseModal.classList.add("hide");
+}
+
+function submitPurchaseForm() {
+  const name = ((purchaseNameInput && purchaseNameInput.value) || "").trim();
+  if (!name) {
+    showToast("Product name is required", "error");
+    hapticFeedback("error");
+    return;
+  }
+  if (editPurchaseId) {
+    const idx = purchaseData.findIndex((x) => x.id === editPurchaseId);
+    if (idx !== -1) {
+      purchaseData[idx] = { ...purchaseData[idx], name };
+    }
+  } else {
+    purchaseData.push({ id: uid(), name, createdAt: Date.now() });
+  }
+  savePurchase();
+  renderPurchase();
+  hapticFeedback("success");
+  showToast(editPurchaseId ? "Purchase updated" : "Purchase added", "success");
+  editPurchaseId = null;
+  const title = document.getElementById("purchaseModalTitle");
+  if (title) title.textContent = "Add Purchase";
+  const submitBtn = purchaseForm && purchaseForm.querySelector('button[type="submit"]');
+  if (submitBtn) submitBtn.textContent = "Save";
+  closePurchaseModalFn();
+}
+
+function renderPurchase() {
+  if (!purchaseListEl) return;
+  if (!purchaseData.length) {
+    purchaseListEl.innerHTML = '<div style="color:var(--muted);padding:12px">No purchases added</div>';
+    return;
+  }
+  const items = purchaseData.slice().sort((a,b) => (a.name||"").localeCompare(b.name||""));
+  purchaseListEl.innerHTML = "";
+  for (const item of items) {
+    const row = document.createElement("div");
+    row.className = "tx";
+    const meta = document.createElement("div");
+    meta.className = "meta";
+    const box = document.createElement("div");
+    box.className = "iconBox";
+    box.innerHTML = getPurchaseIconSVG(20);
+    const info = document.createElement("div");
+    const title = document.createElement("div");
+    title.className = "title";
+    title.textContent = item.name || "Product";
+    info.appendChild(title);
+    meta.appendChild(box);
+    meta.appendChild(info);
+
+    row.appendChild(meta);
+
+    // Swipe-to-delete functionality (similar to transaction list)
+    let startX = 0;
+    let dx = 0;
+    let swiping = false;
+    let moved = false;
+
+    function resetTransform() {
+      row.style.transition = "transform 0.2s ease";
+      row.style.transform = "translateX(0)";
+      setTimeout(() => (row.style.transition = ""), 220);
+    }
+
+    row.addEventListener(
+      "touchstart",
+      (e) => {
+        if (!e.touches || e.touches.length === 0) return;
+        startX = e.touches[0].clientX;
+        dx = 0;
+        swiping = false;
+        moved = false;
+        row.style.transition = ""; // disable during drag
+      },
+      { passive: true }
+    );
+
+    row.addEventListener(
+      "touchmove",
+      (e) => {
+        if (!e.touches || e.touches.length === 0) return;
+        dx = e.touches[0].clientX - startX; // negative when moving left
+        if (dx < -10) swiping = true;
+        if (Math.abs(dx) > 6) moved = true;
+        if (swiping) {
+          const limited = Math.max(dx, -120);
+          row.style.transform = `translateX(${limited}px)`;
+        }
+      },
+      { passive: true }
+    );
+
+    row.addEventListener("touchend", () => {
+      if (swiping && dx <= -80) {
+        hapticFeedback("medium");
+        if (confirm("Delete this item?")) {
+          hapticFeedback("heavy");
+          purchaseData = purchaseData.filter((x) => x.id !== item.id);
+          savePurchase();
+          renderPurchase();
+          showToast("Item deleted", "error");
+          return; // element removed; do not animate back
+        }
+      }
+      resetTransform();
+    });
+
+    // Click to edit (ignore if a swipe occurred)
+    row.addEventListener("click", () => {
+      if (moved) return; // don't treat swipe as click
+      openPurchaseModal({ id: item.id, name: item.name });
+    });
+
+    // Context menu fallback for desktop
+    row.addEventListener("contextmenu", (e) => {
+      e.preventDefault();
+      if (confirm("Delete this item?")) {
+        purchaseData = purchaseData.filter((x) => x.id !== item.id);
+        savePurchase();
+        renderPurchase();
+        showToast("Item deleted", "error");
+      }
+    });
+
+    purchaseListEl.appendChild(row);
+  }
+}
 const STORAGE_KEY = "expense-tracker-data-v1";
 const EXPIRY_STORAGE_KEY = "expense-tracker-expiry-v1";
+const PURCHASE_STORAGE_KEY = "expense-tracker-purchase-v1";
 
 // Mobile app enhancements
 let isRefreshing = false;
@@ -25,6 +190,8 @@ const defaultCategories = [
 let data = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null") || [];
 let expiryData =
   JSON.parse(localStorage.getItem(EXPIRY_STORAGE_KEY) || "null") || [];
+let purchaseData =
+  JSON.parse(localStorage.getItem(PURCHASE_STORAGE_KEY) || "null") || [];
 
 const $ = (id) => document.getElementById(id);
 const transactionsEl = $("transactions");
@@ -80,7 +247,9 @@ const summaryTabEl = $("summaryTab");
 const tabHome = $("tabHome");
 const tabSummary = $("tabSummary");
 const tabExpiry = $("tabExpiry");
+const tabPurchase = $("tabPurchase");
 const expiryTabEl = $("expiryTab");
+const purchaseTabEl = $("purchaseTab");
 const expiryTodayEl = $("expiryToday");
 const expiryWeekEl = $("expiryWeek");
 const expiryMonthEl = $("expiryMonth");
@@ -94,6 +263,14 @@ const cancelExpiryBtn = $("cancelExpiryBtn");
 const expiryNameInput = $("expiryName");
 const expiryDateInput = $("expiryDate");
 let editExpiryId = null;
+// Purchase modal elements
+const purchaseListEl = $("purchaseList");
+const purchaseModal = $("purchaseModal");
+const closePurchaseModal = $("closePurchaseModal");
+const purchaseForm = $("purchaseForm");
+const cancelPurchaseBtn = $("cancelPurchaseBtn");
+const purchaseNameInput = $("purchaseName");
+let editPurchaseId = null;
 let donutChart = null;
 let editId = null; // track transaction being edited
 
@@ -103,6 +280,10 @@ function save() {
 
 function saveExpiry() {
   localStorage.setItem(EXPIRY_STORAGE_KEY, JSON.stringify(expiryData));
+}
+
+function savePurchase() {
+  localStorage.setItem(PURCHASE_STORAGE_KEY, JSON.stringify(purchaseData));
 }
 
 function formatMoney(n) {
@@ -703,18 +884,22 @@ function switchTab(name) {
     homeTabEl.classList.remove("hidden");
     summaryTabEl.classList.add("hidden");
     expiryTabEl && expiryTabEl.classList.add("hidden");
+    purchaseTabEl && purchaseTabEl.classList.add("hidden");
     tabHome.classList.add("active");
     tabSummary.classList.remove("active");
     tabExpiry && tabExpiry.classList.remove("active");
+    tabPurchase && tabPurchase.classList.remove("active");
     screenTitle.textContent = "Expense Tracker";
     if (optionsMenu) optionsMenu.classList.remove("open");
   } else if (name === "summary") {
     homeTabEl.classList.add("hidden");
     summaryTabEl.classList.remove("hidden");
     expiryTabEl && expiryTabEl.classList.add("hidden");
+    purchaseTabEl && purchaseTabEl.classList.add("hidden");
     tabHome.classList.remove("active");
     tabSummary.classList.add("active");
     tabExpiry && tabExpiry.classList.remove("active");
+    tabPurchase && tabPurchase.classList.remove("active");
     screenTitle.textContent = "Expense Summary";
     if (optionsMenu) optionsMenu.classList.remove("open");
     // ensure chart reflects latest data
@@ -723,12 +908,26 @@ function switchTab(name) {
     homeTabEl.classList.add("hidden");
     summaryTabEl.classList.add("hidden");
     expiryTabEl && expiryTabEl.classList.remove("hidden");
+    purchaseTabEl && purchaseTabEl.classList.add("hidden");
     tabHome.classList.remove("active");
     tabSummary.classList.remove("active");
     tabExpiry && tabExpiry.classList.add("active");
+    tabPurchase && tabPurchase.classList.remove("active");
     screenTitle.textContent = "Expiries";
     if (optionsMenu) optionsMenu.classList.remove("open");
     renderExpiry();
+  } else if (name === "purchase") {
+    homeTabEl.classList.add("hidden");
+    summaryTabEl.classList.add("hidden");
+    expiryTabEl && expiryTabEl.classList.add("hidden");
+    purchaseTabEl && purchaseTabEl.classList.remove("hidden");
+    tabHome.classList.remove("active");
+    tabSummary.classList.remove("active");
+    tabExpiry && tabExpiry.classList.remove("active");
+    tabPurchase && tabPurchase.classList.add("active");
+    screenTitle.textContent = "Purchase List";
+    if (optionsMenu) optionsMenu.classList.remove("open");
+    renderPurchase();
   }
 
   // Check if PWA install modal should be shown after tab switch
@@ -1042,6 +1241,11 @@ addBtn.addEventListener("click", () => {
   // If Expiry tab is active, open expiry modal instead
   if (expiryTabEl && !expiryTabEl.classList.contains("hidden")) {
     openExpiryModal();
+    return;
+  }
+  // If Purchase tab is active, open purchase modal
+  if (purchaseTabEl && !purchaseTabEl.classList.contains("hidden")) {
+    openPurchaseModal();
     return;
   }
 
@@ -1843,6 +2047,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (tabHome) tabHome.addEventListener("click", () => switchTab("home"));
   if (tabSummary)
     tabSummary.addEventListener("click", () => switchTab("summary"));
+  if (tabPurchase) tabPurchase.addEventListener("click", () => switchTab("purchase"));
   if (tabExpiry) tabExpiry.addEventListener("click", () => switchTab("expiry"));
 
   // Expiry modal controls
@@ -1857,6 +2062,16 @@ document.addEventListener("DOMContentLoaded", () => {
     expiryForm.addEventListener("submit", (e) => {
       e.preventDefault();
       submitExpiryForm();
+    });
+  }
+
+  // Purchase modal controls
+  if (closePurchaseModal) closePurchaseModal.addEventListener("click", closePurchaseModalFn);
+  if (cancelPurchaseBtn) cancelPurchaseBtn.addEventListener("click", closePurchaseModalFn);
+  if (purchaseForm) {
+    purchaseForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      submitPurchaseForm();
     });
   }
 
