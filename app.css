@@ -1872,12 +1872,18 @@ footer {
   background: transparent;
 }
 
-/* Center Add Button in Bottom Navigation */
+/* Center Add Button Container in Bottom Navigation */
+.fab-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+}
+
 .fab-center {
-  position: fixed;
-  right: 12px;
-  /* Position above bottombar: bottombar bottom + bottombar height + small gap */
-  bottom: calc(12px + env(safe-area-inset-bottom, 0px) + 56px + 8px);
+  position: relative;
+  top: -28px; /* Half the button height to make it half above navbar */
   width: 56px;
   height: 56px;
   border-radius: 9999px;
@@ -1891,6 +1897,45 @@ footer {
   box-shadow: 0 4px 16px rgba(30, 144, 255, 0.3);
   transition: all 0.2s ease;
   z-index: 1200; /* above bottombar */
+}
+
+/* Clickable navigation areas under the add button */
+.under-add-nav {
+  position: absolute;
+  bottom: 0;
+  width: 50%;
+  height: 56px; /* Match navbar height */
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  z-index: 1100;
+  transition: background-color 0.2s ease;
+}
+
+.under-add-nav.left {
+  left: 0;
+  border-radius: 16px 0 0 16px;
+}
+
+.under-add-nav.right {
+  right: 0;
+  border-radius: 0 16px 16px 0;
+}
+
+.under-add-nav:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.under-add-nav:active {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+[data-theme="dark"] .under-add-nav:hover {
+  background: rgba(148, 163, 184, 0.1);
+}
+
+[data-theme="dark"] .under-add-nav:active {
+  background: rgba(148, 163, 184, 0.2);
 }
 
 .fab-center:hover {
