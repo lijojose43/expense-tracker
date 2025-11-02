@@ -91,6 +91,30 @@
         <!-- list -->
       </section>
     </main>
+
+    <!-- Expiry Tab -->
+    <main id="expiryTab" class="content hidden">
+      <section class="summary">
+        <div class="card">
+          <div class="label">Total Products</div>
+          <div id="expiryTotal" class="amount">0</div>
+        </div>
+        <div class="card">
+          <div class="label">Expire This Week</div>
+          <div id="expiryWeek" class="amount">0</div>
+        </div>
+        <div class="card">
+          <div class="label">Expire This Month</div>
+          <div id="expiryMonth" class="amount">0</div>
+        </div>
+      </section>
+
+      <section class="filters" style="display:none"></section>
+
+      <section id="expiryList" class="transactions">
+        <!-- expiry items list -->
+      </section>
+    </main>
     
     <main id="summaryTab" class="content hidden">
       <section class="filters">
@@ -219,12 +243,12 @@
   </div>
 
   <nav class="bottombar">
-    <button id="tabHome" class="tab active" aria-label="Home">
+    <button id="tabHome" class="tab active" aria-label="Expense">
       <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
         <polyline points="9,22 9,12 15,12 15,22"/>
       </svg>
-      <span>Home</span>
+      <span>Expense</span>
     </button>
     
     <button id="addBtn" class="fab-center" title="Add" aria-label="Add transaction">
@@ -241,7 +265,39 @@
       </svg>
       <span>Summary</span>
     </button>
+
+    <button id="tabExpiry" class="tab" aria-label="Expiry">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="13" r="7"/>
+        <path d="M12 10v4l2 2"/>
+        <path d="M8 3h8"/>
+        <path d="M9 3v2"/>
+        <path d="M15 3v2"/>
+      </svg>
+      <span>Expiry</span>
+    </button>
   </nav>
+
+  <!-- Add / Edit Expiry Modal -->
+  <div id="expiryModal" class="modal hide" role="dialog" aria-modal="true">
+    <div class="modal-content">
+      <header><h3 id="expiryModalTitle">Add Expiry Item</h3><button id="closeExpiryModal" class="icon">✕</button></header>
+      <form id="expiryForm">
+        <div class="floating">
+          <input id="expiryName" type="text" required placeholder=" "/>
+          <label for="expiryName" class="floating-label">Product name</label>
+        </div>
+        <div class="floating">
+          <input id="expiryDate" type="date" required placeholder=" "/>
+          <label for="expiryDate" class="floating-label">Expiry date</label>
+        </div>
+        <div class="actions">
+          <button id="cancelExpiryBtn" type="button" class="secondary">Cancel</button>
+          <button type="submit" class="primary">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="app.js"></script>
   <script>

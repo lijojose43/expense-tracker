@@ -1,6 +1,7 @@
 // Simple Expense Tracker PWA (localStorage)
 // Data: array of {id, amount (number), type: 'expense'|'income', category, date, description}
 const STORAGE_KEY = "expense-tracker-data-v1";
+const EXPIRY_STORAGE_KEY = "expense-tracker-expiry-v1";
 
 // Mobile app enhancements
 let isRefreshing = false;
@@ -22,6 +23,7 @@ const defaultCategories = [
 ];
 
 let data = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null") || [];
+let expiryData = JSON.parse(localStorage.getItem(EXPIRY_STORAGE_KEY) || "null") || [];
 
 const $ = (id) => document.getElementById(id);
 const transactionsEl = $("transactions");
@@ -76,11 +78,29 @@ const homeTabEl = $("homeTab");
 const summaryTabEl = $("summaryTab");
 const tabHome = $("tabHome");
 const tabSummary = $("tabSummary");
+const tabExpiry = $("tabExpiry");
+const expiryTabEl = $("expiryTab");
+const expiryTotalEl = $("expiryTotal");
+const expiryWeekEl = $("expiryWeek");
+const expiryMonthEl = $("expiryMonth");
+const expiryListEl = $("expiryList");
+const addExpiryBtn = $("addExpiryBtn");
+const expiryModal = $("expiryModal");
+const closeExpiryModal = $("closeExpiryModal");
+const expiryForm = $("expiryForm");
+const cancelExpiryBtn = $("cancelExpiryBtn");
+const expiryNameInput = $("expiryName");
+const expiryDateInput = $("expiryDate");
+let editExpiryId = null;
 let donutChart = null;
 let editId = null; // track transaction being edited
 
 function save() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+function saveExpiry() {
+  localStorage.setItem(EXPIRY_STORAGE_KEY, JSON.stringify(expiryData));
 }
 
 function formatMoney(n) {
@@ -680,19 +700,33 @@ function switchTab(name) {
   if (name === "home") {
     homeTabEl.classList.remove("hidden");
     summaryTabEl.classList.add("hidden");
+    expiryTabEl && expiryTabEl.classList.add("hidden");
     tabHome.classList.add("active");
     tabSummary.classList.remove("active");
+    tabExpiry && tabExpiry.classList.remove("active");
     screenTitle.textContent = "Expense Tracker";
     if (optionsMenu) optionsMenu.classList.remove("open");
-  } else {
+  } else if (name === "summary") {
     homeTabEl.classList.add("hidden");
     summaryTabEl.classList.remove("hidden");
+    expiryTabEl && expiryTabEl.classList.add("hidden");
     tabHome.classList.remove("active");
     tabSummary.classList.add("active");
+    tabExpiry && tabExpiry.classList.remove("active");
     screenTitle.textContent = "Summary";
     if (optionsMenu) optionsMenu.classList.remove("open");
     // ensure chart reflects latest data
     renderChart();
+  } else if (name === "expiry") {
+    homeTabEl.classList.add("hidden");
+    summaryTabEl.classList.add("hidden");
+    expiryTabEl && expiryTabEl.classList.remove("hidden");
+    tabHome.classList.remove("active");
+    tabSummary.classList.remove("active");
+    tabExpiry && tabExpiry.classList.add("active");
+    screenTitle.textContent = "Expiry";
+    if (optionsMenu) optionsMenu.classList.remove("open");
+    renderExpiry();
   }
 
   // Check if PWA install modal should be shown after tab switch
@@ -993,6 +1027,13 @@ function closeModalFn() {
 
 addBtn.addEventListener("click", () => {
   hapticFeedback("light");
+  // If Expiry tab is active, open expiry modal instead
+  if (expiryTabEl && !expiryTabEl.classList.contains("hidden")) {
+    openExpiryModal();
+    return;
+  }
+
+  // Default: open transaction modal
   populateCategories();
   editId = null;
   const modalTitle = document.getElementById("modalTitle");
@@ -1750,4 +1791,207 @@ document.addEventListener("DOMContentLoaded", () => {
   checkPWAInstallPrompt();
   // start periodic PWA install reminders
   startPWAInstallReminder();
+
+  // Wire bottom nav tabs
+  if (tabHome) tabHome.addEventListener("click", () => switchTab("home"));
+  if (tabSummary) tabSummary.addEventListener("click", () => switchTab("summary"));
+  if (tabExpiry) tabExpiry.addEventListener("click", () => switchTab("expiry"));
+
+  // Expiry modal controls
+  if (addExpiryBtn) {
+    addExpiryBtn.addEventListener("click", () => openExpiryModal());
+  }
+  if (closeExpiryModal) closeExpiryModal.addEventListener("click", closeExpiryModalFn);
+  if (cancelExpiryBtn) cancelExpiryBtn.addEventListener("click", closeExpiryModalFn);
+  if (expiryForm) {
+    expiryForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      submitExpiryForm();
+    });
+  }
+
+  // Initial expiry render if tab is visible (unlikely on load, but safe)
+  renderExpiry();
 });
+
+// ---------- Expiry Feature ----------
+function daysBetween(a, b) {
+  const d1 = new Date(a); d1.setHours(0,0,0,0);
+  const d2 = new Date(b); d2.setHours(0,0,0,0);
+  return Math.round((d2 - d1) / (1000 * 60 * 60 * 24));
+}
+
+function openExpiryModal(defaults) {
+  if (!expiryModal) return;
+  expiryModal.classList.remove("hide");
+  setTimeout(() => expiryModal.classList.add("show"), 10);
+
+  editExpiryId = null;
+  const title = document.getElementById("expiryModalTitle");
+  const submitBtn = expiryForm && expiryForm.querySelector('button[type="submit"]');
+  if (defaults) {
+    if (title) title.textContent = "Edit Expiry Item";
+    if (submitBtn) submitBtn.textContent = "Update";
+    expiryNameInput && (expiryNameInput.value = defaults.name || "");
+    expiryDateInput && (expiryDateInput.value = toDateInputValue(defaults.expiry));
+    editExpiryId = defaults.id;
+  } else {
+    if (title) title.textContent = "Add Expiry Item";
+    if (submitBtn) submitBtn.textContent = "Save";
+    if (expiryForm) expiryForm.reset();
+    if (expiryDateInput) expiryDateInput.value = new Date().toISOString().slice(0,10);
+  }
+}
+
+function closeExpiryModalFn() {
+  if (!expiryModal) return;
+  expiryModal.classList.remove("show");
+  expiryModal.classList.add("hide");
+}
+
+function validateExpiry(name, dateStr) {
+  if (!name || !name.trim()) return { ok: false, msg: "Name is required" };
+  if (!dateStr) return { ok: false, msg: "Expiry date is required" };
+  return { ok: true };
+}
+
+function submitExpiryForm() {
+  const name = (expiryNameInput && expiryNameInput.value || "").trim();
+  const dateStr = expiryDateInput && expiryDateInput.value;
+  const v = validateExpiry(name, dateStr);
+  if (!v.ok) {
+    showToast(v.msg, "error");
+    hapticFeedback("error");
+    return;
+  }
+  if (editExpiryId) {
+    const idx = expiryData.findIndex((x) => x.id === editExpiryId);
+    if (idx !== -1) {
+      expiryData[idx] = { ...expiryData[idx], name, expiry: dateStr };
+    }
+  } else {
+    expiryData.push({ id: uid(), name, expiry: dateStr, createdAt: Date.now() });
+  }
+  saveExpiry();
+  renderExpiry();
+  hapticFeedback("success");
+  showToast(editExpiryId ? "Expiry updated" : "Expiry added", "success");
+  editExpiryId = null;
+  const title = document.getElementById("expiryModalTitle");
+  if (title) title.textContent = "Add Expiry Item";
+  const submitBtn = expiryForm && expiryForm.querySelector('button[type="submit"]');
+  if (submitBtn) submitBtn.textContent = "Save";
+  closeExpiryModalFn();
+}
+
+function getExpiryIconSVG(size = 20) {
+  return `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="13" r="7"/>
+    <path d="M12 10v4l2 2"/>
+    <path d="M8 3h8"/>
+    <path d="M9 3v2"/>
+    <path d="M15 3v2"/>
+  </svg>`;
+}
+
+function computeExpiryTotals() {
+  const today = new Date();
+  const startOfToday = new Date(today); startOfToday.setHours(0,0,0,0);
+  const endOfWeek = new Date(startOfToday); endOfWeek.setDate(endOfWeek.getDate() + (7 - endOfWeek.getDay() || 7));
+  const endOfMonth = new Date(startOfToday.getFullYear(), startOfToday.getMonth() + 1, 0);
+
+  const total = expiryData.length;
+  const week = expiryData.filter(e => {
+    const d = new Date(e.expiry); if (isNaN(d)) return false;
+    return d >= startOfToday && d <= endOfWeek;
+  }).length;
+  const month = expiryData.filter(e => {
+    const d = new Date(e.expiry); if (isNaN(d)) return false;
+    return d >= startOfToday && d <= endOfMonth;
+  }).length;
+
+  if (expiryTotalEl) expiryTotalEl.textContent = String(total);
+  if (expiryWeekEl) expiryWeekEl.textContent = String(week);
+  if (expiryMonthEl) expiryMonthEl.textContent = String(month);
+}
+
+function renderExpiry() {
+  if (!expiryListEl) return;
+  computeExpiryTotals();
+
+  if (!expiryData.length) {
+    expiryListEl.innerHTML = '<div style="color:var(--muted);padding:12px">No products added</div>';
+    return;
+  }
+
+  const today = new Date(); today.setHours(0,0,0,0);
+  const items = expiryData.slice().sort((a,b) => new Date(a.expiry) - new Date(b.expiry));
+  expiryListEl.innerHTML = "";
+  for (const item of items) {
+    const d = new Date(item.expiry); d.setHours(0,0,0,0);
+    const diff = daysBetween(today, d); // positive = days left, negative = expired
+    const statusText = diff < 0 ? `${Math.abs(diff)} day${Math.abs(diff)===1?"":"s"} ago` : diff === 0 ? "Today" : `${diff} day${diff===1?"":"s"} left`;
+    const pct = Math.max(0, Math.min(100, Math.round((1 - Math.min(Math.max(diff,0), 30)/30) * 100)));
+
+    const row = document.createElement("div");
+    row.className = "tx";
+    const meta = document.createElement("div");
+    meta.className = "meta";
+    const box = document.createElement("div");
+    box.className = "iconBox";
+    box.innerHTML = getExpiryIconSVG(20);
+    const info = document.createElement("div");
+    const title = document.createElement("div");
+    title.className = "title";
+    title.textContent = item.name || "Product";
+    const subtitle = document.createElement("div");
+    subtitle.className = "category";
+    subtitle.textContent = `Expires ${formatDateDisplay(item.expiry)} · ${statusText}`;
+    info.appendChild(title);
+    info.appendChild(subtitle);
+    meta.appendChild(box);
+    meta.appendChild(info);
+
+    const right = document.createElement("div");
+    right.style.minWidth = "120px";
+    right.style.display = "flex";
+    right.style.flexDirection = "column";
+    right.style.alignItems = "flex-end";
+
+    const bar = document.createElement("div");
+    bar.className = "expiry-progress";
+    const barInner = document.createElement("div");
+    barInner.className = "expiry-progress-bar";
+    barInner.style.width = `${pct}%`;
+    if (diff < 0) barInner.classList.add("expired");
+    bar.appendChild(barInner);
+
+    const small = document.createElement("div");
+    small.className = "expiry-small";
+    small.textContent = statusText;
+
+    right.appendChild(bar);
+    right.appendChild(small);
+
+    row.appendChild(meta);
+    row.appendChild(right);
+
+    // Click to edit
+    row.addEventListener("click", () => {
+      openExpiryModal({ id: item.id, name: item.name, expiry: item.expiry });
+    });
+
+    // Long press context menu to delete
+    row.addEventListener("contextmenu", (e) => {
+      e.preventDefault();
+      if (confirm("Delete this item?")) {
+        expiryData = expiryData.filter(x => x.id !== item.id);
+        saveExpiry();
+        renderExpiry();
+        showToast("Item deleted", "error");
+      }
+    });
+
+    expiryListEl.appendChild(row);
+  }
+}
