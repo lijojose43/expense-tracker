@@ -1936,8 +1936,8 @@ footer {
   }
   
   .fab-center {
-    /* Position above PWA bottombar: 20px + 56px + 8px gap */
-    bottom: calc(20px + env(safe-area-inset-bottom, 0px) + 56px + 8px);
+    /* Position above PWA bottombar: 20px + 56px + 4px gap (closer) */
+    bottom: calc(20px + env(safe-area-inset-bottom, 0px) + 56px + 4px);
   }
   
   [data-theme="dark"] .bottombar {
@@ -1963,8 +1963,8 @@ footer {
     }
     
     .fab-center {
-      /* Position above iOS PWA bottombar: 24px + 56px + 8px gap */
-      bottom: calc(24px + env(safe-area-inset-bottom, 0px) + 56px + 8px);
+      /* Position above iOS PWA bottombar: 24px + 56px + 2px gap (iPhone specific) */
+      bottom: calc(24px + env(safe-area-inset-bottom, 0px) + 56px + 2px);
     }
   }
 }
