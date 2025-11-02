@@ -728,12 +728,10 @@ html:not([data-theme="dark"]) .summary .card:nth-child(3) {
 
 /* Active state: border-only highlight (no fill change) */
 .filter-btn:hover {
-  transform: translateY(-1px);
   box-shadow: 0 6px 16px rgba(2, 6, 23, 0.12);
 }
 
 .filter-btn:active {
-  transform: none; /* disable click animation */
   box-shadow: inherit; /* no shadow change on press */
 }
 
@@ -1426,9 +1424,6 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
   border: 2px solid rgba(2, 6, 23, 0.25);
   background: transparent;
   display: inline-block;
-}
-.filter-btn:hover {
-  background: rgba(2, 6, 23, 0.06);
 }
 .segmented input[type="radio"]:active + .seg-btn {
   transform: translateY(0.5px);
