@@ -1876,7 +1876,7 @@ footer {
 .fab-center {
   position: fixed; /* float over content */
   right: 12px; /* nudge a bit further to the right */
-  bottom: calc(var(--bottombar-h) + 6px + env(safe-area-inset-bottom, 0px));
+  bottom: calc(var(--bottombar-h) + 2px + env(safe-area-inset-bottom, 0px));
   width: 56px;
   height: 56px;
   border-radius: 9999px;
@@ -1936,7 +1936,7 @@ footer {
   
   .fab-center {
     /* Adjust floating button to match bottombar positioning */
-    bottom: calc(var(--bottombar-h) + 20px + 6px + env(safe-area-inset-bottom, 0px));
+    bottom: calc(var(--bottombar-h) + 20px + 2px + env(safe-area-inset-bottom, 0px));
   }
   
   [data-theme="dark"] .bottombar {
@@ -1963,7 +1963,7 @@ footer {
     
     .fab-center {
       /* Adjust floating button for iOS PWA positioning */
-      bottom: calc(var(--bottombar-h) + 24px + 6px + env(safe-area-inset-bottom, 0px));
+      bottom: calc(var(--bottombar-h) + 24px + 2px + env(safe-area-inset-bottom, 0px));
     }
   }
 }
