@@ -2295,3 +2295,21 @@ function renderExpiry() {
     expiryListEl.appendChild(row);
   }
 }
+
+// Add event listeners for clickable navigation areas under add button
+const underAddSummary = document.getElementById("underAddSummary");
+const underAddPurchase = document.getElementById("underAddPurchase");
+
+if (underAddSummary) {
+  underAddSummary.addEventListener("click", () => {
+    hapticFeedback("light");
+    switchTab("summary");
+  });
+}
+
+if (underAddPurchase) {
+  underAddPurchase.addEventListener("click", () => {
+    hapticFeedback("light");
+    switchTab("purchase");
+  });
+}

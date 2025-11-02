@@ -1923,19 +1923,19 @@ footer {
 }
 
 .under-add-nav:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: transparent; /* Remove hover effect */
 }
 
 .under-add-nav:active {
-  background: rgba(255, 255, 255, 0.15);
+  background: transparent; /* Remove color highlight on click */
 }
 
 [data-theme="dark"] .under-add-nav:hover {
-  background: rgba(148, 163, 184, 0.1);
+  background: transparent; /* Remove hover effect */
 }
 
 [data-theme="dark"] .under-add-nav:active {
-  background: rgba(148, 163, 184, 0.2);
+  background: transparent; /* Remove color highlight on click */
 }
 
 .fab-center:hover {
@@ -1980,9 +1980,21 @@ footer {
     border-top: 1px solid rgba(2, 6, 23, 0.08);
   }
   
-  .fab-center {
-    /* Position above PWA bottombar: 20px + 56px + 4px gap (closer) */
-    bottom: calc(20px + env(safe-area-inset-bottom, 0px) + 56px + 4px);
+  /* Pure white background for safe area above header in lite mode PWA */
+  body {
+    background: #ffffff;
+  }
+  
+  /* Add white background to fill safe area above header */
+  body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: env(safe-area-inset-top, 0px);
+    background: #ffffff;
+    z-index: 999;
   }
   
   [data-theme="dark"] .bottombar {
@@ -2007,10 +2019,6 @@ footer {
       bottom: calc(24px + env(safe-area-inset-bottom, 0px));
     }
     
-    .fab-center {
-      /* Position above iOS PWA bottombar: 24px + 56px + 2px gap (iPhone specific) */
-      bottom: calc(24px + env(safe-area-inset-bottom, 0px) + 56px + 2px);
-    }
   }
 }
 
