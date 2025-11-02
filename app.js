@@ -23,7 +23,8 @@ const defaultCategories = [
 ];
 
 let data = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null") || [];
-let expiryData = JSON.parse(localStorage.getItem(EXPIRY_STORAGE_KEY) || "null") || [];
+let expiryData =
+  JSON.parse(localStorage.getItem(EXPIRY_STORAGE_KEY) || "null") || [];
 
 const $ = (id) => document.getElementById(id);
 const transactionsEl = $("transactions");
@@ -80,9 +81,10 @@ const tabHome = $("tabHome");
 const tabSummary = $("tabSummary");
 const tabExpiry = $("tabExpiry");
 const expiryTabEl = $("expiryTab");
-const expiryTotalEl = $("expiryTotal");
+const expiryTodayEl = $("expiryToday");
 const expiryWeekEl = $("expiryWeek");
 const expiryMonthEl = $("expiryMonth");
+const expiryYearEl = $("expiryYear");
 const expiryListEl = $("expiryList");
 const addExpiryBtn = $("addExpiryBtn");
 const expiryModal = $("expiryModal");
@@ -713,7 +715,7 @@ function switchTab(name) {
     tabHome.classList.remove("active");
     tabSummary.classList.add("active");
     tabExpiry && tabExpiry.classList.remove("active");
-    screenTitle.textContent = "Summary";
+    screenTitle.textContent = "Expense Summary";
     if (optionsMenu) optionsMenu.classList.remove("open");
     // ensure chart reflects latest data
     renderChart();
@@ -724,7 +726,7 @@ function switchTab(name) {
     tabHome.classList.remove("active");
     tabSummary.classList.remove("active");
     tabExpiry && tabExpiry.classList.add("active");
-    screenTitle.textContent = "Expiry";
+    screenTitle.textContent = "Expiries";
     if (optionsMenu) optionsMenu.classList.remove("open");
     renderExpiry();
   }
@@ -918,13 +920,13 @@ function renderList() {
 
 function openModal(defaults) {
   modal.classList.remove("hide");
-  
+
   // Immediate focus attempt for mobile devices
   const amountField = $("amount");
   if (amountField) {
     amountField.focus();
   }
-  
+
   // Trigger the slide-up animation
   setTimeout(() => {
     modal.classList.add("show");
@@ -980,11 +982,21 @@ function openModal(defaults) {
         // More aggressive approach for mobile keyboard activation
         amountField.click();
         amountField.focus();
-        
+
         // Trigger multiple events to ensure keyboard opens
-        const events = ['touchstart', 'touchend', 'mousedown', 'mouseup', 'click', 'focus'];
-        events.forEach(eventType => {
-          const event = new Event(eventType, { bubbles: true, cancelable: true });
+        const events = [
+          "touchstart",
+          "touchend",
+          "mousedown",
+          "mouseup",
+          "click",
+          "focus",
+        ];
+        events.forEach((eventType) => {
+          const event = new Event(eventType, {
+            bubbles: true,
+            cancelable: true,
+          });
           amountField.dispatchEvent(event);
         });
 
@@ -994,9 +1006,9 @@ function openModal(defaults) {
             amountField.focus();
             amountField.click();
             // Scroll into view to ensure visibility
-            amountField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            amountField.scrollIntoView({ behavior: "smooth", block: "center" });
           }, 50);
-          
+
           setTimeout(() => {
             amountField.focus();
             amountField.select();
@@ -1007,7 +1019,7 @@ function openModal(defaults) {
   };
 
   // More frequent attempts to ensure focus works on all devices
-  setTimeout(focusAmountField, 50);  // Very quick attempt
+  setTimeout(focusAmountField, 50); // Very quick attempt
   setTimeout(focusAmountField, 150); // After initial render
   setTimeout(focusAmountField, 300); // After animation
   setTimeout(focusAmountField, 500); // Final attempt for slow devices
@@ -1559,7 +1571,9 @@ function setMaxTodayForFilterDates() {
     ].filter(Boolean);
 
     inputs.forEach((el) => {
-      try { el.type = "date"; } catch (_) {}
+      try {
+        el.type = "date";
+      } catch (_) {}
       el.max = today;
       // If an existing value is in the future (e.g., persisted), clamp it
       if (el.value && el.value > today) {
@@ -1645,16 +1659,20 @@ function hidePWAInstallPopup(withDelay = false) {
   if (pwaInstallPopup) {
     pwaInstallPopup.classList.add("hide");
   }
-  
+
   // If dismissed manually, set a 1-minute delay before showing again
   if (withDelay) {
     const dismissTime = Date.now();
-    localStorage.setItem('pwa-dismiss-time', dismissTime.toString());
-    console.log('PWA install modal dismissed. Next show scheduled in 1 minute.');
-    
+    localStorage.setItem("pwa-dismiss-time", dismissTime.toString());
+    console.log(
+      "PWA install modal dismissed. Next show scheduled in 1 minute."
+    );
+
     // Schedule next show after 1 minute
     setTimeout(() => {
-      console.log('1-minute delay completed. Checking if PWA install modal should show.');
+      console.log(
+        "1-minute delay completed. Checking if PWA install modal should show."
+      );
       checkPWAInstallPrompt(0);
     }, 60000); // 60 seconds = 1 minute
   }
@@ -1672,17 +1690,17 @@ function checkPWAInstallPrompt(delayMs = 2000) {
   }
 
   // Check if we're still within the 1-minute delay period after dismissal
-  const dismissTime = localStorage.getItem('pwa-dismiss-time');
+  const dismissTime = localStorage.getItem("pwa-dismiss-time");
   if (dismissTime) {
     const timeSinceDismiss = Date.now() - parseInt(dismissTime);
     const oneMinute = 60000; // 60 seconds in milliseconds
-    
+
     if (timeSinceDismiss < oneMinute) {
       // Still within delay period, don't show
       return;
     } else {
       // Delay period has passed, clear the dismiss time
-      localStorage.removeItem('pwa-dismiss-time');
+      localStorage.removeItem("pwa-dismiss-time");
     }
   }
 
@@ -1823,15 +1841,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Wire bottom nav tabs
   if (tabHome) tabHome.addEventListener("click", () => switchTab("home"));
-  if (tabSummary) tabSummary.addEventListener("click", () => switchTab("summary"));
+  if (tabSummary)
+    tabSummary.addEventListener("click", () => switchTab("summary"));
   if (tabExpiry) tabExpiry.addEventListener("click", () => switchTab("expiry"));
 
   // Expiry modal controls
   if (addExpiryBtn) {
     addExpiryBtn.addEventListener("click", () => openExpiryModal());
   }
-  if (closeExpiryModal) closeExpiryModal.addEventListener("click", closeExpiryModalFn);
-  if (cancelExpiryBtn) cancelExpiryBtn.addEventListener("click", closeExpiryModalFn);
+  if (closeExpiryModal)
+    closeExpiryModal.addEventListener("click", closeExpiryModalFn);
+  if (cancelExpiryBtn)
+    cancelExpiryBtn.addEventListener("click", closeExpiryModalFn);
   if (expiryForm) {
     expiryForm.addEventListener("submit", (e) => {
       e.preventDefault();
@@ -1845,8 +1866,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // ---------- Expiry Feature ----------
 function daysBetween(a, b) {
-  const d1 = new Date(a); d1.setHours(0,0,0,0);
-  const d2 = new Date(b); d2.setHours(0,0,0,0);
+  const d1 = new Date(a);
+  d1.setHours(0, 0, 0, 0);
+  const d2 = new Date(b);
+  d2.setHours(0, 0, 0, 0);
   return Math.round((d2 - d1) / (1000 * 60 * 60 * 24));
 }
 
@@ -1857,18 +1880,21 @@ function openExpiryModal(defaults) {
 
   editExpiryId = null;
   const title = document.getElementById("expiryModalTitle");
-  const submitBtn = expiryForm && expiryForm.querySelector('button[type="submit"]');
+  const submitBtn =
+    expiryForm && expiryForm.querySelector('button[type="submit"]');
   if (defaults) {
     if (title) title.textContent = "Edit Expiry Item";
     if (submitBtn) submitBtn.textContent = "Update";
     expiryNameInput && (expiryNameInput.value = defaults.name || "");
-    expiryDateInput && (expiryDateInput.value = toDateInputValue(defaults.expiry));
+    expiryDateInput &&
+      (expiryDateInput.value = toDateInputValue(defaults.expiry));
     editExpiryId = defaults.id;
   } else {
     if (title) title.textContent = "Add Expiry Item";
     if (submitBtn) submitBtn.textContent = "Save";
     if (expiryForm) expiryForm.reset();
-    if (expiryDateInput) expiryDateInput.value = new Date().toISOString().slice(0,10);
+    if (expiryDateInput)
+      expiryDateInput.value = new Date().toISOString().slice(0, 10);
   }
 }
 
@@ -1885,7 +1911,7 @@ function validateExpiry(name, dateStr) {
 }
 
 function submitExpiryForm() {
-  const name = (expiryNameInput && expiryNameInput.value || "").trim();
+  const name = ((expiryNameInput && expiryNameInput.value) || "").trim();
   const dateStr = expiryDateInput && expiryDateInput.value;
   const v = validateExpiry(name, dateStr);
   if (!v.ok) {
@@ -1899,7 +1925,12 @@ function submitExpiryForm() {
       expiryData[idx] = { ...expiryData[idx], name, expiry: dateStr };
     }
   } else {
-    expiryData.push({ id: uid(), name, expiry: dateStr, createdAt: Date.now() });
+    expiryData.push({
+      id: uid(),
+      name,
+      expiry: dateStr,
+      createdAt: Date.now(),
+    });
   }
   saveExpiry();
   renderExpiry();
@@ -1908,7 +1939,8 @@ function submitExpiryForm() {
   editExpiryId = null;
   const title = document.getElementById("expiryModalTitle");
   if (title) title.textContent = "Add Expiry Item";
-  const submitBtn = expiryForm && expiryForm.querySelector('button[type="submit"]');
+  const submitBtn =
+    expiryForm && expiryForm.querySelector('button[type="submit"]');
   if (submitBtn) submitBtn.textContent = "Save";
   closeExpiryModalFn();
 }
@@ -1924,24 +1956,60 @@ function getExpiryIconSVG(size = 20) {
 }
 
 function computeExpiryTotals() {
-  const today = new Date();
-  const startOfToday = new Date(today); startOfToday.setHours(0,0,0,0);
-  const endOfWeek = new Date(startOfToday); endOfWeek.setDate(endOfWeek.getDate() + (7 - endOfWeek.getDay() || 7));
-  const endOfMonth = new Date(startOfToday.getFullYear(), startOfToday.getMonth() + 1, 0);
+  const now = new Date();
+  const startOfToday = new Date(now);
+  startOfToday.setHours(0, 0, 0, 0);
+  const endOfToday = new Date(now);
+  endOfToday.setHours(23, 59, 59, 999);
 
-  const total = expiryData.length;
-  const week = expiryData.filter(e => {
-    const d = new Date(e.expiry); if (isNaN(d)) return false;
-    return d >= startOfToday && d <= endOfWeek;
-  }).length;
-  const month = expiryData.filter(e => {
-    const d = new Date(e.expiry); if (isNaN(d)) return false;
-    return d >= startOfToday && d <= endOfMonth;
-  }).length;
+  // Start of week: Monday (or use locale Sunday?). We'll use Monday as start.
+  const startOfWeek = new Date(startOfToday);
+  const day = startOfWeek.getDay(); // 0 Sun..6 Sat
+  const diffToMonday = day === 0 ? -6 : 1 - day; // move back to Monday
+  startOfWeek.setDate(startOfWeek.getDate() + diffToMonday);
+  const endOfWeek = new Date(startOfWeek);
+  endOfWeek.setDate(endOfWeek.getDate() + 6);
+  endOfWeek.setHours(23, 59, 59, 999);
 
-  if (expiryTotalEl) expiryTotalEl.textContent = String(total);
+  // Month boundaries
+  const startOfMonth = new Date(
+    startOfToday.getFullYear(),
+    startOfToday.getMonth(),
+    1
+  );
+  const endOfMonth = new Date(
+    startOfToday.getFullYear(),
+    startOfToday.getMonth() + 1,
+    0
+  );
+  endOfMonth.setHours(23, 59, 59, 999);
+
+  // Year boundaries
+  const startOfYear = new Date(startOfToday.getFullYear(), 0, 1);
+  const endOfYear = new Date(startOfToday.getFullYear(), 11, 31);
+  endOfYear.setHours(23, 59, 59, 999);
+
+  const inRange = (d, a, b) => d >= a && d <= b;
+
+  let today = 0,
+    week = 0,
+    month = 0,
+    year = 0;
+  for (const e of expiryData) {
+    const d = new Date(e.expiry);
+    if (isNaN(d)) continue;
+    const dd = new Date(d);
+    dd.setHours(0, 0, 0, 0);
+    if (inRange(dd, startOfToday, endOfToday)) today++;
+    if (inRange(dd, startOfWeek, endOfWeek)) week++;
+    if (inRange(dd, startOfMonth, endOfMonth)) month++;
+    if (inRange(dd, startOfYear, endOfYear)) year++;
+  }
+
+  if (expiryTodayEl) expiryTodayEl.textContent = String(today);
   if (expiryWeekEl) expiryWeekEl.textContent = String(week);
   if (expiryMonthEl) expiryMonthEl.textContent = String(month);
+  if (expiryYearEl) expiryYearEl.textContent = String(year);
 }
 
 function renderExpiry() {
@@ -1949,18 +2017,34 @@ function renderExpiry() {
   computeExpiryTotals();
 
   if (!expiryData.length) {
-    expiryListEl.innerHTML = '<div style="color:var(--muted);padding:12px">No products added</div>';
+    expiryListEl.innerHTML =
+      '<div style="color:var(--muted);padding:12px">No products added</div>';
     return;
   }
 
-  const today = new Date(); today.setHours(0,0,0,0);
-  const items = expiryData.slice().sort((a,b) => new Date(a.expiry) - new Date(b.expiry));
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const items = expiryData
+    .slice()
+    .sort((a, b) => new Date(a.expiry) - new Date(b.expiry));
   expiryListEl.innerHTML = "";
   for (const item of items) {
-    const d = new Date(item.expiry); d.setHours(0,0,0,0);
+    const d = new Date(item.expiry);
+    d.setHours(0, 0, 0, 0);
     const diff = daysBetween(today, d); // positive = days left, negative = expired
-    const statusText = diff < 0 ? `${Math.abs(diff)} day${Math.abs(diff)===1?"":"s"} ago` : diff === 0 ? "Today" : `${diff} day${diff===1?"":"s"} left`;
-    const pct = Math.max(0, Math.min(100, Math.round((1 - Math.min(Math.max(diff,0), 30)/30) * 100)));
+    const statusText =
+      diff < 0
+        ? `${Math.abs(diff)} day${Math.abs(diff) === 1 ? "" : "s"} ago`
+        : diff === 0
+        ? "Today"
+        : `${diff} day${diff === 1 ? "" : "s"} left`;
+    const pct = Math.max(
+      0,
+      Math.min(
+        100,
+        Math.round((1 - Math.min(Math.max(diff, 0), 30) / 30) * 100)
+      )
+    );
 
     const row = document.createElement("div");
     row.className = "tx";
@@ -1975,7 +2059,9 @@ function renderExpiry() {
     title.textContent = item.name || "Product";
     const subtitle = document.createElement("div");
     subtitle.className = "category";
-    subtitle.textContent = `Expires ${formatDateDisplay(item.expiry)} · ${statusText}`;
+    subtitle.textContent = `Expires ${formatDateDisplay(
+      item.expiry
+    )} · ${statusText}`;
     info.appendChild(title);
     info.appendChild(subtitle);
     meta.appendChild(box);
@@ -2014,7 +2100,7 @@ function renderExpiry() {
     row.addEventListener("contextmenu", (e) => {
       e.preventDefault();
       if (confirm("Delete this item?")) {
-        expiryData = expiryData.filter(x => x.id !== item.id);
+        expiryData = expiryData.filter((x) => x.id !== item.id);
         saveExpiry();
         renderExpiry();
         showToast("Item deleted", "error");

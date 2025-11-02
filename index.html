@@ -11,7 +11,7 @@
 <body>
   <div class="app">
     <header class="topbar">
-      <h1 id="screenTitle">Expense Tracker</h1>
+      <h1 id="screenTitle">Expenses</h1>
       <div class="top-actions" style="display:flex; gap:8px; align-items:center">
         <button id="themeToggle" class="icon" title="Toggle Theme" aria-label="Toggle theme">
           <!-- Sun icon for light mode -->
@@ -96,8 +96,8 @@
     <main id="expiryTab" class="content hidden">
       <section class="summary">
         <div class="card">
-          <div class="label">Total Products</div>
-          <div id="expiryTotal" class="amount">0</div>
+          <div class="label">Expire Today</div>
+          <div id="expiryToday" class="amount">0</div>
         </div>
         <div class="card">
           <div class="label">Expire This Week</div>
@@ -106,6 +106,10 @@
         <div class="card">
           <div class="label">Expire This Month</div>
           <div id="expiryMonth" class="amount">0</div>
+        </div>
+        <div class="card">
+          <div class="label">Expire This Year</div>
+          <div id="expiryYear" class="amount">0</div>
         </div>
       </section>
 
@@ -248,7 +252,7 @@
         <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
         <polyline points="9,22 9,12 15,12 15,22"/>
       </svg>
-      <span>Expense</span>
+      <span>Expenses</span>
     </button>
     
     <button id="addBtn" class="fab-center" title="Add" aria-label="Add transaction">
@@ -274,7 +278,7 @@
         <path d="M9 3v2"/>
         <path d="M15 3v2"/>
       </svg>
-      <span>Expiry</span>
+      <span>Expiries</span>
     </button>
   </nav>
 
