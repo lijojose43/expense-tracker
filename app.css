@@ -1980,22 +1980,6 @@ footer {
     border-top: 1px solid rgba(2, 6, 23, 0.08);
   }
   
-  /* Pure white background for safe area above header in lite mode PWA */
-  body {
-    background: #ffffff;
-  }
-  
-  /* Add white background to fill safe area above header */
-  body::before {
-    content: "";
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: env(safe-area-inset-top, 0px);
-    background: #ffffff;
-    z-index: 999;
-  }
   
   [data-theme="dark"] .bottombar {
     border-top: 1px solid rgba(148, 163, 184, 0.1);
