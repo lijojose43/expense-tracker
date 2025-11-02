@@ -100,17 +100,18 @@ body {
     left: 0;
     right: 0;
     z-index: 1000;
-    padding-top: calc(16px + env(safe-area-inset-top, 0px));
-    background: var(--bg);
-    -webkit-backdrop-filter: blur(20px);
-    backdrop-filter: blur(20px);
-    border-bottom: 1px solid rgba(2, 6, 23, 0.08);
-    box-shadow: 0 1px 3px rgba(2, 6, 23, 0.1);
+    padding-top: calc(12px + env(safe-area-inset-top, 0px));
+    background: var(--glass);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid transparent;
+    box-shadow: 0 6px 18px rgba(2, 6, 23, 0.08);
   }
 
   [data-theme="dark"] .topbar {
-    border-bottom: 1px solid rgba(148, 163, 184, 0.2);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    background: rgba(10, 16, 32, 0.6);
+    border-bottom: 1px solid transparent;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
   }
 
   /* Add extra top padding for content in PWA mode */
@@ -193,22 +194,24 @@ body {
   position: sticky;
   top: 0;
   z-index: 1000;
-  padding: 16px 20px;
-  border-bottom: 1px solid rgba(2, 6, 23, 0.08);
-  background: var(--bg);
+  padding: 12px 16px;
   height: var(--topbar-h);
-  /* Enhanced sticky header for all screens */
-  -webkit-backdrop-filter: blur(20px);
-  backdrop-filter: blur(20px);
-  box-shadow: 0 1px 3px rgba(2, 6, 23, 0.1);
+  background: var(--glass);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  border-bottom: none;
+  border-bottom: 1px solid transparent; /* maintain layout without visible divider */
+  box-shadow: 0 6px 18px rgba(2, 6, 23, 0.08);
 }
 [data-theme="dark"] .topbar {
-  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  background: rgba(10, 16, 32, 0.6);
+  border-bottom: 1px solid transparent;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
 }
 .topbar h1 {
   margin: 0;
-  font-size: 16px;
+  font-size: 18px;
+  font-weight: 700;
 }
 
 .top-actions {
@@ -344,19 +347,23 @@ html:not([data-theme="dark"]) #sunIcon {
 [data-theme="dark"] .topbar {
   border-bottom: none;
 }
+[data-theme="dark"] .topbar {
+  border-bottom: none;
+}
 .card {
-  background: var(--card);
-  padding: 12px;
-  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.4)), var(--card);
+  padding: 16px;
+  border-radius: 16px;
   flex: 1;
-  min-width: 120px;
-  border: 1px solid rgba(2, 6, 23, 0.06);
-  box-shadow: 0 2px 10px rgba(2, 6, 23, 0.06);
+  min-width: 140px;
+  border: 1px solid rgba(2, 6, 23, 0.08);
+  box-shadow: 0 8px 24px rgba(2, 6, 23, 0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
 }
 [data-theme="dark"] .card {
-  border-color: rgba(30, 144, 255, 0.3);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(30, 144, 255, 0.2),
-    0 0 20px rgba(30, 144, 255, 0.15);
+  background: linear-gradient(180deg, rgba(15,23,42,0.6), rgba(15,23,42,0.4)), var(--card);
+  border-color: rgba(148, 163, 184, 0.18);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
 }
 .card.wide {
   flex-basis: 100%;
@@ -387,6 +394,29 @@ html:not([data-theme="dark"]) .summary .card:nth-child(3) {
   font-weight: 700;
   font-size: 18px;
   margin-top: 6px;
+}
+
+/* Card interactions */
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(2, 6, 23, 0.12);
+}
+[data-theme="dark"] .card:hover {
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.55);
+}
+
+/* Keep light mode accented cards subtle and modern */
+html:not([data-theme="dark"]) .summary .card:nth-child(1) {
+  background: linear-gradient(180deg, rgba(236, 253, 245, 0.9), rgba(236, 253, 245, 0.7));
+  border-color: #a7f3d0;
+}
+html:not([data-theme="dark"]) .summary .card:nth-child(2) {
+  background: linear-gradient(180deg, rgba(254, 242, 242, 0.9), rgba(254, 242, 242, 0.7));
+  border-color: #fecaca;
+}
+html:not([data-theme="dark"]) .summary .card:nth-child(3) {
+  background: linear-gradient(180deg, rgba(239, 246, 255, 0.9), rgba(239, 246, 255, 0.7));
+  border-color: #bfdbfe;
 }
 .filters {
   display: flex;
@@ -606,13 +636,18 @@ input[type="date"] {
   position: relative;
 }
 
-/* Hide all native date picker components */
+/* Show and style the native date picker indicator so picker opens on tap */
 input[type="date"]::-webkit-calendar-picker-indicator {
-  display: none;
-  -webkit-appearance: none;
-  opacity: 0;
-  width: 0;
-  height: 0;
+  display: block;
+  -webkit-appearance: auto;
+  opacity: 1;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 input[type="date"]::-webkit-inner-spin-button,
@@ -976,20 +1011,20 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
   right: 10px; /* keep away from right edge */
   border: none;
   border-radius: 10px; /* consistent rounded corners */
-  width: 28px; /* larger touch target */
-  height: 28px;
+  width: 36px; /* larger touch target */
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: background 0.2s ease, box-shadow 0.2s ease;
   color: var(--muted);
-  font-size: 16px;
+  font-size: 20px; /* larger icon glyph */
 }
 
 .modal-content header #closeModal:hover {
-  background: rgba(0, 0, 0, 0.08);
-  box-shadow: 0 0 0 1px rgba(2, 6, 23, 0.06);
+  background: transparent;
+  box-shadow: none;
 }
 
 [data-theme="dark"] .modal-content header #closeModal {
@@ -997,7 +1032,8 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
 }
 
 [data-theme="dark"] .modal-content header #closeModal:hover {
-  background: rgba(255, 255, 255, 0.12);
+  background: transparent;
+  box-shadow: none;
 }
 .modal-content header::before {
   content: "";
@@ -1040,6 +1076,58 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
   margin-top: 0; /* no negative margin - let gap handle spacing */
   font-weight: 500;
   color: inherit;
+}
+
+/* Floating label form fields */
+.floating {
+  position: relative;
+}
+
+.floating input,
+.floating select,
+.floating textarea {
+  padding-top: 18px; /* make room for label */
+  padding-bottom: 10px;
+}
+
+.floating .floating-label {
+  position: absolute;
+  left: 12px;
+  top: 10px;
+  font-size: 14px;
+  color: var(--muted);
+  pointer-events: none;
+  transition: transform 0.15s ease, color 0.15s ease, top 0.15s ease;
+  background: var(--card);
+  padding: 0 4px;
+  border-radius: 4px;
+}
+
+/* Float on focus or when field has value */
+.floating input:focus + .floating-label,
+.floating input:not(:placeholder-shown) + .floating-label,
+.floating input[type="date"]:focus + .floating-label,
+.floating input[type="date"]:valid + .floating-label,
+.floating select:focus + .floating-label,
+.floating select:valid + .floating-label,
+.floating textarea:focus + .floating-label,
+.floating textarea:not(:placeholder-shown) + .floating-label {
+  transform: translateY(-12px) scale(0.85);
+  top: 4px;
+  color: var(--accent);
+}
+
+/* Keep label subtle when not focused but has value */
+.floating input:not(:focus):not(:placeholder-shown) + .floating-label,
+.floating input[type="date"]:valid + .floating-label,
+.floating select:valid + .floating-label,
+.floating textarea:not(:focus):not(:placeholder-shown) + .floating-label {
+  color: var(--muted);
+}
+
+/* Dark theme: ensure label chip blends with card */
+[data-theme="dark"] .floating .floating-label {
+  background: var(--card);
 }
 
 /* Create field groups with proper spacing */
@@ -1445,27 +1533,31 @@ footer {
 }
 .bottombar {
   position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 60px;
-  background: var(--card);
+  left: 12px;
+  right: 12px;
+  bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  height: 56px;
+  background: var(--glass);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
   display: flex;
   align-items: center;
   justify-content: space-around;
-  box-shadow: 0 -2px 12px rgba(2, 6, 23, 0.1);
+  box-shadow: 0 8px 24px rgba(2, 6, 23, 0.12);
+  border: 1px solid rgba(2, 6, 23, 0.08);
   z-index: 1000;
-  /* Enhanced safe area support for iPhone PWA */
-  padding-bottom: env(safe-area-inset-bottom, 0px);
-  padding-left: env(safe-area-inset-left, 0px);
-  padding-right: env(safe-area-inset-right, 0px);
+  border-radius: 16px;
+  padding: 0 8px;
   /* Allow center button to extend upward */
   overflow: visible;
   /* Ensure proper height calculation with safe areas */
-  min-height: calc(60px + env(safe-area-inset-bottom, 0px));
+  min-height: 56px;
+  transition: background 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
 }
 [data-theme="dark"] .bottombar {
-  box-shadow: 0 -2px 12px rgba(2, 6, 23, 0.6);
+  background: rgba(10, 16, 32, 0.6);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  border-color: rgba(148, 163, 184, 0.2);
 }
 .bottombar .tab {
   flex: 1;
@@ -1473,10 +1565,10 @@ footer {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3px; /* Smaller gap */
+  gap: 4px; /* Small gap */
   background: transparent;
   border: none;
-  padding: 0 8px; /* no vertical padding so background covers full height */
+  padding: 0 6px; /* compact padding */
   border-radius: 0; /* full-width/height background */
   color: var(--muted);
   cursor: pointer;
@@ -1485,7 +1577,7 @@ footer {
   align-self: stretch; /* override container alignment to stretch full height */
 }
 .bottombar .tab span {
-  font-size: 12px; /* Slightly smaller font */
+  font-size: 11px; /* Compact label */
 }
 .bottombar .tab.active {
   background: transparent; /* remove highlight */
@@ -1499,6 +1591,23 @@ footer {
 
 [data-theme="dark"] .bottombar .tab:hover {
   background: transparent; /* no hover highlight in dark */
+}
+
+/* Larger icons for a modern look */
+.bottombar .tab svg {
+  width: 24px;
+  height: 24px;
+}
+
+/* Minimal active indicator dot */
+.bottombar .tab.active::after {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  display: block;
+  margin-top: 2px;
 }
 
 /* Remove press highlight specifically for bottom tabs */

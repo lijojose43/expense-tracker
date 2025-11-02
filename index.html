@@ -187,24 +187,26 @@
           </div>
         </div>
         <div class="amount-category-row">
-          <div class="amount-field">
-            <label>Amount</label>
-            <input id="amount" type="text" inputmode="decimal" enterkeyhint="done" step="0.01" min="0" max="9999999.99" required placeholder="e.g. 25.00" autocomplete="off"/>
+          <div class="amount-field floating">
+            <input id="amount" type="text" inputmode="decimal" enterkeyhint="done" step="0.01" min="0" max="9999999.99" required placeholder=" " autocomplete="off"/>
+            <label for="amount" class="floating-label">Amount</label>
           </div>
-          <div class="category-field">
-            <label>Category</label>
-            <select id="category"></select>
+          <div class="category-field floating">
+            <select id="category" required>
+              <option value="" disabled selected hidden></option>
+            </select>
+            <label for="category" class="floating-label">Category</label>
           </div>
         </div>
         <div id="amountError" class="error-message" style="display: none;"></div>
         <div class="date-description-row">
-          <div class="date-field">
-            <label>Date</label>
-            <input id="date" type="date" required/>
+          <div class="date-field floating">
+            <input id="date" type="date" required placeholder=" "/>
+            <label for="date" class="floating-label">Date</label>
           </div>
-          <div class="description-field">
-            <label>Description</label>
-            <input id="description" type="text" placeholder="Grocery, Salary..."/>
+          <div class="description-field floating">
+            <input id="description" type="text" placeholder=" "/>
+            <label for="description" class="floating-label">Description</label>
           </div>
         </div>
         <div id="dateError" class="error-message" style="display: none;"></div>

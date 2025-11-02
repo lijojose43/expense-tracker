@@ -538,10 +538,12 @@ function getCategoryIcon(category) {
 
   const icons = {
     groceries: `<svg viewBox="0 0 24 24" width="${iconSize}" height="${iconSize}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M7 4V2a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v2"/>
-      <path d="M5 4h14l-1 10a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 4Z"/>
-      <path d="M9 8v4"/>
-      <path d="M15 8v4"/>
+      <!-- Grocery basket with handle -->
+      <path d="M7 11l5-7 5 7" />
+      <path d="M5 11h14l-1.5 7a2 2 0 0 1-2 2H8.5a2 2 0 0 1-2-2L5 11z" />
+      <line x1="8" y1="15" x2="8" y2="19" />
+      <line x1="12" y1="15" x2="12" y2="19" />
+      <line x1="16" y1="15" x2="16" y2="19" />
     </svg>`,
 
     dining: `<svg viewBox="0 0 24 24" width="${iconSize}" height="${iconSize}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -583,8 +585,11 @@ function getCategoryIcon(category) {
     </svg>`,
 
     salary: `<svg viewBox="0 0 24 24" width="${iconSize}" height="${iconSize}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <line x1="12" y1="1" x2="12" y2="23"/>
-      <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+      <!-- Indian Rupee symbol (₹) in stroke style -->
+      <path d="M6 4h12"/>
+      <path d="M6 8h12"/>
+      <path d="M6 8a6 6 0 0 1 6 6v0H6"/>
+      <path d="M12 14L6 21"/>
     </svg>`,
 
     business: `<svg viewBox="0 0 24 24" width="${iconSize}" height="${iconSize}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
