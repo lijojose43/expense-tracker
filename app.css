@@ -1881,7 +1881,7 @@ footer {
 .fab-center {
   position: fixed; /* float over content */
   right: 12px; /* nudge a bit further to the right */
-  bottom: calc(var(--bottombar-h) + 22px + env(safe-area-inset-bottom, 0px));
+  bottom: calc(var(--bottombar-h) + 12px + env(safe-area-inset-bottom, 0px));
   width: 56px;
   height: 56px;
   border-radius: 9999px;
@@ -1930,11 +1930,18 @@ footer {
 /* Specific PWA display mode support */
 @media (display-mode: standalone) {
   .bottombar {
+    /* Move further down on iOS PWA for better thumb reach */
+    bottom: calc(20px + env(safe-area-inset-bottom, 0px));
     /* Do not add internal padding/height for safe areas; position handles it */
     padding-bottom: 0;
     height: 56px;
-    background: var(--card);
+    /* Add subtle border for PWA mode */
     border-top: 1px solid rgba(2, 6, 23, 0.08);
+  }
+  
+  .fab-center {
+    /* Adjust floating button to match bottombar positioning */
+    bottom: calc(var(--bottombar-h) + 20px + 12px + env(safe-area-inset-bottom, 0px));
   }
   
   [data-theme="dark"] .bottombar {
@@ -1948,12 +1955,26 @@ footer {
     /* iOS-specific: avoid internal safe-area padding to remove extra gap */
     padding-bottom: 0;
     /* Prevent iOS scrolling issues */
+    position: fixed;
     -webkit-user-select: none;
     user-select: none;
+  }
+  
+  /* iOS PWA specific - move even further down for better ergonomics */
+  @media (display-mode: standalone) {
+    .bottombar {
+      bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    }
+    
+    .fab-center {
+      /* Adjust floating button for iOS PWA positioning */
+      bottom: calc(var(--bottombar-h) + 24px + 12px + env(safe-area-inset-bottom, 0px));
+    }
   }
 }
 
 /* PWA Install Popup */
+{{ ... }}
 .pwa-popup {
   position: fixed;
   inset: 0;
