@@ -1726,7 +1726,7 @@ footer {
   border: 1px solid rgba(2, 6, 23, 0.08);
   z-index: 1000;
   border-radius: 16px;
-  padding: 0 8px;
+  padding: 0;
   /* Allow center button to extend upward */
   overflow: visible;
   /* Ensure proper height calculation with safe areas */
@@ -1854,7 +1854,7 @@ footer {
 @media (display-mode: standalone) {
   .bottombar {
     /* Enhanced PWA support with proper safe areas */
-    padding-bottom: max(env(safe-area-inset-bottom, 0px), 8px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
     height: calc(60px + env(safe-area-inset-bottom, 0px));
     background: var(--card);
     border-top: 1px solid rgba(2, 6, 23, 0.08);
@@ -1869,7 +1869,7 @@ footer {
 @supports (-webkit-touch-callout: none) {
   .bottombar {
     /* iOS-specific safe area handling */
-    padding-bottom: max(env(safe-area-inset-bottom, 0px), 8px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
     /* Prevent iOS scrolling issues */
     -webkit-user-select: none;
     user-select: none;
