@@ -1256,9 +1256,14 @@ function validateDate(dateValue) {
   today.setHours(23, 59, 59, 999); // Set to end of today
 
   if (selectedDate > today) {
-    dateError.textContent = "Future dates are not allowed";
-    dateError.style.display = "block";
-    return false;
+    // Instead of showing an error, clamp to today and continue
+    const todayStr = new Date().toISOString().slice(0, 10);
+    try {
+      const dateInput = $("date");
+      if (dateInput) dateInput.value = todayStr;
+    } catch (_) {}
+    dateError.style.display = "none";
+    return true;
   }
 
   dateError.style.display = "none";
@@ -1542,6 +1547,28 @@ function setMaxTodayForTxDate() {
   } catch (_) {}
 }
 
+// Ensure all filtering date inputs disallow future dates (only up to today)
+function setMaxTodayForFilterDates() {
+  try {
+    const today = new Date().toISOString().slice(0, 10);
+    const inputs = [
+      document.getElementById("startDate"),
+      document.getElementById("endDate"),
+      document.getElementById("summaryStartDate"),
+      document.getElementById("summaryEndDate"),
+    ].filter(Boolean);
+
+    inputs.forEach((el) => {
+      try { el.type = "date"; } catch (_) {}
+      el.max = today;
+      // If an existing value is in the future (e.g., persisted), clamp it
+      if (el.value && el.value > today) {
+        el.value = today;
+      }
+    });
+  } catch (_) {}
+}
+
 // Add event listeners for summary page date filter buttons
 summaryFilterAllTime.addEventListener("click", () =>
   setSummaryDateFilter("all")
@@ -1773,6 +1800,8 @@ document.addEventListener("DOMContentLoaded", () => {
   populateCategories();
   // ensure date inputs have today's date by default
   setDefaultDatesToday();
+  // ensure filter date inputs cannot be set in the future
+  setMaxTodayForFilterDates();
   // ensure transaction date cannot be set in the future
   setMaxTodayForTxDate();
   computeTotals();

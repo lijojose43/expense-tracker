@@ -6,7 +6,7 @@
   --danger: #ef4444;
   --glass: rgba(255, 255, 255, 0.6);
   --topbar-h: 56px;
-  --bottombar-h: 60px;
+  --bottombar-h: 56px;
   font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto,
     "Helvetica Neue", Arial;
 }
@@ -431,6 +431,48 @@ html:not([data-theme="dark"]) .summary .card:nth-child(3) {
   background: linear-gradient(180deg, rgba(15,23,42,0.55), rgba(15,23,42,0.35)), var(--card);
 }
 
+/* Disable generic overlay: rely on per-card layered backgrounds */
+.summary .card::after { content: none; }
+[data-theme="dark"] .summary .card::after { content: none; }
+
+/* Disable overlay to avoid covering content; use layered backgrounds instead */
+.summary .card.use-bg-layer::after { content: none; }
+
+/* Remove special background alignment (no image layers) */
+.summary .card { }
+
+/* Per-card image backgrounds layered under gradients (light) */
+.summary .card:nth-child(1) { background: inherit; }
+.summary .card:nth-child(2) { background: inherit; }
+.summary .card:nth-child(3) { background: inherit; }
+
+/* Dark variants layered under dark gradients */
+[data-theme="dark"] .summary .card:nth-child(1) { background: inherit; }
+[data-theme="dark"] .summary .card:nth-child(2) { background: inherit; }
+[data-theme="dark"] .summary .card:nth-child(3) { background: inherit; }
+
+/* Per-card images: 1 Income, 2 Expenses, 3 Savings (light) */
+.summary .card:nth-child(1)::after { /* Income: rupee coin */
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300'><defs><radialGradient id='ri' cx='0.5' cy='0.4' r='0.7'><stop offset='0' stop-color='%23facc15' stop-opacity='0.35'/><stop offset='1' stop-color='%23fde68a' stop-opacity='0.1'/></radialGradient></defs><rect width='400' height='300' fill='url(%23ri)'/><g stroke='%231e293b' stroke-opacity='0.18' fill='none' stroke-width='3'><circle cx='200' cy='140' r='70'/><path d='M170 120h60M170 140h60M170 140c25 0 45 18 45 40H170M215 180l-45 50'/></g></svg>");
+}
+.summary .card:nth-child(2)::after { /* Expenses: down arrow bars */
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300'><rect width='400' height='300' fill='none'/><g stroke='%23ef4444' stroke-opacity='0.25' fill='none' stroke-width='6'><path d='M80 220V140'/><path d='M140 220V120'/><path d='M200 220V90'/><path d='M260 220V60'/></g><g fill='%23ef4444' fill-opacity='0.25'><polygon points='200,90 188,110 212,110'/><polygon points='260,60 248,80 272,80'/></g></svg>");
+}
+.summary .card:nth-child(3)::after { /* Savings: piggy bank */
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300'><defs><linearGradient id='sv' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%230ea5e9' stop-opacity='0.15'/><stop offset='1' stop-color='%2306b6d4' stop-opacity='0.08'/></linearGradient></defs><rect width='400' height='300' fill='url(%23sv)'/><g stroke='%231e293b' stroke-opacity='0.18' fill='none' stroke-width='3'><path d='M140 190c-20-10-30-40 0-60 20-12 56-16 90-6 16-10 34-14 50 2 18 20 2 48-28 54-4 10-12 18-22 22z'/><circle cx='255' cy='145' r='4'/><path d='M190 112h60' stroke-width='4'/></g></svg>");
+}
+
+/* Per-card images (dark) */
+[data-theme="dark"] .summary .card:nth-child(1)::after {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300'><defs><radialGradient id='rid' cx='0.5' cy='0.4' r='0.7'><stop offset='0' stop-color='%23facc15' stop-opacity='0.35'/><stop offset='1' stop-color='%238a6b1a' stop-opacity='0.08'/></radialGradient></defs><rect width='400' height='300' fill='url(%23rid)'/><g stroke='%23e2e8f0' stroke-opacity='0.22' fill='none' stroke-width='3'><circle cx='200' cy='140' r='70'/><path d='M170 120h60M170 140h60M170 140c25 0 45 18 45 40H170M215 180l-45 50'/></g></svg>");
+}
+[data-theme="dark"] .summary .card:nth-child(2)::after {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300'><rect width='400' height='300' fill='none'/><g stroke='%23f87171' stroke-opacity='0.3' fill='none' stroke-width='6'><path d='M80 220V140'/><path d='M140 220V120'/><path d='M200 220V90'/><path d='M260 220V60'/></g><g fill='%23f87171' fill-opacity='0.3'><polygon points='200,90 188,110 212,110'/><polygon points='260,60 248,80 272,80'/></g></svg>");
+}
+[data-theme="dark"] .summary .card:nth-child(3)::after {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300'><defs><linearGradient id='svd' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%230ea5e9' stop-opacity='0.18'/><stop offset='1' stop-color='%2306b6d4' stop-opacity='0.1'/></linearGradient></defs><rect width='400' height='300' fill='url(%23svd)'/><g stroke='%23e2e8f0' stroke-opacity='0.22' fill='none' stroke-width='3'><path d='M140 190c-20-10-30-40 0-60 20-12 56-16 90-6 16-10 34-14 50 2 18 20 2 48-28 54-4 10-12 18-22 22z'/><circle cx='255' cy='145' r='4'/><path d='M190 112h60' stroke-width='4'/></g></svg>");
+}
+
 /* Accent color per card (1: Income, 2: Expenses, 3: Savings) */
 .summary .card:nth-child(1) { --card-accent: #16a34a; /* emerald-600 */ }
 .summary .card:nth-child(2) { --card-accent: #ef4444; /* red-500 */ }
@@ -450,7 +492,7 @@ html:not([data-theme="dark"]) .summary .card:nth-child(3) {
 
 /* Amount styling inside summary cards only */
 .summary .card .amount {
-  font-size: 24px;
+  font-size: 20px;
   line-height: 1.2;
   margin-top: 8px;
   font-variant-numeric: tabular-nums; /* align numbers */
@@ -567,6 +609,19 @@ html:not([data-theme="dark"]) .summary .card:nth-child(3) {
 #filterCategory {
   min-width: 160px; /* Even wider for "All categories" text */
   flex: 1.4; /* Take more space than other filters */
+}
+
+/* Ensure the type dropdown (All/Income/Expense) has enough width and doesn't shrink */
+#filterType {
+  min-width: 150px;
+  flex: 0 0 150px; /* fixed basis to avoid wrapping/clipping */
+  white-space: nowrap;
+}
+
+/* Prevent option labels from wrapping inside selects */
+.filters select,
+.filters select option {
+  white-space: nowrap;
 }
 
 /* Emphasize default selects (All, All categories) with accent border */
@@ -1220,7 +1275,7 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
   display: flex;
   flex-direction: column;
   gap: 24px; /* increased space between input fields */
-  padding: 0 16px 24px 16px;
+  padding: 5px 16px 24px 16px;
   overflow: hidden; /* Prevent scrolling within the form */
 }
 
@@ -1744,10 +1799,10 @@ footer {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 4px; /* Small gap */
+  gap: 2px; /* tighter gap */
   background: transparent;
   border: none;
-  padding: 4px 6px; /* add vertical padding to avoid touching borders */
+  padding: 0 6px; /* remove vertical padding to avoid extra bottom space */
   border-radius: 0; /* full-width/height background */
   color: var(--muted);
   cursor: pointer;
@@ -1777,7 +1832,7 @@ footer {
   width: 20px;
   height: 20px;
   display: block;
-  margin: 2px 0; /* extra breathing room */
+  margin: 0; /* eliminate extra vertical spacing */
 }
 
 /* Minimal active indicator dot */
@@ -1788,7 +1843,7 @@ footer {
   border-radius: 50%;
   background: currentColor;
   display: block;
-  margin-top: 2px;
+  margin-top: 0; /* sit snug under label */
 }
 
 /* Remove press highlight specifically for bottom tabs */
@@ -1844,18 +1899,18 @@ footer {
 /* Enhanced iPhone PWA support */
 @supports (padding: max(0px)) {
   .bottombar {
-    /* Ensure proper safe area handling */
-    padding-bottom: max(env(safe-area-inset-bottom, 0px), 0px);
-    height: calc(60px + env(safe-area-inset-bottom, 0px));
+    /* Keep navbar height fixed; do not add internal safe-area padding */
+    padding-bottom: 0;
+    height: 56px;
   }
 }
 
 /* Specific PWA display mode support */
 @media (display-mode: standalone) {
   .bottombar {
-    /* Enhanced PWA support with proper safe areas */
-    padding-bottom: env(safe-area-inset-bottom, 0px);
-    height: calc(60px + env(safe-area-inset-bottom, 0px));
+    /* Do not add internal padding/height for safe areas; position handles it */
+    padding-bottom: 0;
+    height: 56px;
     background: var(--card);
     border-top: 1px solid rgba(2, 6, 23, 0.08);
   }
@@ -1868,8 +1923,8 @@ footer {
 /* iOS Safari specific fixes */
 @supports (-webkit-touch-callout: none) {
   .bottombar {
-    /* iOS-specific safe area handling */
-    padding-bottom: env(safe-area-inset-bottom, 0px);
+    /* iOS-specific: avoid internal safe-area padding to remove extra gap */
+    padding-bottom: 0;
     /* Prevent iOS scrolling issues */
     -webkit-user-select: none;
     user-select: none;
@@ -2187,7 +2242,7 @@ footer {
   /* Mobile-friendly layout - keep amount and category in same row */
   .amount-category-row {
     flex-direction: column;
-    gap: 12px;
+    gap: 5px;
   }
 
   /* Mobile-friendly layout - keep date and description in same row */
