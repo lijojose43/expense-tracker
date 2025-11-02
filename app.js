@@ -899,6 +899,15 @@ function openModal(defaults) {
   // Clear any existing validation errors
   clearValidationErrors();
 
+  // Ensure date picker cannot select future dates
+  try {
+    const dateInput = $("date");
+    if (dateInput) {
+      dateInput.type = "date"; // ensure correct type before setting attributes
+      dateInput.max = new Date().toISOString().slice(0, 10);
+    }
+  } catch (_) {}
+
   if (defaults) {
     $("amount").value = defaults.amount;
     // set radio selection for type
@@ -1481,6 +1490,17 @@ function setDefaultDatesToday() {
   });
 }
 
+// Ensure the add/edit transaction date input disallows future dates
+function setMaxTodayForTxDate() {
+  try {
+    const dateInput = document.getElementById("date");
+    if (dateInput) {
+      dateInput.type = "date";
+      dateInput.max = new Date().toISOString().slice(0, 10);
+    }
+  } catch (_) {}
+}
+
 // Add event listeners for summary page date filter buttons
 summaryFilterAllTime.addEventListener("click", () =>
   setSummaryDateFilter("all")
@@ -1712,6 +1732,8 @@ document.addEventListener("DOMContentLoaded", () => {
   populateCategories();
   // ensure date inputs have today's date by default
   setDefaultDatesToday();
+  // ensure transaction date cannot be set in the future
+  setMaxTodayForTxDate();
   computeTotals();
   renderList();
   // initial chart render (will no-op if canvas missing)

@@ -418,28 +418,106 @@ html:not([data-theme="dark"]) .summary .card:nth-child(3) {
   background: linear-gradient(180deg, rgba(239, 246, 255, 0.9), rgba(239, 246, 255, 0.7));
   border-color: #bfdbfe;
 }
+
+/* Modern, sleek summary cards */
+.summary .card {
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  background: linear-gradient(180deg, rgba(255,255,255,0.55), rgba(255,255,255,0.35)), var(--card);
+}
+[data-theme="dark"] .summary .card {
+  background: linear-gradient(180deg, rgba(15,23,42,0.55), rgba(15,23,42,0.35)), var(--card);
+}
+
+/* Accent color per card (1: Income, 2: Expenses, 3: Savings) */
+.summary .card:nth-child(1) { --card-accent: #16a34a; /* emerald-600 */ }
+.summary .card:nth-child(2) { --card-accent: #ef4444; /* red-500 */ }
+.summary .card:nth-child(3) { --card-accent: #0ea5e9; /* sky-500 */ }
+
+/* Subtle top accent bar */
+.summary .card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--card-accent), transparent);
+  opacity: 0.9;
+}
+
+/* Amount styling inside summary cards only */
+.summary .card .amount {
+  font-size: 24px;
+  line-height: 1.2;
+  margin-top: 8px;
+  font-variant-numeric: tabular-nums; /* align numbers */
+  letter-spacing: -0.3px;
+  color: var(--card-accent);
+  text-shadow: 0 1px 0 rgba(255,255,255,0.4);
+}
+[data-theme="dark"] .summary .card .amount {
+  text-shadow: none;
+}
+
+/* Label refinement */
+.summary .card .label {
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+}
+
+/* Hover refine (mobile-friendly subtle lift) */
+.summary .card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(2, 6, 23, 0.12), 0 0 0 1px rgba(2, 6, 23, 0.04) inset;
+}
+[data-theme="dark"] .summary .card:hover {
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(148, 163, 184, 0.12) inset;
+}
 .filters {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
   margin-bottom: 12px;
   overflow-x: hidden;
-  padding-bottom: 4px;
+  padding: 10px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.55), rgba(255,255,255,0.35));
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(2, 6, 23, 0.08);
+  box-shadow: 0 8px 24px rgba(2, 6, 23, 0.08);
+}
+[data-theme="dark"] .filters {
+  background: linear-gradient(180deg, rgba(15,23,42,0.55), rgba(15,23,42,0.35));
+  border-color: rgba(148, 163, 184, 0.18);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
 }
 .filters select {
   flex: 1;
-  min-width: 120px;
-  padding: 12px;
+  min-width: 140px;
+  padding: 10px 40px 10px 12px; /* space for chevron */
   border: 1px solid rgba(2, 6, 23, 0.12);
   border-radius: 8px;
   background: var(--card);
   color: inherit;
-  font-size: 16px; /* Consistent 16px font size */
+  font-size: 16px;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 18px 18px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
 }
 
 .filters-row {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   align-items: center;
   overflow-x: auto;
   scrollbar-width: none;
@@ -480,9 +558,9 @@ html:not([data-theme="dark"]) .summary .card:nth-child(3) {
 /* Ensure filter buttons work within filters-row */
 .filters-row .filter-btn {
   flex: 0 0 auto;
-  min-width: 100px; /* Slightly smaller to fit more items */
-  padding: 12px; /* Consistent 12px padding */
-  font-size: 16px; /* Consistent 16px font size */
+  min-width: 100px;
+  padding: 10px 14px;
+  font-size: 14px;
 }
 
 /* Give category filter adequate width on all devices */
@@ -500,6 +578,21 @@ html:not([data-theme="dark"]) .summary .card:nth-child(3) {
 [data-theme="dark"] #filterType,
 [data-theme="dark"] #filterCategory {
   border-color: var(--accent);
+}
+
+/* Selects hover/focus refinement */
+.filters select:hover {
+  border-color: rgba(2, 6, 23, 0.2);
+}
+[data-theme="dark"] .filters select:hover {
+  border-color: rgba(148, 163, 184, 0.3);
+}
+.filters select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(30, 144, 255, 0.22);
+}
+[data-theme="dark"] .filters select:focus {
+  box-shadow: 0 0 0 3px rgba(30, 144, 255, 0.18);
 }
 
 .custom-date-range {
@@ -524,16 +617,22 @@ html:not([data-theme="dark"]) .summary .card:nth-child(3) {
   min-width: 120px;
   padding: 10px 16px;
   border: 1px solid rgba(2, 6, 23, 0.12);
-  background: var(--card);
+  background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0.7)), var(--card);
   color: inherit;
-  border-radius: 8px; /* ensure same radius on all corners */
+  border-radius: 8px;
   overflow: hidden; /* make hover/active background respect corners */
   background-clip: padding-box; /* avoid bleed through rounded corners */
   cursor: pointer;
   font-size: 14px;
   white-space: nowrap;
-  transition: all 0.2s ease;
+  transition: transform 0.15s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
   text-align: center;
+  box-shadow: 0 2px 8px rgba(2, 6, 23, 0.06);
+}
+[data-theme="dark"] .filter-btn {
+  background: linear-gradient(180deg, rgba(15,23,42,0.9), rgba(15,23,42,0.7)), var(--card);
+  border-color: rgba(148, 163, 184, 0.2);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35);
 }
 
 /* Keep corner radius consistent across states */
@@ -573,18 +672,28 @@ html:not([data-theme="dark"]) .summary .card:nth-child(3) {
 }
 
 /* Active state: border-only highlight (no fill change) */
+.filter-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(2, 6, 23, 0.12);
+}
+
+.filter-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 10px rgba(2, 6, 23, 0.12);
+}
+
 .filter-btn.active {
-  background: var(--card); /* same as default */
+  background: linear-gradient(180deg, rgba(30, 144, 255, 0.12), rgba(30, 144, 255, 0.08)), var(--card);
   border-color: var(--accent);
-  color: inherit; /* keep original text color */
-  box-shadow: none;
+  color: inherit;
+  box-shadow: 0 0 0 1px rgba(30, 144, 255, 0.25) inset;
 }
 
 [data-theme="dark"] .filter-btn.active {
-  background: var(--card); /* same as default */
+  background: linear-gradient(180deg, rgba(30, 144, 255, 0.12), rgba(30, 144, 255, 0.06)), var(--card);
   border-color: var(--accent);
   color: inherit;
-  box-shadow: none;
+  box-shadow: 0 0 0 1px rgba(30, 144, 255, 0.25) inset, 0 6px 16px rgba(0, 0, 0, 0.45);
 }
 
 /* Ensure no background on active+hover */
@@ -732,25 +841,40 @@ textarea:focus {
 [data-theme="dark"] textarea:focus {
   box-shadow: 0 0 0 3px rgba(30, 144, 255, 0.18);
 }
+[data-theme="dark"] .topbar {
+  border-bottom: none;
+}
+
 .tx {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px;
-  border-radius: 12px;
-  background: var(--card);
-  border: 1px solid rgba(2, 6, 23, 0.06);
-  box-shadow: 0 2px 10px rgba(2, 6, 23, 0.06);
-  transition: transform 0.2s ease, box-shadow 0.2s ease,
-    background-color 0.2s ease;
+  padding: 14px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0.75)), var(--card);
+  border: 1px solid rgba(2, 6, 23, 0.08);
+  box-shadow: 0 4px 14px rgba(2, 6, 23, 0.08);
+  transition: transform 0.18s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
 }
 [data-theme="dark"] .tx {
-  border-color: rgba(30, 144, 255, 0.3);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(30, 144, 255, 0.2),
-    0 0 20px rgba(30, 144, 255, 0.15);
+  background: linear-gradient(180deg, rgba(15,23,42,0.9), rgba(15,23,42,0.75)), var(--card);
+  border-color: rgba(148, 163, 184, 0.18);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.5);
 }
+[data-theme="dark"] .tx:active {
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+}
+
+.tx:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(2, 6, 23, 0.12);
+}
+
 .tx:active {
-  box-shadow: 0 4px 16px rgba(2, 6, 23, 0.12);
+  transform: translateY(0);
+  box-shadow: 0 6px 18px rgba(2, 6, 23, 0.12);
 }
 [data-theme="dark"] .tx:active {
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
@@ -779,14 +903,15 @@ textarea:focus {
   align-items: center;
 }
 .iconBox {
-  width: 40px;
-  height: 40px;
-  border-radius: 8px;
-  background: var(--card);
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0.7)), var(--card);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 1px 6px rgba(2, 6, 23, 0.04);
+  box-shadow: 0 2px 8px rgba(2, 6, 23, 0.08);
+  border: 1px solid rgba(2, 6, 23, 0.06);
 }
 
 .iconBox svg {
@@ -796,7 +921,9 @@ textarea:focus {
   fill: none;
 }
 [data-theme="dark"] .iconBox {
-  box-shadow: 0 1px 6px rgba(15, 23, 42, 0.5);
+  background: linear-gradient(180deg, rgba(15,23,42,0.9), rgba(15,23,42,0.7)), var(--card);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.45);
+  border-color: rgba(148, 163, 184, 0.18);
 }
 
 /* Light mode: colored category badges for transaction icon boxes */
@@ -922,6 +1049,7 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
 }
 .tx .title {
   font-weight: 600;
+  letter-spacing: 0.01em;
 }
 .tx .category {
   font-size: 12px;
@@ -929,6 +1057,8 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
 }
 .tx .amount {
   font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.2px;
 }
 .tx .amount.expense {
   color: var(--danger);
@@ -1058,7 +1188,7 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
 .modal-content form {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 24px; /* increased space between input fields */
   padding: 0 16px 24px 16px;
   overflow: hidden; /* Prevent scrolling within the form */
 }
@@ -1081,6 +1211,24 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
 /* Floating label form fields */
 .floating {
   position: relative;
+}
+
+/* Ensure field groups keep one-input-per-line and add comfortable spacing */
+.amount-category-row,
+.date-description-row,
+.type-checkboxes {
+  display: block;
+}
+
+/* Ensure stacked fields inside each row have spacing and full width */
+.amount-category-row > *,
+.date-description-row > * {
+  width: 100%;
+}
+
+.amount-category-row > * + *,
+.date-description-row > * + * {
+  margin-top: 20px; /* space between inputs within the same row */
 }
 
 .floating input,
@@ -1568,7 +1716,7 @@ footer {
   gap: 4px; /* Small gap */
   background: transparent;
   border: none;
-  padding: 0 6px; /* compact padding */
+  padding: 4px 6px; /* add vertical padding to avoid touching borders */
   border-radius: 0; /* full-width/height background */
   color: var(--muted);
   cursor: pointer;
@@ -1593,10 +1741,12 @@ footer {
   background: transparent; /* no hover highlight in dark */
 }
 
-/* Larger icons for a modern look */
+/* Icon sizing adjusted to prevent border touching */
 .bottombar .tab svg {
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
+  display: block;
+  margin: 2px 0; /* extra breathing room */
 }
 
 /* Minimal active indicator dot */
