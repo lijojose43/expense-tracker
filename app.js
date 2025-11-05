@@ -823,19 +823,13 @@ function renderDonut() {
   const colors = labels.map(
     (label, i) => categoryColors[catSlug(label)] || palette[i % palette.length]
   );
-  // If no values, hide the chart and destroy any existing instance
-  if (!values.length) {
-    if (donutChart) {
-      donutChart.destroy();
-      donutChart = null;
-    }
-    // Clear canvas and hide it
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    canvas.style.display = "none";
-    return;
-  }
+  // Build dataset depending on availability
+  const hasData = values.length > 0;
+  const chartLabels = hasData ? labels : ["No data"];
+  const chartValues = hasData ? values : [1];
+  const chartColors = hasData ? (colors.length ? colors : ["#e5e7eb"]) : ["#e5e7eb"];
 
-  // Ensure canvas is visible when we have data
+  // Ensure canvas is visible
   canvas.style.display = "block";
 
   if (donutChart) {
@@ -845,17 +839,21 @@ function renderDonut() {
   donutChart = new Chart(ctx, {
     type: "doughnut",
     data: {
-      labels,
+      labels: chartLabels,
       datasets: [
         {
-          data: values,
-          backgroundColor: colors.length ? colors : ["#e5e7eb"],
+          data: chartValues,
+          backgroundColor: chartColors,
           borderWidth: 0,
         },
       ],
     },
     options: {
-      plugins: { legend: { position: "bottom" } },
+      plugins: {
+        legend: { position: "bottom", display: hasData },
+        tooltip: { enabled: hasData },
+      },
+      events: hasData ? undefined : [],
       cutout: "60%",
       responsive: true,
       maintainAspectRatio: false,
