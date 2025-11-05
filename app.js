@@ -823,6 +823,21 @@ function renderDonut() {
   const colors = labels.map(
     (label, i) => categoryColors[catSlug(label)] || palette[i % palette.length]
   );
+  // If no values, hide the chart and destroy any existing instance
+  if (!values.length) {
+    if (donutChart) {
+      donutChart.destroy();
+      donutChart = null;
+    }
+    // Clear canvas and hide it
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    canvas.style.display = "none";
+    return;
+  }
+
+  // Ensure canvas is visible when we have data
+  canvas.style.display = "block";
+
   if (donutChart) {
     donutChart.destroy();
     donutChart = null;
@@ -833,7 +848,7 @@ function renderDonut() {
       labels,
       datasets: [
         {
-          data: values.length ? values : [1],
+          data: values,
           backgroundColor: colors.length ? colors : ["#e5e7eb"],
           borderWidth: 0,
         },
@@ -867,7 +882,7 @@ function switchTab(name) {
     tabSummary.classList.remove("active");
     tabExpiry && tabExpiry.classList.remove("active");
     tabPurchase && tabPurchase.classList.remove("active");
-    screenTitle.textContent = "Expense Tracker";
+    screenTitle.textContent = "Expenses";
     if (optionsMenu) optionsMenu.classList.remove("open");
   } else if (name === "summary") {
     homeTabEl.classList.add("hidden");
@@ -2298,7 +2313,7 @@ function renderExpiry() {
 
 // Add event listeners for clickable navigation areas under add button
 const underAddSummary = document.getElementById("underAddSummary");
-const underAddPurchase = document.getElementById("underAddPurchase");
+const underAddExpiry = document.getElementById("underAddExpiry");
 
 if (underAddSummary) {
   underAddSummary.addEventListener("click", () => {
@@ -2307,9 +2322,9 @@ if (underAddSummary) {
   });
 }
 
-if (underAddPurchase) {
-  underAddPurchase.addEventListener("click", () => {
+if (underAddExpiry) {
+  underAddExpiry.addEventListener("click", () => {
     hapticFeedback("light");
-    switchTab("purchase");
+    switchTab("expiry");
   });
 }
