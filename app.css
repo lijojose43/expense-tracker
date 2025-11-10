@@ -13,7 +13,7 @@
 
 /* Dark theme */
 [data-theme="dark"] {
-  --bg: #0b1220;
+  --bg: #000000;
   --card: #0a1020;
   --muted: #94a3b8;
   --accent: #1e90ff;

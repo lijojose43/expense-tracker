@@ -425,7 +425,7 @@ function systemPrefersDark() {
 function setThemeMetaColor(theme) {
   const meta = document.querySelector('meta[name="theme-color"]');
   if (!meta) return;
-  const color = theme === "dark" ? "#0b1220" : "#f1f5f9";
+  const color = theme === "dark" ? "#000000" : "#f1f5f9";
   meta.setAttribute("content", color);
 }
 function setThemeIcon(theme) {
