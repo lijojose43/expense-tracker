@@ -916,7 +916,7 @@ function switchTab(name) {
     tabSummary.classList.remove("active");
     tabExpiry && tabExpiry.classList.remove("active");
     tabPurchase && tabPurchase.classList.add("active");
-    screenTitle.textContent = "Purchase List";
+    screenTitle.textContent = "Shopping List";
     if (optionsMenu) optionsMenu.classList.remove("open");
     renderPurchase();
   }
@@ -1997,10 +1997,96 @@ if (pwaCloseBtn) {
 
 // Listen for successful app installation
 window.addEventListener("appinstalled", () => {
-  console.log("PWA was installed");
   hidePWAInstallPopup();
   deferredPrompt = null;
 });
+
+const EXPIRY_NOTIFY_KEY = "expiry-notified-date-v1";
+
+function todayStr() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function getExpiringToday() {
+  const t = todayStr();
+  return (expiryData || []).filter((e) => {
+    const d = new Date(e.expiry);
+    if (isNaN(d)) return false;
+    return d.toISOString().slice(0, 10) === t;
+  });
+}
+
+async function showExpiryNotification(items) {
+  try {
+    if (!("Notification" in window)) return;
+    if (Notification.permission !== "granted") return;
+    const reg = await navigator.serviceWorker.getRegistration();
+    if (!reg) return;
+    const count = items.length;
+    const title = count === 1 ? "1 item expires today" : `${count} items expire today`;
+    const names = items.slice(0, 3).map((i) => i.name || "Item").join(", ");
+    const more = count > 3 ? ` +${count - 3} more` : "";
+    const body = names ? `${names}${more}` : "Tap to view";
+    await reg.showNotification(title, {
+      body,
+      tag: "expiry-today",
+      renotify: false,
+      data: { url: "#expiry" },
+      icon: "icons/icon-192.png",
+      badge: "icons/icon-192.png",
+    });
+  } catch (_) {}
+}
+
+function shouldNotifyToday(signature) {
+  const last = localStorage.getItem(EXPIRY_NOTIFY_KEY) || "";
+  return last !== signature;
+}
+
+function setNotified(signature) {
+  localStorage.setItem(EXPIRY_NOTIFY_KEY, signature);
+}
+
+function signatureForToday(items) {
+  const t = todayStr();
+  const ids = items.map((i) => i.id).sort().join("|");
+  return `${t}|${items.length}|${ids}`;
+}
+
+async function checkAndNotifyExpiringToday() {
+  try {
+    const items = getExpiringToday();
+    if (!items.length) return;
+    const sig = signatureForToday(items);
+    if (!shouldNotifyToday(sig)) return;
+    await showExpiryNotification(items);
+    setNotified(sig);
+  } catch (_) {}
+}
+
+function requestNotificationPermission() {
+  try {
+    if (!("Notification" in window)) return;
+    if (Notification.permission === "default") {
+      Notification.requestPermission().catch(() => {});
+    }
+  } catch (_) {}
+}
+
+function initExpiryNotifications() {
+  requestNotificationPermission();
+  checkAndNotifyExpiringToday();
+  try {
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") {
+        checkAndNotifyExpiringToday();
+      }
+    });
+  } catch (_) {}
+  setInterval(() => {
+    checkAndNotifyExpiringToday();
+  }, 60 * 60 * 1000);
+}
 
 document.addEventListener("DOMContentLoaded", () => {
   // initialize theme
@@ -2028,6 +2114,17 @@ document.addEventListener("DOMContentLoaded", () => {
   checkPWAInstallPrompt();
   // start periodic PWA install reminders
   startPWAInstallReminder();
+
+  try {
+    if (location.hash === '#expiry') {
+      switchTab('expiry');
+    } else if (location.hash === '#summary') {
+      switchTab('summary');
+    } else if (location.hash === '#purchase') {
+      switchTab('purchase');
+    }
+  } catch (_) {}
+  initExpiryNotifications();
 
   // Wire bottom nav tabs
   if (tabHome) tabHome.addEventListener("click", () => switchTab("home"));
@@ -2142,6 +2239,9 @@ function submitExpiryForm() {
     expiryForm && expiryForm.querySelector('button[type="submit"]');
   if (submitBtn) submitBtn.textContent = "Save";
   closeExpiryModalFn();
+
+  // After saving an expiry item, re-check notifications
+  setTimeout(checkAndNotifyExpiringToday, 500);
 }
 
 function getExpiryIconSVG(size = 20) {
