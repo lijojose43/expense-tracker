@@ -2390,12 +2390,67 @@ function renderExpiry() {
     row.appendChild(meta);
     row.appendChild(right);
 
-    // Click to edit
+    // Swipe-to-delete gesture handling
+    let startX = 0;
+    let dx = 0;
+    let swiping = false;
+    let moved = false;
+
+    function resetTransform() {
+      row.style.transition = "transform 0.2s ease";
+      row.style.transform = "translateX(0)";
+      setTimeout(() => (row.style.transition = ""), 220);
+    }
+
+    row.addEventListener(
+      "touchstart",
+      (e) => {
+        if (!e.touches || e.touches.length === 0) return;
+        startX = e.touches[0].clientX;
+        dx = 0;
+        swiping = false;
+        moved = false;
+        row.style.transition = ""; // disable during drag
+      },
+      { passive: true }
+    );
+
+    row.addEventListener(
+      "touchmove",
+      (e) => {
+        if (!e.touches || e.touches.length === 0) return;
+        dx = e.touches[0].clientX - startX; // negative when moving left
+        if (dx < -10) swiping = true;
+        if (Math.abs(dx) > 6) moved = true;
+        if (swiping) {
+          const limited = Math.max(dx, -120);
+          row.style.transform = `translateX(${limited}px)`;
+        }
+      },
+      { passive: true }
+    );
+
+    row.addEventListener("touchend", () => {
+      if (swiping && dx <= -80) {
+        hapticFeedback("medium");
+        if (confirm("Delete this item?")) {
+          hapticFeedback("heavy");
+          expiryData = expiryData.filter((x) => x.id !== item.id);
+          saveExpiry();
+          renderExpiry();
+          return; // element removed; do not animate back
+        }
+      }
+      resetTransform();
+    });
+
+    // Click to edit (ignore if a swipe occurred)
     row.addEventListener("click", () => {
+      if (moved) return; // don't treat swipe as click
       openExpiryModal({ id: item.id, name: item.name, expiry: item.expiry });
     });
 
-    // Long press context menu to delete
+    // Long press context menu to delete (fallback)
     row.addEventListener("contextmenu", (e) => {
       e.preventDefault();
       if (confirm("Delete this item?")) {
