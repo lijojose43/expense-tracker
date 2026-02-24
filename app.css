@@ -987,6 +987,26 @@ textarea {
   box-shadow: 0 18px 36px rgba(2, 6, 23, 0.16);
 }
 
+/* Increase date picker header (month + nav) height */
+.flatpickr-months {
+  min-height: 46px;
+}
+
+.flatpickr-months .flatpickr-month {
+  height: 46px;
+}
+
+.flatpickr-current-month {
+  height: 46px;
+  padding-top: 10px;
+}
+
+.flatpickr-months .flatpickr-prev-month,
+.flatpickr-months .flatpickr-next-month {
+  height: 46px;
+  padding-top: 10px;
+}
+
 .flatpickr-day.today {
   border-color: var(--accent);
 }
