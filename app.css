@@ -798,7 +798,7 @@ html:not([data-theme="dark"]) .summary .card:nth-child(3) {
   flex: 1;
   min-width: 150px; /* reduced to avoid scroll */
   min-height: 44px;
-  /* All other styling inherited from global input[type="date"] styles */
+  /* All other styling inherited from global .date-input styles */
 }
 
 .filter-btn {
@@ -937,7 +937,7 @@ textarea {
 }
 
 /* Consistent textbox-like design for date inputs across all devices */
-input[type="date"] {
+.date-input {
   -webkit-appearance: none;
   -moz-appearance: textfield;
   appearance: none;
@@ -950,78 +950,80 @@ input[type="date"] {
   color: inherit;
   width: 100%;
   box-sizing: border-box;
-  /* Remove all native date picker elements */
-  position: relative;
-}
-
-/* Show and style the native date picker indicator so picker opens on tap */
-input[type="date"]::-webkit-calendar-picker-indicator {
-  display: block;
-  opacity: 1;
-  width: 20px;
-  height: 20px;
   cursor: pointer;
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-}
-
-input[type="date"]::-webkit-inner-spin-button,
-input[type="date"]::-webkit-outer-spin-button {
-  display: none;
-  -webkit-appearance: none;
-}
-
-input[type="date"]::-webkit-datetime-edit {
-  padding: 0;
-  border: none;
-  background: transparent;
-}
-
-input[type="date"]::-webkit-datetime-edit-fields-wrapper {
-  padding: 0;
-  border: none;
-  background: transparent;
-}
-
-input[type="date"]::-webkit-datetime-edit-text,
-input[type="date"]::-webkit-datetime-edit-month-field,
-input[type="date"]::-webkit-datetime-edit-day-field,
-input[type="date"]::-webkit-datetime-edit-year-field {
-  padding: 0 1px;
-  border: none;
-  background: transparent;
-  color: inherit;
-  font-family: inherit;
-  font-size: inherit;
 }
 
 /* Dark theme support for date inputs */
-[data-theme="dark"] input[type="date"] {
+[data-theme="dark"] .date-input {
   border-color: rgba(148, 163, 184, 0.2);
   background: var(--card);
   color: inherit;
 }
 
 /* Focus states for date inputs */
-input[type="date"]:focus {
+.date-input:focus {
   outline: none;
   border-color: var(--accent);
   box-shadow: 0 0 0 3px rgba(30, 144, 255, 0.25);
 }
 
-[data-theme="dark"] input[type="date"]:focus {
+[data-theme="dark"] .date-input:focus {
   box-shadow: 0 0 0 3px rgba(30, 144, 255, 0.18);
 }
 
 /* Hover states for date inputs */
-input[type="date"]:hover {
+.date-input:hover {
   border-color: rgba(2, 6, 23, 0.2);
 }
 
-[data-theme="dark"] input[type="date"]:hover {
+[data-theme="dark"] .date-input:hover {
   border-color: rgba(148, 163, 184, 0.3);
+}
+
+/* Flatpickr surface */
+.flatpickr-calendar {
+  border: 1px solid rgba(2, 6, 23, 0.12);
+  border-radius: 12px;
+  box-shadow: 0 18px 36px rgba(2, 6, 23, 0.16);
+}
+
+.flatpickr-day.today {
+  border-color: var(--accent);
+}
+
+.flatpickr-day.selected,
+.flatpickr-day.startRange,
+.flatpickr-day.endRange,
+.flatpickr-day.selected:hover,
+.flatpickr-day.startRange:hover,
+.flatpickr-day.endRange:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+[data-theme="dark"] .flatpickr-calendar {
+  background: #0a1020;
+  border-color: rgba(148, 163, 184, 0.25);
+  box-shadow: 0 24px 44px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="dark"] .flatpickr-months .flatpickr-month,
+[data-theme="dark"] .flatpickr-current-month input.cur-year,
+[data-theme="dark"] .flatpickr-current-month .flatpickr-monthDropdown-months,
+[data-theme="dark"] .flatpickr-weekday,
+[data-theme="dark"] .flatpickr-day {
+  color: #e5e7eb;
+  fill: #e5e7eb;
+}
+
+[data-theme="dark"] .flatpickr-day:hover {
+  background: rgba(30, 144, 255, 0.14);
+  border-color: transparent;
+}
+
+[data-theme="dark"] .flatpickr-day.prevMonthDay,
+[data-theme="dark"] .flatpickr-day.nextMonthDay {
+  color: rgba(148, 163, 184, 0.55);
 }
 
 [data-theme="dark"] input:not([type="checkbox"]):not([type="radio"]),
@@ -1520,8 +1522,6 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
 /* Float on focus or when field has value */
 .floating input:focus + .floating-label,
 .floating input:not(:placeholder-shown) + .floating-label,
-.floating input[type="date"]:focus + .floating-label,
-.floating input[type="date"]:valid + .floating-label,
 .floating select:focus + .floating-label,
 .floating select:valid + .floating-label,
 .floating textarea:focus + .floating-label,
@@ -1533,7 +1533,6 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
 
 /* Keep label subtle when not focused but has value */
 .floating input:not(:focus):not(:placeholder-shown) + .floating-label,
-.floating input[type="date"]:valid + .floating-label,
 .floating select:valid + .floating-label,
 .floating textarea:not(:focus):not(:placeholder-shown) + .floating-label {
   color: var(--muted);
@@ -2586,7 +2585,7 @@ footer {
     flex: 1 1 150px;
     height: 48px;
     font-size: 16px; /* Prevent zoom on iOS */
-    /* All other styling inherited from global input[type="date"] styles */
+    /* All other styling inherited from global .date-input styles */
   }
 
   /* Make filters row more compact on mobile */
@@ -2732,20 +2731,11 @@ footer {
   }
 
   /* Enhanced iPhone date input styling */
-  input[type="date"] {
+  .date-input {
     font-size: 17px;
     min-height: 48px;
     height: 48px;
     padding: 12px;
-    /* All appearance and webkit styles handled by global date input styles */
-  }
-
-  /* Ensure date field components are properly sized on iPhone */
-  input[type="date"]::-webkit-datetime-edit-text,
-  input[type="date"]::-webkit-datetime-edit-month-field,
-  input[type="date"]::-webkit-datetime-edit-day-field,
-  input[type="date"]::-webkit-datetime-edit-year-field {
-    font-size: 17px;
-    padding: 0 2px;
+    /* All appearance styles handled by global .date-input rules */
   }
 }

@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1.0,user-scalable=no,viewport-fit=cover" />
   <meta name="theme-color" content="#f1f5f9"/>
   <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
   <link rel="stylesheet" href="app.css?v=2">
   <title>Expense Tracker PWA</title>
 </head>
@@ -84,8 +85,8 @@
       
       <!-- Custom date range inputs (hidden by default) -->
       <section id="customDateRange" class="custom-date-range hidden">
-        <input id="startDate" type="date" placeholder="Start date" />
-        <input id="endDate" type="date" placeholder="End date" />
+        <input id="startDate" type="text" class="date-input" placeholder="Start date" autocomplete="off" />
+        <input id="endDate" type="text" class="date-input" placeholder="End date" autocomplete="off" />
       </section>
 
       <section id="transactions" class="transactions">
@@ -133,8 +134,8 @@
       
       <!-- Custom date range inputs for summary (hidden by default) -->
       <section id="summaryCustomDateRange" class="custom-date-range hidden">
-        <input id="summaryStartDate" type="date" placeholder="Start date" />
-        <input id="summaryEndDate" type="date" placeholder="End date" />
+        <input id="summaryStartDate" type="text" class="date-input" placeholder="Start date" autocomplete="off" />
+        <input id="summaryEndDate" type="text" class="date-input" placeholder="End date" autocomplete="off" />
       </section>
       
       <section class="summary">
@@ -236,7 +237,7 @@
         <div id="amountError" class="error-message" style="display: none;"></div>
         <div class="date-description-row">
           <div class="date-field floating">
-            <input id="date" type="date" required placeholder=" "/>
+            <input id="date" type="text" class="date-input" required placeholder=" " autocomplete="off"/>
             <label for="date" class="floating-label">Date</label>
           </div>
           <div class="description-field floating">
@@ -317,7 +318,7 @@
           <label for="expiryName" class="floating-label">Product name</label>
         </div>
         <div class="floating">
-          <input id="expiryDate" type="date" required placeholder=" "/>
+          <input id="expiryDate" type="text" class="date-input" required placeholder=" " autocomplete="off"/>
           <label for="expiryDate" class="floating-label">Expiry date</label>
         </div>
         <div class="actions">
@@ -345,6 +346,7 @@
     </div>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
   <script src="app.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

@@ -270,6 +270,89 @@ let editPurchaseId = null;
 let donutChart = null;
 let editId = null; // track transaction being edited
 
+const DATE_INPUT_IDS = [
+  "date",
+  "startDate",
+  "endDate",
+  "summaryStartDate",
+  "summaryEndDate",
+  "expiryDate",
+];
+
+const DATE_INPUTS_WITH_MAX_TODAY = new Set([
+  "date",
+  "startDate",
+  "endDate",
+  "summaryStartDate",
+  "summaryEndDate",
+]);
+
+function todayIsoDate() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function resolveDateInput(inputOrId) {
+  if (!inputOrId) return null;
+  if (typeof inputOrId === "string") return $(inputOrId);
+  return inputOrId;
+}
+
+function setDateInputValue(inputOrId, value, triggerChange = false) {
+  const input = resolveDateInput(inputOrId);
+  if (!input) return;
+  const picker = input._flatpickr;
+  if (!value) {
+    if (picker) picker.clear(triggerChange);
+    else {
+      input.value = "";
+      if (triggerChange) {
+        input.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+    }
+    return;
+  }
+  if (picker) {
+    picker.setDate(value, triggerChange, "Y-m-d");
+    return;
+  }
+  input.value = value;
+  if (triggerChange) {
+    input.dispatchEvent(new Event("change", { bubbles: true }));
+  }
+}
+
+function setDateInputMax(inputOrId, maxDate) {
+  const input = resolveDateInput(inputOrId);
+  if (!input) return;
+  input.max = maxDate;
+  if (input._flatpickr) {
+    input._flatpickr.set("maxDate", maxDate);
+  }
+}
+
+function initDatePickers() {
+  if (typeof window === "undefined" || typeof window.flatpickr !== "function") {
+    return;
+  }
+  const today = todayIsoDate();
+  DATE_INPUT_IDS.forEach((id) => {
+    const input = $(id);
+    if (!input) return;
+    if (input._flatpickr) {
+      input._flatpickr.destroy();
+    }
+    const options = {
+      dateFormat: "Y-m-d",
+      allowInput: false,
+      disableMobile: true,
+    };
+    if (DATE_INPUTS_WITH_MAX_TODAY.has(id)) {
+      options.maxDate = today;
+    }
+    window.flatpickr(input, options);
+  });
+}
+
 function save() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 }
@@ -1124,25 +1207,19 @@ function openModal(defaults) {
   // Clear any existing validation errors
   clearValidationErrors();
 
-  // Ensure date picker cannot select future dates
-  try {
-    const dateInput = $("date");
-    if (dateInput) {
-      dateInput.type = "date"; // ensure correct type before setting attributes
-      dateInput.max = new Date().toISOString().slice(0, 10);
-    }
-  } catch (_) {}
+  // Keep max date fresh whenever the modal opens.
+  setMaxTodayForTxDate();
 
   if (defaults) {
     $("amount").value = defaults.amount;
     // set radio selection for type
     setSelectedType(defaults.type);
     $("category").value = defaults.category;
-    $("date").value = toDateInputValue(defaults.date);
+    setDateInputValue("date", toDateInputValue(defaults.date));
     $("description").value = defaults.description || "";
   } else {
     txForm.reset();
-    $("date").value = new Date().toISOString().slice(0, 10);
+    setDateInputValue("date", todayIsoDate());
     // default to expense on new entry
     setSelectedType("expense");
   }
@@ -1458,15 +1535,20 @@ function validateDate(dateValue) {
   }
 
   const selectedDate = new Date(dateValue);
+  if (isNaN(selectedDate.getTime())) {
+    dateError.textContent = "Enter a valid date";
+    dateError.style.display = "block";
+    return false;
+  }
   const today = new Date();
   today.setHours(23, 59, 59, 999); // Set to end of today
 
   if (selectedDate > today) {
     // Instead of showing an error, clamp to today and continue
-    const todayStr = new Date().toISOString().slice(0, 10);
+    const todayStr = todayIsoDate();
     try {
       const dateInput = $("date");
-      if (dateInput) dateInput.value = todayStr;
+      if (dateInput) setDateInputValue(dateInput, todayStr);
     } catch (_) {}
     dateError.style.display = "none";
     return true;
@@ -1618,9 +1700,9 @@ function setDateFilter(filter) {
   if (filter === "custom") {
     customDateRange.classList.remove("hidden");
     // if empty, initialize to today's date so range is valid
-    const today = new Date().toISOString().slice(0, 10);
-    if (startDate && !startDate.value) startDate.value = today;
-    if (endDate && !endDate.value) endDate.value = today;
+    const today = todayIsoDate();
+    if (startDate && !startDate.value) setDateInputValue(startDate, today);
+    if (endDate && !endDate.value) setDateInputValue(endDate, today);
   } else {
     customDateRange.classList.add("hidden");
   }
@@ -1654,10 +1736,11 @@ function setSummaryDateFilter(filter) {
   // Show/hide custom date range for summary
   if (filter === "custom") {
     summaryCustomDateRange.classList.remove("hidden");
-    const today = new Date().toISOString().slice(0, 10);
+    const today = todayIsoDate();
     if (summaryStartDate && !summaryStartDate.value)
-      summaryStartDate.value = today;
-    if (summaryEndDate && !summaryEndDate.value) summaryEndDate.value = today;
+      setDateInputValue(summaryStartDate, today);
+    if (summaryEndDate && !summaryEndDate.value)
+      setDateInputValue(summaryEndDate, today);
   } else {
     summaryCustomDateRange.classList.add("hidden");
   }
@@ -1669,111 +1752,38 @@ function setSummaryDateFilter(filter) {
   setTimeout(() => checkPWAInstallPrompt(1500), 800);
 }
 
-// --- Mobile placeholder support for date inputs ---
-// On many mobile browsers/PWAs, placeholders on input[type="date"] are hidden until a value is set.
-// Workaround: when empty, present as type="text" (placeholder visible). On focus, switch to "date" and open picker.
-function enableMobileDatePlaceholder(input) {
-  if (!input) return;
-  const originalType = "date";
-  const ua = navigator.userAgent || "";
-  const isIOS = /iPhone|iPad|iPod/i.test(ua);
-  const isAndroid = /Android/i.test(ua);
-  const prefersSmallViewport =
-    typeof window !== "undefined" &&
-    window.matchMedia &&
-    window.matchMedia("(max-width: 420px)").matches;
-  const isMobile = isIOS || isAndroid || prefersSmallViewport;
-  if (!isMobile) return; // do not affect desktop UX
-
-  // Initialize as text if empty so placeholder shows
-  if (!input.value) input.type = "text";
-
-  input.addEventListener("focus", () => {
-    // Switch to date and try to show native picker
-    try {
-      input.type = originalType;
-      if (typeof input.showPicker === "function") {
-        // Give the browser a tick to apply the new type
-        setTimeout(() => {
-          try {
-            input.showPicker();
-          } catch (_) {}
-        }, 0);
-      }
-    } catch (_) {
-      // no-op
-    }
-  });
-
-  input.addEventListener("blur", () => {
-    // If no value selected, revert to text so placeholder remains visible
-    if (!input.value) {
-      try {
-        input.type = "text";
-      } catch (_) {}
-    }
-  });
-}
-
-function setupMobileDatePlaceholders() {
-  [startDate, endDate, summaryStartDate, summaryEndDate]
-    .filter(Boolean)
-    .forEach(enableMobileDatePlaceholder);
-}
-
 // Set today's date as default for all date inputs
 function setDefaultDatesToday() {
-  const today = new Date().toISOString().slice(0, 10);
-  const inputs = [
-    document.getElementById("date"),
-    startDate,
-    endDate,
-    summaryStartDate,
-    summaryEndDate,
-  ].filter(Boolean);
+  const today = todayIsoDate();
+  const inputs = [$("date"), startDate, endDate, summaryStartDate, summaryEndDate]
+    .filter(Boolean);
   inputs.forEach((el) => {
     if (!el.value) {
-      try {
-        el.type = "date";
-      } catch (_) {}
-      el.value = today;
+      setDateInputValue(el, today);
     }
   });
 }
 
 // Ensure the add/edit transaction date input disallows future dates
 function setMaxTodayForTxDate() {
-  try {
-    const dateInput = document.getElementById("date");
-    if (dateInput) {
-      dateInput.type = "date";
-      dateInput.max = new Date().toISOString().slice(0, 10);
-    }
-  } catch (_) {}
+  const dateInput = $("date");
+  if (!dateInput) return;
+  setDateInputMax(dateInput, todayIsoDate());
 }
 
 // Ensure all filtering date inputs disallow future dates (only up to today)
 function setMaxTodayForFilterDates() {
-  try {
-    const today = new Date().toISOString().slice(0, 10);
-    const inputs = [
-      document.getElementById("startDate"),
-      document.getElementById("endDate"),
-      document.getElementById("summaryStartDate"),
-      document.getElementById("summaryEndDate"),
-    ].filter(Boolean);
-
-    inputs.forEach((el) => {
-      try {
-        el.type = "date";
-      } catch (_) {}
-      el.max = today;
-      // If an existing value is in the future (e.g., persisted), clamp it
-      if (el.value && el.value > today) {
-        el.value = today;
-      }
-    });
-  } catch (_) {}
+  const today = todayIsoDate();
+  const inputs = [startDate, endDate, summaryStartDate, summaryEndDate].filter(
+    Boolean
+  );
+  inputs.forEach((el) => {
+    setDateInputMax(el, today);
+    // If an existing value is in the future (e.g., persisted), clamp it.
+    if (el.value && el.value > today) {
+      setDateInputValue(el, today);
+    }
+  });
 }
 
 // Add event listeners for summary page date filter buttons
@@ -2092,6 +2102,8 @@ document.addEventListener("DOMContentLoaded", () => {
   // initialize theme
   applyTheme();
   populateCategories();
+  // initialize calendar picker for every date input
+  initDatePickers();
   // ensure date inputs have today's date by default
   setDefaultDatesToday();
   // ensure filter date inputs cannot be set in the future
@@ -2102,8 +2114,6 @@ document.addEventListener("DOMContentLoaded", () => {
   renderList();
   // initial chart render (will no-op if canvas missing)
   renderChart();
-  // initialize mobile placeholder workaround for date inputs
-  setupMobileDatePlaceholders();
   // initialize enhanced mobile focus for form inputs
   setupEnhancedMobileFocus();
   // initialize mobile app enhancements
@@ -2185,14 +2195,13 @@ function openExpiryModal(defaults) {
     if (submitBtn) submitBtn.textContent = "Update";
     expiryNameInput && (expiryNameInput.value = defaults.name || "");
     expiryDateInput &&
-      (expiryDateInput.value = toDateInputValue(defaults.expiry));
+      setDateInputValue(expiryDateInput, toDateInputValue(defaults.expiry));
     editExpiryId = defaults.id;
   } else {
     if (title) title.textContent = "Add Expiry Item";
     if (submitBtn) submitBtn.textContent = "Save";
     if (expiryForm) expiryForm.reset();
-    if (expiryDateInput)
-      expiryDateInput.value = new Date().toISOString().slice(0, 10);
+    if (expiryDateInput) setDateInputValue(expiryDateInput, todayIsoDate());
   }
 }
 
@@ -2205,6 +2214,8 @@ function closeExpiryModalFn() {
 function validateExpiry(name, dateStr) {
   if (!name || !name.trim()) return { ok: false, msg: "Name is required" };
   if (!dateStr) return { ok: false, msg: "Expiry date is required" };
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return { ok: false, msg: "Enter a valid expiry date" };
   return { ok: true };
 }
 
