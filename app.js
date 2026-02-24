@@ -327,7 +327,79 @@ function setDateInputMax(inputOrId, maxDate) {
   input.max = maxDate;
   if (input._flatpickr) {
     input._flatpickr.set("maxDate", maxDate);
+    syncFlatpickrYearDropdown(input._flatpickr);
   }
+}
+
+function yearFromDateLike(value, fallbackYear) {
+  if (!value) return fallbackYear;
+  const d = value instanceof Date ? value : new Date(value);
+  if (isNaN(d.getTime())) return fallbackYear;
+  return d.getFullYear();
+}
+
+function getFlatpickrYearBounds(fp) {
+  const currentYear = new Date().getFullYear();
+  const minYear = yearFromDateLike(fp && fp.config && fp.config.minDate, currentYear - 50);
+  const maxYear = yearFromDateLike(fp && fp.config && fp.config.maxDate, currentYear + 50);
+  return {
+    minYear: Math.min(minYear, maxYear),
+    maxYear: Math.max(minYear, maxYear),
+  };
+}
+
+function syncFlatpickrYearDropdown(fp) {
+  if (!fp || !fp.calendarContainer) return;
+  const currentMonth = fp.calendarContainer.querySelector(".flatpickr-current-month");
+  if (!currentMonth) return;
+
+  const yearSelect = currentMonth.querySelector(".flatpickr-yearDropdown-years");
+  if (!yearSelect) return;
+
+  const { minYear, maxYear } = getFlatpickrYearBounds(fp);
+  const shouldRebuild =
+    !yearSelect.options.length ||
+    Number(yearSelect.options[0].value) !== minYear ||
+    Number(yearSelect.options[yearSelect.options.length - 1].value) !== maxYear;
+
+  if (shouldRebuild) {
+    yearSelect.innerHTML = "";
+    for (let year = minYear; year <= maxYear; year++) {
+      const option = document.createElement("option");
+      option.value = String(year);
+      option.textContent = String(year);
+      yearSelect.appendChild(option);
+    }
+  }
+
+  const targetYear = String(fp.currentYear);
+  if (!yearSelect.querySelector(`option[value="${targetYear}"]`)) {
+    const option = document.createElement("option");
+    option.value = targetYear;
+    option.textContent = targetYear;
+    yearSelect.appendChild(option);
+  }
+  yearSelect.value = targetYear;
+}
+
+function ensureFlatpickrYearDropdown(fp) {
+  if (!fp || !fp.calendarContainer) return;
+  const currentMonth = fp.calendarContainer.querySelector(".flatpickr-current-month");
+  if (!currentMonth) return;
+
+  let yearSelect = currentMonth.querySelector(".flatpickr-yearDropdown-years");
+  if (!yearSelect) {
+    yearSelect = document.createElement("select");
+    yearSelect.className = "flatpickr-yearDropdown-years";
+    yearSelect.setAttribute("aria-label", "Select year");
+    yearSelect.addEventListener("change", (e) => {
+      const year = Number(e.target.value);
+      if (!isFinite(year)) return;
+      fp.changeYear(year);
+    });
+    currentMonth.appendChild(yearSelect);
+  }
+  syncFlatpickrYearDropdown(fp);
 }
 
 function initDatePickers() {
@@ -345,6 +417,19 @@ function initDatePickers() {
       dateFormat: "Y-m-d",
       allowInput: false,
       disableMobile: true,
+      monthSelectorType: "dropdown",
+      onReady: (_, __, fp) => {
+        ensureFlatpickrYearDropdown(fp);
+      },
+      onOpen: (_, __, fp) => {
+        syncFlatpickrYearDropdown(fp);
+      },
+      onMonthChange: (_, __, fp) => {
+        syncFlatpickrYearDropdown(fp);
+      },
+      onYearChange: (_, __, fp) => {
+        syncFlatpickrYearDropdown(fp);
+      },
     };
     if (DATE_INPUTS_WITH_MAX_TODAY.has(id)) {
       options.maxDate = today;

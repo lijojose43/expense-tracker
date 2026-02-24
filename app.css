@@ -987,24 +987,77 @@ textarea {
   box-shadow: 0 18px 36px rgba(2, 6, 23, 0.16);
 }
 
-/* Increase date picker header (month + nav) height */
+/* Date picker header: taller + centered controls */
 .flatpickr-months {
-  min-height: 46px;
+  min-height: 52px;
+  display: grid;
+  grid-template-columns: 40px 1fr 40px;
+  align-items: center;
 }
 
 .flatpickr-months .flatpickr-month {
-  height: 46px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  grid-column: 2;
 }
 
 .flatpickr-current-month {
-  height: 46px;
-  padding-top: 10px;
+  position: static;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  height: 52px;
+  padding: 0 8px;
+}
+
+.flatpickr-current-month .numInputWrapper {
+  display: none;
+}
+
+.flatpickr-current-month .flatpickr-monthDropdown-months,
+.flatpickr-current-month .flatpickr-yearDropdown-years {
+  height: 34px;
+  padding: 0 10px;
+  border: 1px solid rgba(2, 6, 23, 0.14);
+  border-radius: 8px;
+  background: var(--card);
+  color: inherit;
+  font-size: 14px;
+  line-height: 34px;
 }
 
 .flatpickr-months .flatpickr-prev-month,
 .flatpickr-months .flatpickr-next-month {
-  height: 46px;
-  padding-top: 10px;
+  position: static !important;
+  top: auto !important;
+  transform: none !important;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: inherit;
+}
+
+.flatpickr-months .flatpickr-prev-month {
+  grid-column: 1;
+  justify-self: center;
+}
+
+.flatpickr-months .flatpickr-next-month {
+  grid-column: 3;
+  justify-self: center;
+}
+
+.flatpickr-months .flatpickr-prev-month svg,
+.flatpickr-months .flatpickr-next-month svg {
+  width: 14px;
+  height: 14px;
 }
 
 .flatpickr-day.today {
@@ -1030,10 +1083,31 @@ textarea {
 [data-theme="dark"] .flatpickr-months .flatpickr-month,
 [data-theme="dark"] .flatpickr-current-month input.cur-year,
 [data-theme="dark"] .flatpickr-current-month .flatpickr-monthDropdown-months,
+[data-theme="dark"] .flatpickr-current-month .flatpickr-yearDropdown-years,
 [data-theme="dark"] .flatpickr-weekday,
 [data-theme="dark"] .flatpickr-day {
   color: #e5e7eb;
   fill: #e5e7eb;
+}
+
+[data-theme="dark"] .flatpickr-current-month .flatpickr-monthDropdown-months,
+[data-theme="dark"] .flatpickr-current-month .flatpickr-yearDropdown-years {
+  background: #0f172a;
+  border-color: rgba(148, 163, 184, 0.5);
+  color: #f8fafc;
+}
+
+[data-theme="dark"] .flatpickr-months .flatpickr-prev-month,
+[data-theme="dark"] .flatpickr-months .flatpickr-next-month {
+  color: #f8fafc;
+  fill: #f8fafc;
+  opacity: 1;
+}
+
+[data-theme="dark"] .flatpickr-months .flatpickr-prev-month:hover,
+[data-theme="dark"] .flatpickr-months .flatpickr-next-month:hover {
+  background: rgba(30, 144, 255, 0.18);
+  border-radius: 8px;
 }
 
 [data-theme="dark"] .flatpickr-day:hover {
