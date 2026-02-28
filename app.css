@@ -704,6 +704,7 @@ html:not([data-theme="dark"]) .summary .card:nth-child(4) {
 .date-filter-buttons {
   display: flex;
   gap: 12px;
+  margin-bottom: 20px;
   align-items: center;
   overflow-x: auto;
   scrollbar-width: none; /* Firefox */
@@ -1893,6 +1894,7 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
   width: 100%;
   min-width: 0;
   box-sizing: border-box;
+  padding-left: 16px;
 }
 
 .description-field {
@@ -1913,6 +1915,7 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
   width: 100%;
   min-width: 0;
   box-sizing: border-box;
+  height: 48px;
 }
 
 .type-checkboxes {
@@ -2039,6 +2042,20 @@ select {
 #category {
   max-height: 200px;
   overflow-y: auto;
+  outline: none;
+  padding-left: 16px;
+}
+
+#category:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(30, 144, 255, 0.25);
+}
+
+#category:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(30, 144, 255, 0.25);
 }
 
 /* Custom scrollbar for select dropdown options */

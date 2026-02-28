@@ -2,7 +2,7 @@
 // Data: array of {id, amount (number), type: 'expense'|'income', category, date, description}
 
 // Version control for cache busting
-const APP_VERSION = "8.0";
+const APP_VERSION = "9.0";
 
 // Force reload if version mismatch
 if (localStorage.getItem("app-version") !== APP_VERSION) {
@@ -2534,11 +2534,46 @@ async function checkAndNotifyExpiringToday() {
   } catch (_) {}
 }
 
+function resetNotificationChoice() {
+  localStorage.removeItem("notification-choice");
+  // Request permission again immediately
+  requestNotificationPermission();
+}
+
 function requestNotificationPermission() {
   try {
     if (!("Notification" in window)) return;
+
+    // Check if user has already made a choice
+    const notificationChoice = localStorage.getItem("notification-choice");
+    if (notificationChoice === "dismissed") return;
+    if (notificationChoice === "granted") return;
+
+    // If permission is already granted or denied, save the choice
+    if (Notification.permission === "granted") {
+      localStorage.setItem("notification-choice", "granted");
+      return;
+    }
+    if (Notification.permission === "denied") {
+      localStorage.setItem("notification-choice", "dismissed");
+      return;
+    }
+
+    // Only request if permission is default and user hasn't dismissed
     if (Notification.permission === "default") {
-      Notification.requestPermission().catch(() => {});
+      Notification.requestPermission()
+        .then((permission) => {
+          // Save the user's choice
+          if (permission === "granted") {
+            localStorage.setItem("notification-choice", "granted");
+          } else if (permission === "denied") {
+            localStorage.setItem("notification-choice", "dismissed");
+          }
+        })
+        .catch(() => {
+          // If request fails, mark as dismissed to avoid repeated prompts
+          localStorage.setItem("notification-choice", "dismissed");
+        });
     }
   } catch (_) {}
 }
