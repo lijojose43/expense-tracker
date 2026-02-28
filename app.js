@@ -1627,12 +1627,8 @@ function renderList() {
       const formattedAmount = amountValue.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
       amt.textContent =
         (t.type === "expense" ? "-" : "+") + "₹" + formattedAmount;
-      const actions = document.createElement("div");
-      actions.className = "txActions"; // kept for layout spacing; no buttons inside
-
       el.appendChild(meta);
       el.appendChild(amt);
-      el.appendChild(actions);
 
       // Swipe-to-delete gesture handling
       let startX = 0;

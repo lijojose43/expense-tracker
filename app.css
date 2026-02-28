@@ -214,7 +214,7 @@ body {
 }
 
 .section-title {
-  margin: 0 0 16px 0;
+  margin: 15px 0 0px 0;
   font-size: 16px;
   font-weight: 600;
   color: var(--muted);
@@ -636,12 +636,10 @@ html:not([data-theme="dark"]) .summary .card:nth-child(4) {
     0 6px 12px rgba(0, 0, 0, 0.3),
     0 0 0 1px rgba(148, 163, 184, 0.15) inset;
 }
-}
 .filters {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  margin-bottom: 10px !important; /* Add space between filters and transactions */
   overflow-x: hidden;
   padding: 10px;
   border-radius: 16px;
@@ -711,52 +709,6 @@ html:not([data-theme="dark"]) .summary .card:nth-child(4) {
   position: relative;
 }
 
-/* Scroll indicators for filters */
-.filters-row::before,
-.filters-row::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 20px;
-  pointer-events: none;
-  z-index: 10;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.filters-row::before {
-  left: 0;
-  background: linear-gradient(to right, rgba(255, 255, 255, 0.9), transparent);
-}
-
-.filters-row::after {
-  right: 0;
-  background: linear-gradient(to left, rgba(255, 255, 255, 0.9), transparent);
-}
-
-[data-theme="dark"] .filters-row::before {
-  background: linear-gradient(to right, rgba(15, 23, 42, 0.9), transparent);
-}
-
-[data-theme="dark"] .filters-row::after {
-  background: linear-gradient(to left, rgba(15, 23, 42, 0.9), transparent);
-}
-
-/* Show scroll indicators when content is scrollable */
-.filters-row.scrollable-left::before {
-  opacity: 1;
-}
-
-.filters-row.scrollable-right::after {
-  opacity: 1;
-}
-
-/* Hide scroll indicators when scrolling */
-.filters-row.scrolling::after {
-  opacity: 0;
-  transition: opacity 0.1s ease;
-}
   -ms-overflow-style: none;
   flex-wrap: nowrap; /* Keep all items in single row */
 }
