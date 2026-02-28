@@ -1562,6 +1562,8 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.2px;
   font-size: 18px;
+  text-align: right;
+  flex: 0 0 auto;
 }
 .tx .amount.expense {
   color: var(--danger);
