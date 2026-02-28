@@ -199,6 +199,15 @@ const defaultCategories = [
   "Business",
   "Investment",
   "Emergency Fund",
+  "Mutual Fund",
+  "Fixed Deposit",
+  "Chit Fund",
+  "LIC",
+  "Medical Insurance",
+  "Term Insurance",
+  "Gold",
+  "Land",
+  "Property",
   "Other",
 ];
 
@@ -828,13 +837,36 @@ function populateCategories() {
   const cats = new Set(
     defaultCategories.concat(data.map((d) => d.category)).filter(Boolean),
   );
+  // Exclude Emergency Fund from dropdown since it's handled by radio button
+  // Also exclude Investment categories since they're handled by Investment radio button
+  const excludedCategories = [
+    "Emergency Fund",
+    "Investment",
+    "Mutual Fund",
+    "Fixed Deposit",
+    "Chit Fund",
+    "LIC",
+    "Term Insurance",
+    "Gold",
+    "Land",
+    "Property",
+  ];
   for (const c of cats) {
+    if (!excludedCategories.includes(c)) {
+      const opt = document.createElement("option");
+      opt.value = c;
+      opt.textContent = c;
+      categorySelect.appendChild(opt);
+      const opt2 = opt.cloneNode(true);
+      filterCategory.appendChild(opt2);
+    }
+  }
+  // Add Investment categories and Emergency Fund to filter dropdown for filtering
+  for (const specialCat of excludedCategories) {
     const opt = document.createElement("option");
-    opt.value = c;
-    opt.textContent = c;
-    categorySelect.appendChild(opt);
-    const opt2 = opt.cloneNode(true);
-    filterCategory.appendChild(opt2);
+    opt.value = specialCat;
+    opt.textContent = specialCat;
+    filterCategory.appendChild(opt);
   }
 }
 
@@ -919,6 +951,21 @@ function expensesByCategory() {
 }
 
 // Line chart removed
+
+function isInvestmentCategory(category) {
+  const investmentCategories = [
+    "Investment",
+    "Mutual Fund",
+    "Fixed Deposit",
+    "Chit Fund",
+    "LIC",
+    "Term Insurance",
+    "Gold",
+    "Land",
+    "Property",
+  ];
+  return investmentCategories.includes(category);
+}
 
 function catSlug(category) {
   return category.toLowerCase().replace(/\s+/g, "");
@@ -1006,6 +1053,69 @@ function getCategoryIcon(category) {
       <circle cx="12" cy="14" r="1"/>
     </svg>`,
 
+    mutualfund: `<svg viewBox="0 0 24 24" width="${iconSize}" height="${iconSize}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 3v18h18"/>
+      <path d="M7 12l4-4 4 4"/>
+      <path d="M11 8v8"/>
+      <path d="M15 12l4-4 4 4"/>
+      <path d="M19 8v8"/>
+    </svg>`,
+
+    fixeddeposit: `<svg viewBox="0 0 24 24" width="${iconSize}" height="${iconSize}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="11" width="18" height="10" rx="2" ry="2"/>
+      <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+      <circle cx="12" cy="16" r="1"/>
+    </svg>`,
+
+    chitfund: `<svg viewBox="0 0 24 24" width="${iconSize}" height="${iconSize}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"/>
+      <path d="M12 6v6l4 2"/>
+      <path d="M8 12h8"/>
+      <circle cx="12" cy="12" r="2"/>
+    </svg>`,
+
+    lic: `<svg viewBox="0 0 24 24" width="${iconSize}" height="${iconSize}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/>
+      <path d="M12 8v4"/>
+      <path d="M12 16h.01"/>
+    </svg>`,
+
+    medicalinsurance: `<svg viewBox="0 0 24 24" width="${iconSize}" height="${iconSize}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M9 12h6"/>
+      <path d="M12 9v6"/>
+      <path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z"/>
+      <rect x="3" y="3" width="18" height="18" rx="2" ry="2" opacity="0.3"/>
+    </svg>`,
+
+    terminsurance: `<svg viewBox="0 0 24 24" width="${iconSize}" height="${iconSize}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 1.5-.37 2.89-.96 4.13-1.72"/>
+      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67"/>
+      <path d="M12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78"/>
+    </svg>`,
+
+    gold: `<svg viewBox="0 0 24 24" width="${iconSize}" height="${iconSize}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"/>
+      <path d="M12 2v20"/>
+      <path d="M12 2a10 10 0 0 1 0 20"/>
+      <path d="M8 12h8"/>
+      <circle cx="12" cy="8" r="1"/>
+      <circle cx="12" cy="16" r="1"/>
+    </svg>`,
+
+    land: `<svg viewBox="0 0 24 24" width="${iconSize}" height="${iconSize}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/>
+      <path d="M2 12l10 10 10-10"/>
+      <path d="M12 2v20"/>
+      <rect x="8" y="8" width="8" height="8" rx="1"/>
+    </svg>`,
+
+    property: `<svg viewBox="0 0 24 24" width="${iconSize}" height="${iconSize}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+      <polyline points="9,22 9,12 15,12 15,22"/>
+      <path d="M5 12h14"/>
+      <circle cx="12" cy="6" r="1"/>
+    </svg>`,
+
     other: `<svg viewBox="0 0 24 24" width="${iconSize}" height="${iconSize}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <circle cx="12" cy="12" r="1"/>
       <circle cx="19" cy="12" r="1"/>
@@ -1047,6 +1157,15 @@ function renderDonut() {
     business: "#14b8a6", // teal
     investment: "#22c55e", // green
     emergencyfund: "#ef4444", // red
+    mutualfund: "#8b5cf6", // violet
+    fixeddeposit: "#f59e0b", // amber
+    chitfund: "#06b6d4", // cyan
+    lic: "#10b981", // emerald
+    medicalinsurance: "#3b82f6", // blue
+    terminsurance: "#6366f1", // indigo
+    gold: "#fbbf24", // yellow
+    land: "#84cc16", // lime
+    property: "#a855f7", // purple
     other: "#9ca3af", // neutral
   };
   const colors = labels.map(
@@ -1376,7 +1495,21 @@ function openModal(defaults) {
     $("amount").value = defaults.amount;
     // set radio selection for type
     setSelectedType(defaults.type);
-    $("category").value = defaults.category;
+
+    // Handle special categories with radio buttons
+    const investmentRadio = $("typeInvestment");
+    const medicalInsuranceRadio = $("typeMedicalInsurance");
+
+    if (defaults.category === "Medical Insurance") {
+      if (medicalInsuranceRadio) medicalInsuranceRadio.checked = true;
+      $("category").value = "Other"; // Set to default since Medical Insurance is handled by radio
+    } else if (isInvestmentCategory(defaults.category)) {
+      if (investmentRadio) investmentRadio.checked = true;
+      $("category").value = defaults.category; // Keep the specific investment category
+    } else {
+      $("category").value = defaults.category;
+    }
+
     setDateInputValue("date", toDateInputValue(defaults.date));
     $("description").value = defaults.description || "";
   } else {
@@ -1724,9 +1857,20 @@ txForm.addEventListener("submit", (e) => {
   e.preventDefault();
   const amount = Number($("amount").value) || 0;
   const type = getSelectedType();
-  const category = $("category").value || "Other";
+  let category = $("category").value || "Other";
   const date = $("date").value;
   const description = $("description").value;
+
+  // Check for special category radio buttons
+  const investmentRadio = $("typeInvestment");
+  const medicalInsuranceRadio = $("typeMedicalInsurance");
+
+  if (investmentRadio && investmentRadio.checked) {
+    // Keep the selected category for Investment transactions
+    category = $("category").value || "Other";
+  } else if (medicalInsuranceRadio && medicalInsuranceRadio.checked) {
+    category = "Medical Insurance";
+  }
 
   // Validate form inputs
   const isAmountValid = validateAmount(amount);

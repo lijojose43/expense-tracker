@@ -1312,6 +1312,51 @@ html:not([data-theme="dark"]) .iconBox[data-cat="emergencyfund"] {
   color: #991b1b; /* red-800 */
   border-color: #fca5a5; /* red-300 */
 }
+html:not([data-theme="dark"]) .iconBox[data-cat="mutualfund"] {
+  background: #f3e8ff; /* violet-50 */
+  color: #6b21a8; /* violet-800 */
+  border-color: #d8b4fe; /* violet-300 */
+}
+html:not([data-theme="dark"]) .iconBox[data-cat="fixeddeposit"] {
+  background: #fef3c7; /* amber-50 */
+  color: #92400e; /* amber-800 */
+  border-color: #fcd34d; /* amber-300 */
+}
+html:not([data-theme="dark"]) .iconBox[data-cat="chitfund"] {
+  background: #ecfeff; /* cyan-50 */
+  color: #164e63; /* cyan-800 */
+  border-color: #67e8f9; /* cyan-300 */
+}
+html:not([data-theme="dark"]) .iconBox[data-cat="lic"] {
+  background: #f0fdf4; /* emerald-50 */
+  color: #065f46; /* emerald-800 */
+  border-color: #6ee7b7; /* emerald-300 */
+}
+html:not([data-theme="dark"]) .iconBox[data-cat="medicalinsurance"] {
+  background: #eff6ff; /* blue-50 */
+  color: #1e3a8a; /* blue-800 */
+  border-color: #93c5fd; /* blue-300 */
+}
+html:not([data-theme="dark"]) .iconBox[data-cat="terminsurance"] {
+  background: #eef2ff; /* indigo-50 */
+  color: #3730a3; /* indigo-800 */
+  border-color: #c7d2fe; /* indigo-300 */
+}
+html:not([data-theme="dark"]) .iconBox[data-cat="gold"] {
+  background: #fefce8; /* yellow-50 */
+  color: #713f12; /* yellow-800 */
+  border-color: #fde047; /* yellow-300 */
+}
+html:not([data-theme="dark"]) .iconBox[data-cat="land"] {
+  background: #f7fee7; /* lime-50 */
+  color: #365314; /* lime-800 */
+  border-color: #bef264; /* lime-300 */
+}
+html:not([data-theme="dark"]) .iconBox[data-cat="property"] {
+  background: #faf5ff; /* purple-50 */
+  color: #6b21a8; /* purple-800 */
+  border-color: #e9d5ff; /* purple-300 */
+}
 html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
   background: #f5f5f5; /* neutral-100 */
   color: #262626; /* neutral-800 */
@@ -1385,6 +1430,60 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
   background: #7f1d1d; /* red-900 */
   color: #fca5a5; /* red-300 */
   border-color: #991b1b; /* red-800 */
+}
+/* Dark mode: Mutual Fund */
+[data-theme="dark"] .iconBox[data-cat="mutualfund"] {
+  background: #581c87; /* violet-900 */
+  color: #e9d5ff; /* violet-300 */
+  border-color: #6b21a8; /* violet-800 */
+}
+/* Dark mode: Fixed Deposit */
+[data-theme="dark"] .iconBox[data-cat="fixeddeposit"] {
+  background: #78350f; /* amber-900 */
+  color: #fcd34d; /* amber-300 */
+  border-color: #92400e; /* amber-800 */
+}
+/* Dark mode: Chit Fund */
+[data-theme="dark"] .iconBox[data-cat="chitfund"] {
+  background: #164e63; /* cyan-900 */
+  color: #67e8f9; /* cyan-300 */
+  border-color: #0e7490; /* cyan-800 */
+}
+/* Dark mode: LIC */
+[data-theme="dark"] .iconBox[data-cat="lic"] {
+  background: #064e3b; /* emerald-900 */
+  color: #6ee7b7; /* emerald-300 */
+  border-color: #047857; /* emerald-800 */
+}
+/* Dark mode: Medical Insurance */
+[data-theme="dark"] .iconBox[data-cat="medicalinsurance"] {
+  background: #1e3a8a; /* blue-900 */
+  color: #93c5fd; /* blue-300 */
+  border-color: #1d4ed8; /* blue-800 */
+}
+/* Dark mode: Term Insurance */
+[data-theme="dark"] .iconBox[data-cat="terminsurance"] {
+  background: #312e81; /* indigo-900 */
+  color: #c7d2fe; /* indigo-300 */
+  border-color: #3730a3; /* indigo-800 */
+}
+/* Dark mode: Gold */
+[data-theme="dark"] .iconBox[data-cat="gold"] {
+  background: #713f12; /* yellow-900 */
+  color: #fde047; /* yellow-300 */
+  border-color: #854d0e; /* yellow-800 */
+}
+/* Dark mode: Land */
+[data-theme="dark"] .iconBox[data-cat="land"] {
+  background: #365314; /* lime-900 */
+  color: #bef264; /* lime-300 */
+  border-color: #4d7c0f; /* lime-800 */
+}
+/* Dark mode: Property */
+[data-theme="dark"] .iconBox[data-cat="property"] {
+  background: #581c87; /* purple-900 */
+  color: #e9d5ff; /* purple-300 */
+  border-color: #6b21a8; /* purple-800 */
 }
 .tx .title {
   font-weight: 600;
@@ -1839,16 +1938,17 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
 }
 
 .type-checkboxes {
-  display: flex;
-  flex-direction: row;
-  gap: 16px;
-  justify-content: space-between; /* push Expense to left and Income to right */
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
   margin-top: 0;
 }
 
 .checkbox-group {
   display: flex;
   align-items: center;
+  justify-content: left;
+  min-height: 44px; /* ensure good touch target */
 }
 
 .checkbox-group input[type="radio"] {
@@ -1875,8 +1975,11 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
   width: 16px;
   height: 16px;
   border: 2px solid rgba(2, 6, 23, 0.2);
-  border-radius: 3px;
-  background: var(--card);
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 8px;
   position: relative;
   transition: all 0.2s ease;
 }
@@ -2613,7 +2716,16 @@ footer {
   /* Ensure segmented buttons are comfortable on mobile */
   .seg-btn {
     min-height: 44px;
-    padding: 12px;
+  }
+
+  /* Adjust grid layout for smaller mobile screens */
+  .type-checkboxes {
+    grid-template-columns: 1fr; /* single column on very small screens */
+    gap: 8px;
+  }
+
+  .checkbox-group {
+    justify-content: flex-start; /* align left for single column */
   }
 
   /* Mobile-friendly layout - keep amount and category in same row */
