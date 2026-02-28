@@ -106,6 +106,9 @@ body {
   box-shadow: none;
   position: relative;
   overflow-x: hidden; /* Prevent horizontal scroll in app container */
+  overflow-y: auto; /* Allow vertical scrolling in app container */
+  -webkit-overflow-scrolling: touch; /* Enable smooth scrolling on iOS */
+  touch-action: pan-y; /* Allow vertical scrolling but prevent horizontal gestures */
 }
 
 /* Forcefully hide scrollbars in installed PWA only */
@@ -945,15 +948,18 @@ html:not([data-theme="dark"]) .summary .card:nth-child(3) {
 input:not([type="checkbox"]):not([type="radio"]),
 select,
 textarea {
-  background: var(--card);
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.5;
   color: inherit;
+  background: var(--card);
   border: 1px solid rgba(2, 6, 23, 0.12);
   border-radius: 8px;
   padding: 8px;
-  /* Allow text selection in inputs but prevent zoom */
+  /* Allow text selection in inputs and normal touch interactions */
   -webkit-user-select: text;
   user-select: text;
-  touch-action: manipulation;
+  touch-action: pan-y;
 }
 
 /* Consistent textbox-like design for date inputs across all devices */
@@ -1320,6 +1326,16 @@ html:not([data-theme="dark"]) .iconBox[data-cat="business"] {
   color: #115e59; /* teal-800 */
   border-color: #99f6e4; /* teal-200 */
 }
+html:not([data-theme="dark"]) .iconBox[data-cat="investment"] {
+  background: #dcfce7; /* green-100 */
+  color: #166534; /* green-800 */
+  border-color: #86efac; /* green-300 */
+}
+html:not([data-theme="dark"]) .iconBox[data-cat="emergencyfund"] {
+  background: #fef2f2; /* red-50 */
+  color: #991b1b; /* red-800 */
+  border-color: #fca5a5; /* red-300 */
+}
 html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
   background: #f5f5f5; /* neutral-100 */
   color: #262626; /* neutral-800 */
@@ -1375,17 +1391,24 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
   color: #7dd3fc; /* sky-300 */
   border-color: #075985; /* sky-800 */
 }
-[data-theme="dark"] .iconBox[data-cat="other"] {
-  background: #0a0a0a; /* neutral-950 */
-  color: #d4d4d4; /* neutral-300 */
-  border-color: #171717; /* neutral-900 */
-}
 
 /* Dark mode: Business */
 [data-theme="dark"] .iconBox[data-cat="business"] {
   background: #134e4a; /* teal-900 */
   color: #99f6e4; /* teal-200 */
   border-color: #115e59; /* teal-800 */
+}
+/* Dark mode: Investment */
+[data-theme="dark"] .iconBox[data-cat="investment"] {
+  background: #064e3b; /* green-900 */
+  color: #bbf7d0; /* green-200 */
+  border-color: #065f46; /* green-800 */
+}
+/* Dark mode: Emergency Fund */
+[data-theme="dark"] .iconBox[data-cat="emergencyfund"] {
+  background: #7f1d1d; /* red-900 */
+  color: #fca5a5; /* red-300 */
+  border-color: #991b1b; /* red-800 */
 }
 .tx .title {
   font-weight: 600;
@@ -2835,7 +2858,7 @@ footer {
     -webkit-user-select: text;
     user-select: text;
     -webkit-touch-callout: default;
-    touch-action: manipulation;
+    touch-action: pan-y;
     /* Prevent iOS zoom while allowing keyboard */
     font-size: 16px;
     min-height: 48px;
