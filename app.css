@@ -2925,6 +2925,7 @@ div.app {
   /* Make filters row more compact on mobile */
   .filters-row {
     gap: 10px; /* Increased spacing on mobile */
+    margin-bottom: 10px;
   }
 
   .filters-row select {
@@ -2949,6 +2950,7 @@ div.app {
   /* Summary tab: compact single-row layout on mobile */
   .date-filter-buttons {
     gap: 10px; /* Increased spacing on mobile */
+    margin-bottom: 10px;
   }
 
   .date-filter-buttons .filter-btn {

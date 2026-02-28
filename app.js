@@ -2,7 +2,7 @@
 // Data: array of {id, amount (number), type: 'expense'|'income', category, date, description}
 
 // Version control for cache busting
-const APP_VERSION = "5.0";
+const APP_VERSION = "8.0";
 
 // Force reload if version mismatch
 if (localStorage.getItem("app-version") !== APP_VERSION) {
@@ -371,12 +371,13 @@ const defaultCategories = [
   "Chit Fund",
   "LIC",
   "Term Insurance",
-  "Gold",
-  "Land",
-  "Property",
+  "Gold Investment",
+  "Land Investment",
+  "Property Investment",
   "Other",
 ];
 
+// ... (rest of the code remains the same)
 let data = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null") || [];
 let expiryData =
   JSON.parse(localStorage.getItem(EXPIRY_STORAGE_KEY) || "null") || [];
@@ -1127,9 +1128,9 @@ function isInvestmentCategory(category) {
     "Chit Fund",
     "LIC",
     "Term Insurance",
-    "Gold",
-    "Land",
-    "Property",
+    "Gold Investment",
+    "Land Investment",
+    "Property Investment",
   ];
   return investmentCategories.includes(category);
 }
@@ -1250,26 +1251,17 @@ function getCategoryIcon(category) {
     terminsurance: `<svg viewBox="0 0 24 24" width="${iconSize}" height="${iconSize}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 1.5-.37 2.89-.96 4.13-1.72"/>
       <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67"/>
-      <path d="M12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78"/>
+      <path d="M12 5.67l-1.06-1.06a5.5 5.0 0 0 0-7.78 7.78"/>
     </svg>`,
 
-    gold: `<svg viewBox="0 0 24 24" width="${iconSize}" height="${iconSize}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <circle cx="12" cy="12" r="10"/>
-      <path d="M12 2v20"/>
-      <path d="M12 2a10 10 0 0 1 0 20"/>
-      <path d="M8 12h8"/>
-      <circle cx="12" cy="8" r="1"/>
-      <circle cx="12" cy="16" r="1"/>
-    </svg>`,
-
-    land: `<svg viewBox="0 0 24 24" width="${iconSize}" height="${iconSize}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    "land-investment": `<svg viewBox="0 0 24 24" width="${iconSize}" height="${iconSize}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/>
       <path d="M2 12l10 10 10-10"/>
       <path d="M12 2v20"/>
       <rect x="8" y="8" width="8" height="8" rx="1"/>
     </svg>`,
 
-    property: `<svg viewBox="0 0 24 24" width="${iconSize}" height="${iconSize}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    "property-investment": `<svg viewBox="0 0 24 24" width="${iconSize}" height="${iconSize}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
       <polyline points="9,22 9,12 15,12 15,22"/>
       <path d="M5 12h14"/>
@@ -1283,6 +1275,7 @@ function getCategoryIcon(category) {
     </svg>`,
   };
 
+  // Ensure edit is detected
   return icons[slug] || icons.other;
 }
 
@@ -1322,7 +1315,7 @@ function renderDonut() {
     chitfund: "#06b6d4", // cyan
     lic: "#10b981", // emerald
     terminsurance: "#6366f1", // indigo
-    gold: "#fbbf24", // yellow
+    gold: "#fbbf24", // yellow for Gold Investment
     land: "#84cc16", // lime
     property: "#a855f7", // purple
     other: "#9ca3af", // neutral
@@ -1633,15 +1626,79 @@ function renderList() {
 function openModal(defaults) {
   modal.classList.remove("hide");
 
-  // Immediate focus attempt for mobile devices
-  const amountField = $("amount");
-  if (amountField) {
-    amountField.focus();
-  }
-
-  // Trigger the slide-up animation
+  // Trigger slide-up animation first
   setTimeout(() => {
     modal.classList.add("show");
+
+    // Enhanced focus handling for amount field - start after modal is visible
+    const focusAmountField = () => {
+      const amountField = $("amount");
+      if (amountField) {
+        // Force focus and trigger keyboard on mobile devices
+        amountField.focus();
+
+        // For mobile devices, also select text if there's a value
+        if (amountField.value) {
+          amountField.select();
+        }
+
+        // Additional iPhone-specific handling
+        const ua = navigator.userAgent || "";
+        const isIOS = /iPhone|iPad|iPod/i.test(ua);
+        const isMobile =
+          isIOS ||
+          /Android/i.test(ua) ||
+          (window.matchMedia &&
+            window.matchMedia("(max-width: 768px)").matches);
+
+        if (isMobile) {
+          // More aggressive approach for mobile keyboard activation
+          amountField.click();
+          amountField.focus();
+
+          // Trigger multiple events to ensure keyboard opens
+          const events = [
+            "touchstart",
+            "touchend",
+            "mousedown",
+            "mouseup",
+            "click",
+            "focus",
+          ];
+          events.forEach((eventType) => {
+            const event = new Event(eventType, {
+              bubbles: true,
+              cancelable: true,
+            });
+            amountField.dispatchEvent(event);
+          });
+
+          // Additional iOS-specific attempts
+          if (isIOS) {
+            setTimeout(() => {
+              amountField.focus();
+              amountField.click();
+              // Scroll into view to ensure visibility
+              amountField.scrollIntoView({
+                behavior: "smooth",
+                block: "center",
+              });
+            }, 50);
+
+            setTimeout(() => {
+              amountField.focus();
+              amountField.select();
+            }, 150);
+          }
+        }
+      }
+    };
+
+    // Multiple timing attempts to ensure focus works on all devices
+    setTimeout(focusAmountField, 100); // After modal animation starts
+    setTimeout(focusAmountField, 200); // After modal is fully visible
+    setTimeout(focusAmountField, 400); // Additional attempt for slower devices
+    setTimeout(focusAmountField, 600); // Final attempt for very slow devices
   }, 10);
 
   // Clear any existing validation errors
@@ -1673,73 +1730,6 @@ function openModal(defaults) {
     // default to expense on new entry
     setSelectedType("expense");
   }
-
-  // Enhanced focus handling for iPhone and mobile devices
-  const focusAmountField = () => {
-    const amountField = $("amount");
-    if (amountField) {
-      // Force focus and trigger keyboard on mobile devices
-      amountField.focus();
-
-      // For mobile devices, also select the text if there's a value
-      if (amountField.value) {
-        amountField.select();
-      }
-
-      // Additional iPhone-specific handling
-      const ua = navigator.userAgent || "";
-      const isIOS = /iPhone|iPad|iPod/i.test(ua);
-      const isMobile =
-        isIOS ||
-        /Android/i.test(ua) ||
-        (window.matchMedia && window.matchMedia("(max-width: 768px)").matches);
-
-      if (isMobile) {
-        // More aggressive approach for mobile keyboard activation
-        amountField.click();
-        amountField.focus();
-
-        // Trigger multiple events to ensure keyboard opens
-        const events = [
-          "touchstart",
-          "touchend",
-          "mousedown",
-          "mouseup",
-          "click",
-          "focus",
-        ];
-        events.forEach((eventType) => {
-          const event = new Event(eventType, {
-            bubbles: true,
-            cancelable: true,
-          });
-          amountField.dispatchEvent(event);
-        });
-
-        // Additional iOS-specific attempts
-        if (isIOS) {
-          setTimeout(() => {
-            amountField.focus();
-            amountField.click();
-            // Scroll into view to ensure visibility
-            amountField.scrollIntoView({ behavior: "smooth", block: "center" });
-          }, 50);
-
-          setTimeout(() => {
-            amountField.focus();
-            amountField.select();
-          }, 150);
-        }
-      }
-    }
-  };
-
-  // More frequent attempts to ensure focus works on all devices
-  setTimeout(focusAmountField, 50); // Very quick attempt
-  setTimeout(focusAmountField, 150); // After initial render
-  setTimeout(focusAmountField, 300); // After animation
-  setTimeout(focusAmountField, 500); // Final attempt for slow devices
-  setTimeout(focusAmountField, 800); // Extra attempt for very slow devices
 }
 
 function closeModalFn() {
@@ -2819,6 +2809,36 @@ function openExpiryModal(defaults) {
     if (submitBtn) submitBtn.textContent = "Save";
     if (expiryForm) expiryForm.reset();
     if (expiryDateInput) setDateInputValue(expiryDateInput, todayIsoDate());
+  }
+
+  // Focus on product name field with enhanced mobile handling
+  if (expiryNameInput) {
+    // Immediate focus attempt
+    setTimeout(() => {
+      expiryNameInput.focus();
+      enhanceMobileFocus(expiryNameInput);
+    }, 100);
+
+    // Additional attempts for slower devices (especially iPhone)
+    setTimeout(() => {
+      expiryNameInput.focus();
+      // Trigger touch events to wake up iOS keyboard
+      if (navigator.userAgent.includes("iPhone")) {
+        expiryNameInput.click();
+        const touchEvent = new TouchEvent("touchstart", {
+          bubbles: true,
+          cancelable: true,
+          view: window,
+        });
+        expiryNameInput.dispatchEvent(touchEvent);
+      }
+    }, 300);
+
+    // Final attempt with scroll into view
+    setTimeout(() => {
+      expiryNameInput.focus();
+      expiryNameInput.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 500);
   }
 }
 
