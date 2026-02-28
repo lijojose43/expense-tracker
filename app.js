@@ -1,6 +1,34 @@
 // Simple Expense Tracker PWA (localStorage)
 // Data: array of {id, amount (number), type: 'expense'|'income', category, date, description}
 
+// Version control for cache busting
+const APP_VERSION = "4.0";
+
+// Force reload if version mismatch
+if (localStorage.getItem("app-version") !== APP_VERSION) {
+  localStorage.clear(); // Clear all cached data
+  localStorage.setItem("app-version", APP_VERSION);
+  console.log("App version updated, cache cleared");
+}
+
+// Add meta tags for cache control
+document.addEventListener("DOMContentLoaded", () => {
+  const meta = document.createElement("meta");
+  meta.httpEquiv = "Cache-Control";
+  meta.content = "no-cache, no-store, must-revalidate";
+  document.head.appendChild(meta);
+
+  const meta2 = document.createElement("meta");
+  meta2.httpEquiv = "Pragma";
+  meta2.content = "no-cache";
+  document.head.appendChild(meta2);
+
+  const meta3 = document.createElement("meta");
+  meta3.httpEquiv = "Expires";
+  meta3.content = "0";
+  document.head.appendChild(meta3);
+});
+
 // ---------- Purchase Feature ----------
 function getPurchaseIconSVG(size = 20) {
   return `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

@@ -626,7 +626,7 @@ html:not([data-theme="dark"]) .summary .card:nth-child(4) {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  margin-bottom: 20px !important; /* Add space between filters and transactions */
+  margin-bottom: 10px !important; /* Add space between filters and transactions */
   overflow-x: hidden;
   padding: 10px;
   border-radius: 16px;
@@ -905,9 +905,9 @@ html:not([data-theme="dark"]) .summary .card:nth-child(4) {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding-top: 20px !important; /* Add space between filters and first transaction */
+  padding-top: 10px !important; /* Add space between filters and first transaction */
   overflow-x: hidden; /* Prevent horizontal scroll in transactions list */
-  padding-bottom: 20px; /* Extra space to ensure last transaction is visible above footer */
+  padding-bottom: 5px; /* Reduced space to prevent blank area above footer */
 }
 
 /* Global form controls */
@@ -2684,7 +2684,7 @@ body.standalone .transactions {
   height: auto !important;
   overscroll-behavior: auto !important;
   pointer-events: none !important;
-  margin-top: 20px !important; /* Add space between filters and first transaction */
+  padding-top: 10px !important; /* Add space between filters and first transaction */
 }
 
 /* Allow interaction with transaction cards but let scroll events bubble */
@@ -2858,7 +2858,7 @@ div.app {
 
   /* Extra bottom padding for transactions on mobile to prevent footer overlap */
   .transactions {
-    padding-bottom: 30px;
+    padding-bottom: 10px;
   }
 
   /* Normalize native select appearance on iOS */
