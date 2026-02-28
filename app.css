@@ -185,18 +185,6 @@ body {
   }
 }
 
-/* Create scrollbar-free zone above bottom navbar */
-.app::after {
-  content: "";
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 60px; /* Height of navbar area */
-  background: transparent;
-  z-index: 899; /* Just below navbar */
-  pointer-events: none;
-}
 .topbar {
   display: flex;
   align-items: center;
@@ -490,7 +478,7 @@ html:not([data-theme="dark"]) .summary .card:nth-child(4) {
 }
 
 .summary .card:hover::after {
-  opacity: 0.7;
+  opacity: 0.4;
 }
 
 /* Per-card images (dark) - enhanced with better contrast */
@@ -533,7 +521,7 @@ html:not([data-theme="dark"]) .summary .card:nth-child(4) {
 }
 
 [data-theme="dark"] .summary .card:hover::after {
-  opacity: 0.6;
+  opacity: 0.3;
 }
 
 /* Accent color per card (1: Income, 2: Expenses, 3: Savings, 4: Investments) */
@@ -574,8 +562,8 @@ html:not([data-theme="dark"]) .summary .card:nth-child(4) {
 }
 
 .summary .card:hover::before {
-  opacity: 1;
-  box-shadow: 0 0 12px var(--card-accent);
+  opacity: 0.6;
+  box-shadow: 0 0 6px var(--card-accent);
 }
 
 /* Amount styling inside summary cards */
@@ -600,7 +588,7 @@ html:not([data-theme="dark"]) .summary .card:nth-child(4) {
 }
 
 .summary .card:hover .amount {
-  transform: scale(1.05);
+  transform: scale(1.02);
 }
 
 /* Label refinement */
@@ -617,28 +605,28 @@ html:not([data-theme="dark"]) .summary .card:nth-child(4) {
 }
 
 .summary .card:hover .label {
-  opacity: 0.9;
+  opacity: 0.7;
 }
 
 /* Hover refine (mobile-friendly subtle lift) */
 .summary .card:hover {
-  transform: translateY(-6px) scale(1.02);
+  transform: translateY(-2px) scale(1.01);
   box-shadow:
-    0 16px 48px rgba(2, 6, 23, 0.14),
-    0 8px 16px rgba(2, 6, 23, 0.1),
-    0 0 0 1px rgba(2, 6, 23, 0.06) inset;
+    0 8px 24px rgba(2, 6, 23, 0.08),
+    0 4px 8px rgba(2, 6, 23, 0.04);
 }
 [data-theme="dark"] .summary .card:hover {
   box-shadow:
-    0 20px 56px rgba(0, 0, 0, 0.6),
-    0 10px 20px rgba(0, 0, 0, 0.5),
+    0 12px 32px rgba(0, 0, 0, 0.4),
+    0 6px 12px rgba(0, 0, 0, 0.3),
     0 0 0 1px rgba(148, 163, 184, 0.15) inset;
+}
 }
 .filters {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  margin-bottom: 12px;
+  margin-bottom: 20px !important; /* Add space between filters and transactions */
   overflow-x: hidden;
   padding: 10px;
   border-radius: 16px;
@@ -917,6 +905,7 @@ html:not([data-theme="dark"]) .summary .card:nth-child(4) {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  padding-top: 20px !important; /* Add space between filters and first transaction */
   overflow-x: hidden; /* Prevent horizontal scroll in transactions list */
   padding-bottom: 20px; /* Extra space to ensure last transaction is visible above footer */
 }
@@ -1332,11 +1321,6 @@ html:not([data-theme="dark"]) .iconBox[data-cat="lic"] {
   color: #065f46; /* emerald-800 */
   border-color: #6ee7b7; /* emerald-300 */
 }
-html:not([data-theme="dark"]) .iconBox[data-cat="medicalinsurance"] {
-  background: #eff6ff; /* blue-50 */
-  color: #1e3a8a; /* blue-800 */
-  border-color: #93c5fd; /* blue-300 */
-}
 html:not([data-theme="dark"]) .iconBox[data-cat="terminsurance"] {
   background: #eef2ff; /* indigo-50 */
   color: #3730a3; /* indigo-800 */
@@ -1454,12 +1438,6 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
   background: #064e3b; /* emerald-900 */
   color: #6ee7b7; /* emerald-300 */
   border-color: #047857; /* emerald-800 */
-}
-/* Dark mode: Medical Insurance */
-[data-theme="dark"] .iconBox[data-cat="medicalinsurance"] {
-  background: #1e3a8a; /* blue-900 */
-  color: #93c5fd; /* blue-300 */
-  border-color: #1d4ed8; /* blue-800 */
 }
 /* Dark mode: Term Insurance */
 [data-theme="dark"] .iconBox[data-cat="terminsurance"] {
@@ -1938,17 +1916,19 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
 }
 
 .type-checkboxes {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  flex-wrap: nowrap;
   gap: 12px;
+  justify-content: space-between;
   margin-top: 0;
 }
 
 .checkbox-group {
   display: flex;
   align-items: center;
-  justify-content: left;
+  justify-content: center;
   min-height: 44px; /* ensure good touch target */
+  flex: 1;
 }
 
 .checkbox-group input[type="radio"] {
@@ -2582,8 +2562,9 @@ footer {
 /* Enhanced mobile app experience */
 @media (max-width: 768px) {
   body {
-    height: 100vh;
-    height: 100dvh; /* Dynamic viewport height for mobile */
+    min-height: 100vh;
+    min-height: 100dvh; /* Dynamic viewport height for mobile */
+    height: auto !important;
     overflow: hidden;
   }
 
@@ -2593,10 +2574,12 @@ footer {
   }
 
   .app {
-    height: 100vh;
-    height: 100dvh;
-    overflow-y: auto;
+    min-height: 100vh;
+    min-height: 100dvh;
+    height: auto !important;
+    overflow-y: auto !important;
     overflow-x: hidden;
+    -webkit-overflow-scrolling: touch !important;
     scrollbar-width: none !important;
     -ms-overflow-style: none !important;
   }
@@ -2668,13 +2651,136 @@ footer {
   }
 }
 
-/* PWA standalone mode - complete scrollbar elimination */
+/* Enhanced scrolling support for PWA mode - mouse wheel and touchpad */
+body.pwa-mode .app,
+body.standalone .app,
+html body .app,
+div.app {
+  min-height: 100vh !important;
+  min-height: 100dvh !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow-y: visible !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+/* Make all main content tabs scrollable in PWA mode */
+body.pwa-mode .content,
+body.standalone .content,
+html body .content {
+  min-height: calc(100vh - var(--topbar-h) - var(--bottombar-h)) !important;
+  min-height: calc(100dvh - var(--topbar-h) - var(--bottombar-h)) !important;
+  height: auto !important;
+  max-height: calc(100vh - var(--topbar-h) - var(--bottombar-h)) !important;
+  overflow-y: scroll !important;
+  -webkit-overflow-scrolling: touch !important;
+  position: relative !important;
+}
+
+/* Ensure transactions container can grow and allows scroll events */
+body.pwa-mode .transactions,
+body.standalone .transactions {
+  min-height: auto !important;
+  height: auto !important;
+  overscroll-behavior: auto !important;
+  pointer-events: none !important;
+  margin-top: 20px !important; /* Add space between filters and first transaction */
+}
+
+/* Allow interaction with transaction cards but let scroll events bubble */
+body.pwa-mode .tx,
+body.standalone .tx {
+  pointer-events: auto !important;
+  overscroll-behavior: auto !important;
+}
+
+/* Ensure expiry items container allows scroll events */
+body.pwa-mode .expiry-list,
+body.standalone .expiry-list {
+  min-height: auto !important;
+  height: auto !important;
+  overscroll-behavior: auto !important;
+  pointer-events: none !important;
+}
+
+/* Allow interaction with expiry items but let scroll events bubble */
+body.pwa-mode .expiry-item,
+body.standalone .expiry-item {
+  pointer-events: auto !important;
+  overscroll-behavior: auto !important;
+}
+
+/* Ensure purchase items container allows scroll events */
+body.pwa-mode .purchase-list,
+body.standalone .purchase-list {
+  min-height: auto !important;
+  height: auto !important;
+  overscroll-behavior: auto !important;
+  pointer-events: none !important;
+}
+
+/* Allow interaction with purchase items but let scroll events bubble */
+body.pwa-mode .purchase-item,
+body.standalone .purchase-item {
+  pointer-events: auto !important;
+  overscroll-behavior: auto !important;
+}
+
+/* Universal app height fix - highest specificity */
+* .app,
+html > body > .app,
+body > .app,
+.app {
+  min-height: 100vh !important;
+  min-height: 100dvh !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+/* Force scrolling in PWA mode - highest specificity */
+body.pwa-mode .app,
+body.standalone .app,
+html body .app,
+div.app {
+  min-height: 100vh !important;
+  min-height: 100dvh !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+/* Ensure app can grow beyond viewport when content is longer */
+.app {
+  min-height: 100vh;
+  min-height: 100dvh;
+  height: auto !important;
+  max-height: none !important;
+  overflow-y: auto !important;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch !important;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+/* Content section should be able to grow */
+.content {
+  min-height: calc(100vh - var(--topbar-h) - var(--bottombar-h));
+  min-height: calc(100dvh - var(--topbar-h) - var(--bottombar-h));
+  height: auto !important;
+}
+
+/* PWA standalone mode - maintain scrolling while hiding scrollbars */
 @media (display-mode: standalone) {
   body,
   html,
   .app {
     scrollbar-width: none !important;
     -ms-overflow-style: none !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
   }
 
   body::-webkit-scrollbar,
@@ -2718,14 +2824,14 @@ footer {
     min-height: 44px;
   }
 
-  /* Adjust grid layout for smaller mobile screens */
+  /* Adjust layout for smaller mobile screens - keep three buttons in row */
   .type-checkboxes {
-    grid-template-columns: 1fr; /* single column on very small screens */
+    flex-direction: row; /* keep single row on mobile */
     gap: 8px;
   }
 
   .checkbox-group {
-    justify-content: flex-start; /* align left for single column */
+    justify-content: center; /* center align for mobile */
   }
 
   /* Mobile-friendly layout - keep amount and category in same row */
@@ -2738,13 +2844,6 @@ footer {
   .date-description-row {
     flex-direction: column;
     gap: 12px;
-  }
-
-  .type-checkboxes {
-    flex-direction: row;
-    gap: 16px;
-    margin-top: 8px;
-    justify-content: space-between;
   }
 
   .checkbox-label {

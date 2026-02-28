@@ -203,7 +203,6 @@ const defaultCategories = [
   "Fixed Deposit",
   "Chit Fund",
   "LIC",
-  "Medical Insurance",
   "Term Insurance",
   "Gold",
   "Land",
@@ -837,36 +836,14 @@ function populateCategories() {
   const cats = new Set(
     defaultCategories.concat(data.map((d) => d.category)).filter(Boolean),
   );
-  // Exclude Emergency Fund from dropdown since it's handled by radio button
-  // Also exclude Investment categories since they're handled by Investment radio button
-  const excludedCategories = [
-    "Emergency Fund",
-    "Investment",
-    "Mutual Fund",
-    "Fixed Deposit",
-    "Chit Fund",
-    "LIC",
-    "Term Insurance",
-    "Gold",
-    "Land",
-    "Property",
-  ];
+
   for (const c of cats) {
-    if (!excludedCategories.includes(c)) {
-      const opt = document.createElement("option");
-      opt.value = c;
-      opt.textContent = c;
-      categorySelect.appendChild(opt);
-      const opt2 = opt.cloneNode(true);
-      filterCategory.appendChild(opt2);
-    }
-  }
-  // Add Investment categories and Emergency Fund to filter dropdown for filtering
-  for (const specialCat of excludedCategories) {
     const opt = document.createElement("option");
-    opt.value = specialCat;
-    opt.textContent = specialCat;
-    filterCategory.appendChild(opt);
+    opt.value = c;
+    opt.textContent = c;
+    categorySelect.appendChild(opt);
+    const opt2 = opt.cloneNode(true);
+    filterCategory.appendChild(opt2);
   }
 }
 
@@ -1080,13 +1057,6 @@ function getCategoryIcon(category) {
       <path d="M12 16h.01"/>
     </svg>`,
 
-    medicalinsurance: `<svg viewBox="0 0 24 24" width="${iconSize}" height="${iconSize}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M9 12h6"/>
-      <path d="M12 9v6"/>
-      <path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z"/>
-      <rect x="3" y="3" width="18" height="18" rx="2" ry="2" opacity="0.3"/>
-    </svg>`,
-
     terminsurance: `<svg viewBox="0 0 24 24" width="${iconSize}" height="${iconSize}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 1.5-.37 2.89-.96 4.13-1.72"/>
       <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67"/>
@@ -1161,7 +1131,6 @@ function renderDonut() {
     fixeddeposit: "#f59e0b", // amber
     chitfund: "#06b6d4", // cyan
     lic: "#10b981", // emerald
-    medicalinsurance: "#3b82f6", // blue
     terminsurance: "#6366f1", // indigo
     gold: "#fbbf24", // yellow
     land: "#84cc16", // lime
@@ -1498,12 +1467,8 @@ function openModal(defaults) {
 
     // Handle special categories with radio buttons
     const investmentRadio = $("typeInvestment");
-    const medicalInsuranceRadio = $("typeMedicalInsurance");
 
-    if (defaults.category === "Medical Insurance") {
-      if (medicalInsuranceRadio) medicalInsuranceRadio.checked = true;
-      $("category").value = "Other"; // Set to default since Medical Insurance is handled by radio
-    } else if (isInvestmentCategory(defaults.category)) {
+    if (isInvestmentCategory(defaults.category)) {
       if (investmentRadio) investmentRadio.checked = true;
       $("category").value = defaults.category; // Keep the specific investment category
     } else {
@@ -1863,13 +1828,10 @@ txForm.addEventListener("submit", (e) => {
 
   // Check for special category radio buttons
   const investmentRadio = $("typeInvestment");
-  const medicalInsuranceRadio = $("typeMedicalInsurance");
 
   if (investmentRadio && investmentRadio.checked) {
     // Keep the selected category for Investment transactions
     category = $("category").value || "Other";
-  } else if (medicalInsuranceRadio && medicalInsuranceRadio.checked) {
-    category = "Medical Insurance";
   }
 
   // Validate form inputs
@@ -2431,6 +2393,147 @@ document.addEventListener("DOMContentLoaded", () => {
   setMaxTodayForFilterDates();
   // ensure transaction date cannot be set in the future
   setMaxTodayForTxDate();
+
+  // Detect PWA/standalone mode and apply appropriate classes
+  if (
+    window.matchMedia("(display-mode: standalone)").matches ||
+    window.navigator.standalone === true ||
+    document.referrer.includes("android-app://") ||
+    // Also detect mobile viewport for testing
+    (window.innerWidth <= 768 && window.innerHeight <= 1024)
+  ) {
+    document.body.classList.add("pwa-mode");
+    document.body.classList.add("standalone");
+
+    // Setup proper scrolling for mouse wheel and touchpad on ALL tabs
+    const app = document.querySelector(".app");
+    const viewportHeight = window.innerHeight;
+    const contentHeight = viewportHeight - 120; // Account for header and nav
+
+    // Apply scrolling setup to all main content tabs
+    const allTabs = [
+      { id: "#homeTab", name: "Expenses" },
+      { id: "#expiryTab", name: "Expiries" },
+      { id: "#summaryTab", name: "Summary" },
+      { id: "#purchaseTab", name: "Shopping" },
+    ];
+
+    allTabs.forEach((tab) => {
+      const tabContent = document.querySelector(tab.id);
+      if (tabContent) {
+        // Make tab content scrollable with proper height
+        tabContent.style.setProperty(
+          "height",
+          contentHeight + 1000 + "px",
+          "important",
+        );
+        tabContent.style.setProperty(
+          "max-height",
+          contentHeight + "px",
+          "important",
+        );
+        tabContent.style.setProperty("overflow-y", "scroll", "important");
+        tabContent.style.setProperty(
+          "-webkit-overflow-scrolling",
+          "touch",
+          "important",
+        );
+        tabContent.style.setProperty("position", "relative", "important");
+
+        // Add scroll event listeners for debugging
+        tabContent.addEventListener("scroll", () => {
+          console.log(`${tab.name} tab scrolled to:`, tabContent.scrollTop);
+        });
+
+        tabContent.addEventListener(
+          "wheel",
+          (e) => {
+            console.log(
+              `Wheel event on ${tab.name} tab:`,
+              e.deltaY,
+              "target:",
+              e.target.className,
+            );
+          },
+          { passive: false },
+        );
+
+        // Handle wheel events on items within each tab
+        const itemSelector =
+          tab.id === "#expiryTab"
+            ? ".expiry-item"
+            : tab.id === "#purchaseTab"
+              ? ".purchase-item"
+              : ".tx";
+        const items = tabContent.querySelectorAll(itemSelector);
+
+        items.forEach((item, index) => {
+          item.addEventListener(
+            "wheel",
+            (e) => {
+              console.log(
+                `Wheel event on ${tab.name} item ${index}:`,
+                e.deltaY,
+              );
+              // Allow the event to bubble up to the scrollable container
+            },
+            { passive: true },
+          );
+
+          // Also handle wheel events on child elements
+          const children = item.querySelectorAll("*");
+          children.forEach((child) => {
+            child.addEventListener(
+              "wheel",
+              (e) => {
+                console.log(
+                  `Wheel event on ${tab.name} item child:`,
+                  child.className,
+                  e.deltaY,
+                );
+                // Let the event bubble up to the scrollable container
+              },
+              { passive: true },
+            );
+          });
+        });
+
+        console.log(`${tab.name} tab scrolling setup complete`);
+      }
+    });
+
+    if (app) {
+      // Make app container non-scrollable
+      app.style.setProperty("height", "auto", "important");
+      app.style.setProperty("overflow-y", "visible", "important");
+    }
+  }
+
+  // Listen for display mode changes (for Dev Tools testing)
+  window
+    .matchMedia("(display-mode: standalone)")
+    .addEventListener("change", (e) => {
+      const app = document.querySelector(".app");
+      if (e.matches) {
+        document.body.classList.add("pwa-mode");
+        document.body.classList.add("standalone");
+        // Force app height to auto for scrolling
+        if (app) {
+          app.style.setProperty("height", "auto", "important");
+          app.style.setProperty("max-height", "none", "important");
+          app.style.setProperty("overflow-y", "auto", "important");
+          app.style.setProperty(
+            "-webkit-overflow-scrolling",
+            "touch",
+            "important",
+          );
+        }
+      } else {
+        document.body.classList.remove("pwa-mode");
+        document.body.classList.remove("standalone");
+      }
+    });
+
   computeTotals();
   renderList();
   // initial chart render (will no-op if canvas missing)
