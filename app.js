@@ -17,7 +17,8 @@ function openPurchaseModal(defaults) {
   setTimeout(() => purchaseModal.classList.add("show"), 10);
   editPurchaseId = null;
   const title = document.getElementById("purchaseModalTitle");
-  const submitBtn = purchaseForm && purchaseForm.querySelector('button[type="submit"]');
+  const submitBtn =
+    purchaseForm && purchaseForm.querySelector('button[type="submit"]');
   if (defaults) {
     if (title) title.textContent = "Edit Purchase";
     if (submitBtn) submitBtn.textContent = "Update";
@@ -56,7 +57,8 @@ function submitPurchaseForm() {
   editPurchaseId = null;
   const title = document.getElementById("purchaseModalTitle");
   if (title) title.textContent = "Add Purchase";
-  const submitBtn = purchaseForm && purchaseForm.querySelector('button[type="submit"]');
+  const submitBtn =
+    purchaseForm && purchaseForm.querySelector('button[type="submit"]');
   if (submitBtn) submitBtn.textContent = "Save";
   closePurchaseModalFn();
 }
@@ -64,10 +66,13 @@ function submitPurchaseForm() {
 function renderPurchase() {
   if (!purchaseListEl) return;
   if (!purchaseData.length) {
-    purchaseListEl.innerHTML = '<div style="color:var(--muted);padding:12px">No purchases added</div>';
+    purchaseListEl.innerHTML =
+      '<div style="color:var(--muted);padding:12px">No purchases added</div>';
     return;
   }
-  const items = purchaseData.slice().sort((a,b) => (a.name||"").localeCompare(b.name||""));
+  const items = purchaseData
+    .slice()
+    .sort((a, b) => (a.name || "").localeCompare(b.name || ""));
   purchaseListEl.innerHTML = "";
   for (const item of items) {
     const row = document.createElement("div");
@@ -89,7 +94,9 @@ function renderPurchase() {
 
     // Swipe-to-delete functionality (similar to transaction list)
     let startX = 0;
+    let startY = 0;
     let dx = 0;
+    let dy = 0;
     let swiping = false;
     let moved = false;
 
@@ -104,27 +111,37 @@ function renderPurchase() {
       (e) => {
         if (!e.touches || e.touches.length === 0) return;
         startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
         dx = 0;
+        dy = 0;
         swiping = false;
         moved = false;
         row.style.transition = ""; // disable during drag
       },
-      { passive: true }
+      { passive: true },
     );
 
     row.addEventListener(
       "touchmove",
       (e) => {
         if (!e.touches || e.touches.length === 0) return;
-        dx = e.touches[0].clientX - startX; // negative when moving left
-        if (dx < -10) swiping = true;
-        if (Math.abs(dx) > 6) moved = true;
+        dx = e.touches[0].clientX - startX;
+        dy = e.touches[0].clientY - startY;
+
+        // Only consider it a swipe if horizontal movement is dominant
+        if (Math.abs(dx) > Math.abs(dy) && dx < -10) {
+          swiping = true;
+        }
+        if (Math.abs(dx) > 6 || Math.abs(dy) > 6) moved = true;
+
         if (swiping) {
+          e.preventDefault(); // Prevent scrolling when swiping
           const limited = Math.max(dx, -120);
           row.style.transform = `translateX(${limited}px)`;
         }
+        // If not swiping (vertical scroll), allow default behavior
       },
-      { passive: true }
+      { passive: false },
     );
 
     row.addEventListener("touchend", () => {
@@ -340,8 +357,14 @@ function yearFromDateLike(value, fallbackYear) {
 
 function getFlatpickrYearBounds(fp) {
   const currentYear = new Date().getFullYear();
-  const minYear = yearFromDateLike(fp && fp.config && fp.config.minDate, currentYear - 50);
-  const maxYear = yearFromDateLike(fp && fp.config && fp.config.maxDate, currentYear + 50);
+  const minYear = yearFromDateLike(
+    fp && fp.config && fp.config.minDate,
+    currentYear - 50,
+  );
+  const maxYear = yearFromDateLike(
+    fp && fp.config && fp.config.maxDate,
+    currentYear + 50,
+  );
   return {
     minYear: Math.min(minYear, maxYear),
     maxYear: Math.max(minYear, maxYear),
@@ -350,10 +373,14 @@ function getFlatpickrYearBounds(fp) {
 
 function syncFlatpickrYearDropdown(fp) {
   if (!fp || !fp.calendarContainer) return;
-  const currentMonth = fp.calendarContainer.querySelector(".flatpickr-current-month");
+  const currentMonth = fp.calendarContainer.querySelector(
+    ".flatpickr-current-month",
+  );
   if (!currentMonth) return;
 
-  const yearSelect = currentMonth.querySelector(".flatpickr-yearDropdown-years");
+  const yearSelect = currentMonth.querySelector(
+    ".flatpickr-yearDropdown-years",
+  );
   if (!yearSelect) return;
 
   const { minYear, maxYear } = getFlatpickrYearBounds(fp);
@@ -384,7 +411,9 @@ function syncFlatpickrYearDropdown(fp) {
 
 function ensureFlatpickrYearDropdown(fp) {
   if (!fp || !fp.calendarContainer) return;
-  const currentMonth = fp.calendarContainer.querySelector(".flatpickr-current-month");
+  const currentMonth = fp.calendarContainer.querySelector(
+    ".flatpickr-current-month",
+  );
   if (!currentMonth) return;
 
   let yearSelect = currentMonth.querySelector(".flatpickr-yearDropdown-years");
@@ -485,7 +514,6 @@ function hapticFeedback(type = "light") {
   }
 }
 
-
 function addPullToRefresh() {
   const app = document.querySelector(".app");
   if (!app) return;
@@ -502,7 +530,7 @@ function addPullToRefresh() {
         startY = e.touches[0].clientY;
       }
     },
-    { passive: true }
+    { passive: true },
   );
 
   app.addEventListener(
@@ -529,7 +557,7 @@ function addPullToRefresh() {
         }
       }
     },
-    { passive: false }
+    { passive: false },
   );
 
   app.addEventListener("touchend", () => {
@@ -764,15 +792,15 @@ async function importFromFile(file) {
   const items = Array.isArray(json)
     ? json
     : json && Array.isArray(json.items)
-    ? json.items
-    : null;
+      ? json.items
+      : null;
   if (!items)
     throw new Error("Invalid file format: expected an array or {items: []}");
   const cleaned = items.map(normalizeTx).filter(Boolean);
   if (cleaned.length === 0) throw new Error("No valid transactions found");
 
   const replace = confirm(
-    "Replace existing data with imported items?\nOK = Replace, Cancel = Merge"
+    "Replace existing data with imported items?\nOK = Replace, Cancel = Merge",
   );
   if (replace) {
     data = cleaned;
@@ -795,7 +823,7 @@ function populateCategories() {
   categorySelect.innerHTML = "";
   filterCategory.innerHTML = '<option value="all">All categories</option>';
   const cats = new Set(
-    defaultCategories.concat(data.map((d) => d.category)).filter(Boolean)
+    defaultCategories.concat(data.map((d) => d.category)).filter(Boolean),
   );
   for (const c of cats) {
     const opt = document.createElement("option");
@@ -989,13 +1017,17 @@ function renderDonut() {
     other: "#9ca3af", // neutral
   };
   const colors = labels.map(
-    (label, i) => categoryColors[catSlug(label)] || palette[i % palette.length]
+    (label, i) => categoryColors[catSlug(label)] || palette[i % palette.length],
   );
   // Build dataset depending on availability
   const hasData = values.length > 0;
   const chartLabels = hasData ? labels : ["No data"];
   const chartValues = hasData ? values : [1];
-  const chartColors = hasData ? (colors.length ? colors : ["#e5e7eb"]) : ["#e5e7eb"];
+  const chartColors = hasData
+    ? colors.length
+      ? colors
+      : ["#e5e7eb"]
+    : ["#e5e7eb"];
 
   // Ensure canvas is visible
   canvas.style.display = "block";
@@ -1189,7 +1221,9 @@ function renderList() {
 
     // Swipe-to-delete gesture handling
     let startX = 0;
+    let startY = 0;
     let dx = 0;
+    let dy = 0;
     let swiping = false;
     let moved = false;
 
@@ -1204,27 +1238,37 @@ function renderList() {
       (e) => {
         if (!e.touches || e.touches.length === 0) return;
         startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
         dx = 0;
+        dy = 0;
         swiping = false;
         moved = false;
         el.style.transition = ""; // disable during drag
       },
-      { passive: true }
+      { passive: true },
     );
 
     el.addEventListener(
       "touchmove",
       (e) => {
         if (!e.touches || e.touches.length === 0) return;
-        dx = e.touches[0].clientX - startX; // negative when moving left
-        if (dx < -10) swiping = true;
-        if (Math.abs(dx) > 6) moved = true;
+        dx = e.touches[0].clientX - startX;
+        dy = e.touches[0].clientY - startY;
+
+        // Only consider it a swipe if horizontal movement is dominant
+        if (Math.abs(dx) > Math.abs(dy) && dx < -10) {
+          swiping = true;
+        }
+        if (Math.abs(dx) > 6 || Math.abs(dy) > 6) moved = true;
+
         if (swiping) {
+          e.preventDefault(); // Prevent scrolling when swiping
           const limited = Math.max(dx, -120);
           el.style.transform = `translateX(${limited}px)`;
         }
+        // If not swiping (vertical scroll), allow default behavior
       },
-      { passive: true }
+      { passive: false },
     );
 
     el.addEventListener("touchend", () => {
@@ -1433,7 +1477,7 @@ function initModalDragToClose() {
       modalIsDragging = true;
       modalContent.style.transition = "none";
     },
-    { passive: true }
+    { passive: true },
   );
 
   modalHeader.addEventListener(
@@ -1449,7 +1493,7 @@ function initModalDragToClose() {
         modalContent.style.transform = `translateY(${deltaY}px)`;
       }
     },
-    { passive: true }
+    { passive: true },
   );
 
   modalHeader.addEventListener(
@@ -1473,7 +1517,7 @@ function initModalDragToClose() {
         modalContent.style.transform = "translateY(0)";
       }
     },
-    { passive: true }
+    { passive: true },
   );
 
   // Also handle mouse events for desktop
@@ -1840,8 +1884,13 @@ function setSummaryDateFilter(filter) {
 // Set today's date as default for all date inputs
 function setDefaultDatesToday() {
   const today = todayIsoDate();
-  const inputs = [$("date"), startDate, endDate, summaryStartDate, summaryEndDate]
-    .filter(Boolean);
+  const inputs = [
+    $("date"),
+    startDate,
+    endDate,
+    summaryStartDate,
+    summaryEndDate,
+  ].filter(Boolean);
   inputs.forEach((el) => {
     if (!el.value) {
       setDateInputValue(el, today);
@@ -1860,7 +1909,7 @@ function setMaxTodayForTxDate() {
 function setMaxTodayForFilterDates() {
   const today = todayIsoDate();
   const inputs = [startDate, endDate, summaryStartDate, summaryEndDate].filter(
-    Boolean
+    Boolean,
   );
   inputs.forEach((el) => {
     setDateInputMax(el, today);
@@ -1873,16 +1922,16 @@ function setMaxTodayForFilterDates() {
 
 // Add event listeners for summary page date filter buttons
 summaryFilterAllTime.addEventListener("click", () =>
-  setSummaryDateFilter("all")
+  setSummaryDateFilter("all"),
 );
 summaryFilterThisMonth.addEventListener("click", () =>
-  setSummaryDateFilter("thisMonth")
+  setSummaryDateFilter("thisMonth"),
 );
 summaryFilterPrevMonth.addEventListener("click", () =>
-  setSummaryDateFilter("previousMonth")
+  setSummaryDateFilter("previousMonth"),
 );
 summaryFilterCustom.addEventListener("click", () =>
-  setSummaryDateFilter("custom")
+  setSummaryDateFilter("custom"),
 );
 
 // Handle summary custom date range changes
@@ -1953,13 +2002,13 @@ function hidePWAInstallPopup(withDelay = false) {
     const dismissTime = Date.now();
     localStorage.setItem("pwa-dismiss-time", dismissTime.toString());
     console.log(
-      "PWA install modal dismissed. Next show scheduled in 1 minute."
+      "PWA install modal dismissed. Next show scheduled in 1 minute.",
     );
 
     // Schedule next show after 1 minute
     setTimeout(() => {
       console.log(
-        "1-minute delay completed. Checking if PWA install modal should show."
+        "1-minute delay completed. Checking if PWA install modal should show.",
       );
       checkPWAInstallPrompt(0);
     }, 60000); // 60 seconds = 1 minute
@@ -2118,8 +2167,12 @@ async function showExpiryNotification(items) {
     const reg = await navigator.serviceWorker.getRegistration();
     if (!reg) return;
     const count = items.length;
-    const title = count === 1 ? "1 item expires today" : `${count} items expire today`;
-    const names = items.slice(0, 3).map((i) => i.name || "Item").join(", ");
+    const title =
+      count === 1 ? "1 item expires today" : `${count} items expire today`;
+    const names = items
+      .slice(0, 3)
+      .map((i) => i.name || "Item")
+      .join(", ");
     const more = count > 3 ? ` +${count - 3} more` : "";
     const body = names ? `${names}${more}` : "Tap to view";
     await reg.showNotification(title, {
@@ -2144,7 +2197,10 @@ function setNotified(signature) {
 
 function signatureForToday(items) {
   const t = todayStr();
-  const ids = items.map((i) => i.id).sort().join("|");
+  const ids = items
+    .map((i) => i.id)
+    .sort()
+    .join("|");
   return `${t}|${items.length}|${ids}`;
 }
 
@@ -2178,9 +2234,12 @@ function initExpiryNotifications() {
       }
     });
   } catch (_) {}
-  setInterval(() => {
-    checkAndNotifyExpiringToday();
-  }, 60 * 60 * 1000);
+  setInterval(
+    () => {
+      checkAndNotifyExpiringToday();
+    },
+    60 * 60 * 1000,
+  );
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -2211,12 +2270,12 @@ document.addEventListener("DOMContentLoaded", () => {
   startPWAInstallReminder();
 
   try {
-    if (location.hash === '#expiry') {
-      switchTab('expiry');
-    } else if (location.hash === '#summary') {
-      switchTab('summary');
-    } else if (location.hash === '#purchase') {
-      switchTab('purchase');
+    if (location.hash === "#expiry") {
+      switchTab("expiry");
+    } else if (location.hash === "#summary") {
+      switchTab("summary");
+    } else if (location.hash === "#purchase") {
+      switchTab("purchase");
     }
   } catch (_) {}
   initExpiryNotifications();
@@ -2225,7 +2284,8 @@ document.addEventListener("DOMContentLoaded", () => {
   if (tabHome) tabHome.addEventListener("click", () => switchTab("home"));
   if (tabSummary)
     tabSummary.addEventListener("click", () => switchTab("summary"));
-  if (tabPurchase) tabPurchase.addEventListener("click", () => switchTab("purchase"));
+  if (tabPurchase)
+    tabPurchase.addEventListener("click", () => switchTab("purchase"));
   if (tabExpiry) tabExpiry.addEventListener("click", () => switchTab("expiry"));
 
   // Expiry modal controls
@@ -2244,8 +2304,10 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Purchase modal controls
-  if (closePurchaseModal) closePurchaseModal.addEventListener("click", closePurchaseModalFn);
-  if (cancelPurchaseBtn) cancelPurchaseBtn.addEventListener("click", closePurchaseModalFn);
+  if (closePurchaseModal)
+    closePurchaseModal.addEventListener("click", closePurchaseModalFn);
+  if (cancelPurchaseBtn)
+    cancelPurchaseBtn.addEventListener("click", closePurchaseModalFn);
   if (purchaseForm) {
     purchaseForm.addEventListener("submit", (e) => {
       e.preventDefault();
@@ -2300,7 +2362,8 @@ function validateExpiry(name, dateStr) {
   if (!name || !name.trim()) return { ok: false, msg: "Name is required" };
   if (!dateStr) return { ok: false, msg: "Expiry date is required" };
   const d = new Date(dateStr);
-  if (isNaN(d.getTime())) return { ok: false, msg: "Enter a valid expiry date" };
+  if (isNaN(d.getTime()))
+    return { ok: false, msg: "Enter a valid expiry date" };
   return { ok: true };
 }
 
@@ -2370,12 +2433,12 @@ function computeExpiryTotals() {
   const startOfMonth = new Date(
     startOfToday.getFullYear(),
     startOfToday.getMonth(),
-    1
+    1,
   );
   const endOfMonth = new Date(
     startOfToday.getFullYear(),
     startOfToday.getMonth() + 1,
-    0
+    0,
   );
   endOfMonth.setHours(23, 59, 59, 999);
 
@@ -2431,14 +2494,14 @@ function renderExpiry() {
       diff < 0
         ? `${Math.abs(diff)} day${Math.abs(diff) === 1 ? "" : "s"} ago`
         : diff === 0
-        ? "Today"
-        : `${diff} day${diff === 1 ? "" : "s"} left`;
+          ? "Today"
+          : `${diff} day${diff === 1 ? "" : "s"} left`;
     const pct = Math.max(
       0,
       Math.min(
         100,
-        Math.round((1 - Math.min(Math.max(diff, 0), 30) / 30) * 100)
-      )
+        Math.round((1 - Math.min(Math.max(diff, 0), 30) / 30) * 100),
+      ),
     );
 
     const row = document.createElement("div");
@@ -2455,7 +2518,7 @@ function renderExpiry() {
     const subtitle = document.createElement("div");
     subtitle.className = "category";
     subtitle.textContent = `Expires ${formatDateDisplay(
-      item.expiry
+      item.expiry,
     )} · ${statusText}`;
     info.appendChild(title);
     info.appendChild(subtitle);
@@ -2488,7 +2551,9 @@ function renderExpiry() {
 
     // Swipe-to-delete gesture handling
     let startX = 0;
+    let startY = 0;
     let dx = 0;
+    let dy = 0;
     let swiping = false;
     let moved = false;
 
@@ -2503,27 +2568,37 @@ function renderExpiry() {
       (e) => {
         if (!e.touches || e.touches.length === 0) return;
         startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
         dx = 0;
+        dy = 0;
         swiping = false;
         moved = false;
         row.style.transition = ""; // disable during drag
       },
-      { passive: true }
+      { passive: true },
     );
 
     row.addEventListener(
       "touchmove",
       (e) => {
         if (!e.touches || e.touches.length === 0) return;
-        dx = e.touches[0].clientX - startX; // negative when moving left
-        if (dx < -10) swiping = true;
-        if (Math.abs(dx) > 6) moved = true;
+        dx = e.touches[0].clientX - startX;
+        dy = e.touches[0].clientY - startY;
+
+        // Only consider it a swipe if horizontal movement is dominant
+        if (Math.abs(dx) > Math.abs(dy) && dx < -10) {
+          swiping = true;
+        }
+        if (Math.abs(dx) > 6 || Math.abs(dy) > 6) moved = true;
+
         if (swiping) {
+          e.preventDefault(); // Prevent scrolling when swiping
           const limited = Math.max(dx, -120);
           row.style.transform = `translateX(${limited}px)`;
         }
+        // If not swiping (vertical scroll), allow default behavior
       },
-      { passive: true }
+      { passive: false },
     );
 
     row.addEventListener("touchend", () => {
