@@ -2,7 +2,7 @@
 // Data: array of {id, amount (number), type: 'expense'|'income', category, date, description}
 
 // Version control for cache busting
-const APP_VERSION = "9.0";
+const APP_VERSION = "10.0";
 
 // Force reload if version mismatch
 if (localStorage.getItem("app-version") !== APP_VERSION) {
@@ -357,17 +357,12 @@ const defaultCategories = [
   "Groceries",
   "Dining",
   "Rent",
-  "Utilities",
   "Transportation",
   "Shopping",
   "Healthcare",
   "Entertainment",
   "Salary",
   "Business",
-  "Investment",
-  "Emergency Fund",
-  "Mutual Fund",
-  "Fixed Deposit",
   "Chit Fund",
   "LIC",
   "Term Insurance",
@@ -1024,11 +1019,48 @@ async function importFromFile(file) {
 function populateCategories() {
   categorySelect.innerHTML = "";
   filterCategory.innerHTML = '<option value="all">All categories</option>';
+
+  // Get current transaction type
+  const currentType = getSelectedType();
+
+  // Define categories by type
+  const categoriesByType = {
+    expense: [
+      "Groceries",
+      "Dining",
+      "Rent",
+      "Transportation",
+      "Shopping",
+      "Healthcare",
+      "Entertainment",
+      "Chit Fund",
+      "LIC",
+      "Term Insurance",
+      "Gold Investment",
+      "Land Investment",
+      "Property Investment",
+      "Other",
+    ],
+    income: ["Salary", "Business", "Other"],
+  };
+
+  // Get appropriate categories for current type
+  const typeCategories =
+    categoriesByType[currentType] || categoriesByType.expense;
+
+  // Combine with existing data categories
   const cats = new Set(
-    defaultCategories.concat(data.map((d) => d.category)).filter(Boolean),
+    typeCategories.concat(data.map((d) => d.category)).filter(Boolean),
   );
 
-  for (const c of cats) {
+  // Sort categories: put Other at the end
+  const sortedCats = Array.from(cats).sort((a, b) => {
+    if (a === "Other") return 1;
+    if (b === "Other") return -1;
+    return a.localeCompare(b);
+  });
+
+  for (const c of sortedCats) {
     const opt = document.createElement("option");
     opt.value = c;
     opt.textContent = c;
@@ -1122,12 +1154,6 @@ function expensesByCategory() {
 
 function isInvestmentCategory(category) {
   const investmentCategories = [
-    "Investment",
-    "Mutual Fund",
-    "Fixed Deposit",
-    "Chit Fund",
-    "LIC",
-    "Term Insurance",
     "Gold Investment",
     "Land Investment",
     "Property Investment",
@@ -2811,6 +2837,29 @@ document.addEventListener("DOMContentLoaded", () => {
     document.addEventListener("DOMContentLoaded", initScrollIndicators);
   } else {
     initScrollIndicators();
+  }
+
+  // Wire type radio buttons to update categories
+  const typeExpense = $("typeExpense");
+  const typeIncome = $("typeIncome");
+  const typeInvestment = $("typeInvestment");
+
+  if (typeExpense) {
+    typeExpense.addEventListener("change", () => {
+      populateCategories();
+    });
+  }
+
+  if (typeIncome) {
+    typeIncome.addEventListener("change", () => {
+      populateCategories();
+    });
+  }
+
+  if (typeInvestment) {
+    typeInvestment.addEventListener("change", () => {
+      populateCategories();
+    });
   }
 
   // Wire bottom nav tabs

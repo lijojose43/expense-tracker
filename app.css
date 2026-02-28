@@ -338,10 +338,15 @@ html:not([data-theme="dark"]) #sunIcon {
   justify-content: center;
 }
 .summary {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  flex-wrap: wrap;
   gap: 16px;
   margin-bottom: 16px;
+}
+
+.summary .card:not(.wide) {
+  flex: 1;
+  min-width: calc(50% - 8px); /* Maintain 2-column layout accounting for gap */
 }
 .card {
   background:
@@ -374,6 +379,7 @@ html:not([data-theme="dark"]) #sunIcon {
 }
 .card.wide {
   flex-basis: 100%;
+  width: 100%;
 }
 .label {
   font-size: 13px;
@@ -2630,8 +2636,12 @@ footer {
   }
 
   .summary {
-    grid-template-columns: 1fr 1fr; /* Maintain 2x2 grid on mobile */
     gap: 12px;
+  }
+
+  .summary .card:not(.wide) {
+    flex: 1;
+    min-width: calc(50% - 6px); /* Maintain 2-column layout accounting for gap */
   }
 
   .app {
