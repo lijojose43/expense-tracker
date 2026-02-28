@@ -871,9 +871,16 @@ function computeTotals() {
   savingsEl.textContent = formatMoney(savings);
 
   // Calculate investments (sum of all Investment category transactions)
-  const investments = filteredData
-    .filter((t) => t.category === "Investment")
-    .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+  let investments = 0;
+  for (const t of data) {
+    // Apply same date filtering to investments
+    if (dateRange && !isDateInRange(t.date, dateRange.start, dateRange.end)) {
+      continue;
+    }
+    if (t.category === "Investment") {
+      investments += Math.abs(Number(t.amount));
+    }
+  }
   investmentsEl.textContent = formatMoney(investments);
 }
 
