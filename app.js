@@ -369,6 +369,7 @@ const defaultCategories = [
   "Gold Investment",
   "Land Investment",
   "Property Investment",
+  "Mutual Fund",
   "Other",
 ];
 
@@ -1020,8 +1021,11 @@ function populateCategories() {
   categorySelect.innerHTML = "";
   filterCategory.innerHTML = '<option value="all">All categories</option>';
 
-  // Get current transaction type
+  // Get current transaction type for the form
   const currentType = getSelectedType();
+
+  // Get current filter type
+  const currentFilterType = filterType.value;
 
   // Define categories by type
   const categoriesByType = {
@@ -1033,40 +1037,76 @@ function populateCategories() {
       "Shopping",
       "Healthcare",
       "Entertainment",
+      "Other",
+    ],
+    income: ["Salary", "Business", "Other"],
+    investment: [
       "Chit Fund",
       "LIC",
       "Term Insurance",
       "Gold Investment",
       "Land Investment",
       "Property Investment",
+      "Mutual Fund",
       "Other",
     ],
-    income: ["Salary", "Business", "Other"],
   };
 
-  // Get appropriate categories for current type
-  const typeCategories =
+  // Get appropriate categories for form (based on selected transaction type)
+  const formCategories =
     categoriesByType[currentType] || categoriesByType.expense;
 
-  // Combine with existing data categories
-  const cats = new Set(
-    typeCategories.concat(data.map((d) => d.category)).filter(Boolean),
-  );
+  // Get appropriate categories for filter (based on filter type)
+  const filterCategories =
+    currentFilterType === "all"
+      ? Object.values(categoriesByType).flat()
+      : categoriesByType[currentFilterType] || categoriesByType.expense;
+
+  // Combine with existing data categories for form
+  const existingFormCategories = data
+    .filter((d) => d.type === currentType)
+    .map((d) => d.category)
+    .filter(Boolean);
+
+  // Combine with existing data categories for filter
+  const existingFilterCategories =
+    currentFilterType === "all"
+      ? data.map((d) => d.category).filter(Boolean)
+      : data
+          .filter((d) => d.type === currentFilterType)
+          .map((d) => d.category)
+          .filter(Boolean);
+
+  const formCats = new Set(formCategories.concat(existingFormCategories));
+  const filterCats = new Set(filterCategories.concat(existingFilterCategories));
 
   // Sort categories: put Other at the end
-  const sortedCats = Array.from(cats).sort((a, b) => {
+  const sortedFormCats = Array.from(formCats).sort((a, b) => {
     if (a === "Other") return 1;
     if (b === "Other") return -1;
     return a.localeCompare(b);
   });
 
-  for (const c of sortedCats) {
+  const sortedFilterCats = Array.from(filterCats).sort((a, b) => {
+    if (a === "Other") return 1;
+    if (b === "Other") return -1;
+    return a.localeCompare(b);
+  });
+
+  // Populate form category dropdown
+  for (const c of sortedFormCats) {
     const opt = document.createElement("option");
     opt.value = c;
     opt.textContent = c;
     categorySelect.appendChild(opt);
-    const opt2 = opt.cloneNode(true);
-    filterCategory.appendChild(opt2);
+  }
+
+  // Populate filter category dropdown
+  for (const c of sortedFilterCats) {
+    const opt = document.createElement("option");
+    opt.value = c;
+    opt.textContent = c;
+    filterCategory.appendChild(opt);
   }
 }
 
@@ -1512,141 +1552,187 @@ function renderList() {
       '<div style="color:var(--muted);padding:12px">No transactions yet</div>';
     return;
   }
-  for (const t of list) {
-    const el = document.createElement("div");
-    el.className = "tx";
-    const meta = document.createElement("div");
-    meta.className = "meta";
-    const box = document.createElement("div");
-    box.className = "iconBox";
-    // Set category icon and data attribute for styling
-    box.innerHTML = getCategoryIcon(t.category);
-    try {
-      const slug = catSlug(t.category || "other");
-      box.setAttribute("data-cat", slug);
-    } catch (_) {}
-    const info = document.createElement("div");
-    const title = document.createElement("div");
-    title.className = "title";
-    title.textContent = t.description || t.category || "Transaction";
-    const cat = document.createElement("div");
-    cat.className = "category";
-    cat.textContent = t.category + " · " + formatDateDisplay(t.date);
-    info.appendChild(title);
-    info.appendChild(cat);
-    meta.appendChild(box);
-    meta.appendChild(info);
-    const amt = document.createElement("div");
-    amt.className = "amount " + (t.type === "expense" ? "expense" : "income");
-    const amountValue = Math.abs(Number(t.amount)).toFixed(2);
-    const formattedAmount = amountValue.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-    amt.textContent =
-      (t.type === "expense" ? "-" : "+") + "₹" + formattedAmount;
-    const actions = document.createElement("div");
-    actions.className = "txActions"; // kept for layout spacing; no buttons inside
 
-    el.appendChild(meta);
-    el.appendChild(amt);
-    el.appendChild(actions);
+  // Group transactions by date
+  const groupedByDate = {};
+  list.forEach((transaction) => {
+    const date = transaction.date;
+    if (!groupedByDate[date]) {
+      groupedByDate[date] = [];
+    }
+    groupedByDate[date].push(transaction);
+  });
 
-    // Swipe-to-delete gesture handling
-    let startX = 0;
-    let startY = 0;
-    let dx = 0;
-    let dy = 0;
-    let swiping = false;
-    let moved = false;
+  // Render transactions grouped by date
+  Object.keys(groupedByDate).forEach((date) => {
+    // Add date header
+    const dateHeader = document.createElement("div");
+    dateHeader.className = "date-header";
 
-    function resetTransform() {
-      el.style.transition = "transform 0.2s ease";
-      el.style.transform = "translateX(0)";
-      setTimeout(() => (el.style.transition = ""), 220);
+    // Format date header
+    const today = new Date().toISOString().slice(0, 10);
+    const yesterday = new Date(Date.now() - 86400000)
+      .toISOString()
+      .slice(0, 10);
+
+    let displayDate = formatDateDisplay(date);
+    if (date === today) {
+      displayDate = "Today";
+    } else if (date === yesterday) {
+      displayDate = "Yesterday";
+    } else {
+      // Add relative time for older dates
+      const transactionDate = new Date(date);
+      const daysDiff = Math.floor(
+        (new Date() - transactionDate) / (1000 * 60 * 60 * 24),
+      );
+      if (daysDiff <= 7) {
+        displayDate = transactionDate.toLocaleDateString("en-US", {
+          weekday: "long",
+        });
+      }
     }
 
-    el.addEventListener(
-      "touchstart",
-      (e) => {
-        if (!e.touches || e.touches.length === 0) return;
-        startX = e.touches[0].clientX;
-        startY = e.touches[0].clientY;
-        dx = 0;
-        dy = 0;
-        swiping = false;
-        moved = false;
-        el.style.transition = ""; // disable during drag
-      },
-      { passive: true },
-    );
+    dateHeader.textContent = displayDate;
+    transactionsEl.appendChild(dateHeader);
 
-    el.addEventListener(
-      "touchmove",
-      (e) => {
-        if (!e.touches || e.touches.length === 0) return;
-        dx = e.touches[0].clientX - startX;
-        dy = e.touches[0].clientY - startY;
+    // Add transactions for this date
+    groupedByDate[date].forEach((t) => {
+      const el = document.createElement("div");
+      el.className = "tx";
+      const meta = document.createElement("div");
+      meta.className = "meta";
+      const box = document.createElement("div");
+      box.className = "iconBox";
+      // Set category icon and data attribute for styling
+      box.innerHTML = getCategoryIcon(t.category);
+      try {
+        const slug = catSlug(t.category || "other");
+        box.setAttribute("data-cat", slug);
+      } catch (_) {}
+      const info = document.createElement("div");
+      const title = document.createElement("div");
+      title.className = "title";
+      title.textContent = t.description || t.category || "Transaction";
+      const cat = document.createElement("div");
+      cat.className = "category";
+      cat.textContent = t.category; // Remove date from here since it's now in the header
+      info.appendChild(title);
+      info.appendChild(cat);
+      meta.appendChild(box);
+      meta.appendChild(info);
+      const amt = document.createElement("div");
+      amt.className = "amount " + (t.type === "expense" ? "expense" : "income");
+      const amountValue = Math.abs(Number(t.amount)).toFixed(2);
+      const formattedAmount = amountValue.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+      amt.textContent =
+        (t.type === "expense" ? "-" : "+") + "₹" + formattedAmount;
+      const actions = document.createElement("div");
+      actions.className = "txActions"; // kept for layout spacing; no buttons inside
 
-        // Only consider it a swipe if horizontal movement is dominant
-        if (Math.abs(dx) > Math.abs(dy) && dx < -10) {
-          swiping = true;
+      el.appendChild(meta);
+      el.appendChild(amt);
+      el.appendChild(actions);
+
+      // Swipe-to-delete gesture handling
+      let startX = 0;
+      let startY = 0;
+      let dx = 0;
+      let dy = 0;
+      let swiping = false;
+      let moved = false;
+
+      function resetTransform() {
+        el.style.transition = "transform 0.2s ease";
+        el.style.transform = "translateX(0)";
+        setTimeout(() => (el.style.transition = ""), 220);
+      }
+
+      el.addEventListener(
+        "touchstart",
+        (e) => {
+          if (!e.touches || e.touches.length === 0) return;
+          startX = e.touches[0].clientX;
+          startY = e.touches[0].clientY;
+          dx = 0;
+          dy = 0;
+          swiping = false;
+          moved = false;
+          el.style.transition = ""; // disable during drag
+        },
+        { passive: true },
+      );
+
+      el.addEventListener(
+        "touchmove",
+        (e) => {
+          if (!e.touches || e.touches.length === 0) return;
+          dx = e.touches[0].clientX - startX;
+          dy = e.touches[0].clientY - startY;
+
+          // Only consider it a swipe if horizontal movement is dominant
+          if (Math.abs(dx) > Math.abs(dy) && dx < -10) {
+            swiping = true;
+          }
+          if (Math.abs(dx) > 6 || Math.abs(dy) > 6) moved = true;
+
+          if (swiping) {
+            e.preventDefault(); // Prevent scrolling when swiping
+            const limited = Math.max(dx, -120);
+            el.style.transform = `translateX(${limited}px)`;
+          }
+          // If not swiping (vertical scroll), allow default behavior
+        },
+        { passive: false },
+      );
+
+      el.addEventListener("touchend", () => {
+        if (swiping && dx <= -80) {
+          hapticFeedback("medium");
+          if (confirm("Delete this transaction?")) {
+            hapticFeedback("heavy");
+            data = data.filter((x) => x.id !== t.id);
+            save();
+            populateCategories();
+            computeTotals();
+            renderList();
+            if (!summaryTabEl.classList.contains("hidden")) renderChart();
+            return; // element removed; do not animate back
+          }
         }
-        if (Math.abs(dx) > 6 || Math.abs(dy) > 6) moved = true;
+        resetTransform();
+      });
 
-        if (swiping) {
-          e.preventDefault(); // Prevent scrolling when swiping
-          const limited = Math.max(dx, -120);
-          el.style.transform = `translateX(${limited}px)`;
-        }
-        // If not swiping (vertical scroll), allow default behavior
-      },
-      { passive: false },
-    );
-
-    el.addEventListener("touchend", () => {
-      if (swiping && dx <= -80) {
-        hapticFeedback("medium");
+      // Open edit on row click (ignore if a swipe occurred)
+      el.addEventListener("click", () => {
+        if (moved) return; // don't treat swipe as click
+        populateCategories();
+        editId = t.id;
+        const modalTitle = document.getElementById("modalTitle");
+        if (modalTitle) modalTitle.textContent = "Edit Transaction";
+        const submitBtn = txForm.querySelector('button[type="submit"]');
+        if (submitBtn) submitBtn.textContent = "Update";
+        openModal({
+          amount: Math.abs(Number(t.amount)).toFixed(2),
+          type: t.type,
+          category: t.category,
+          date: t.date,
+          description: t.description || "",
+        });
+      });
+      el.addEventListener("contextmenu", (e) => {
+        e.preventDefault();
         if (confirm("Delete this transaction?")) {
-          hapticFeedback("heavy");
           data = data.filter((x) => x.id !== t.id);
           save();
           populateCategories();
           computeTotals();
           renderList();
-          if (!summaryTabEl.classList.contains("hidden")) renderChart();
-          return; // element removed; do not animate back
         }
-      }
-      resetTransform();
-    });
-
-    // Open edit on row click (ignore if a swipe occurred)
-    el.addEventListener("click", () => {
-      if (moved) return; // don't treat swipe as click
-      populateCategories();
-      editId = t.id;
-      const modalTitle = document.getElementById("modalTitle");
-      if (modalTitle) modalTitle.textContent = "Edit Transaction";
-      const submitBtn = txForm.querySelector('button[type="submit"]');
-      if (submitBtn) submitBtn.textContent = "Update";
-      openModal({
-        amount: Math.abs(Number(t.amount)).toFixed(2),
-        type: t.type,
-        category: t.category,
-        date: t.date,
-        description: t.description || "",
       });
+      transactionsEl.appendChild(el);
     });
-    el.addEventListener("contextmenu", (e) => {
-      e.preventDefault();
-      if (confirm("Delete this transaction?")) {
-        data = data.filter((x) => x.id !== t.id);
-        save();
-        populateCategories();
-        computeTotals();
-        renderList();
-      }
-    });
-    transactionsEl.appendChild(el);
-  }
+  });
 }
 
 function openModal(defaults) {
@@ -2806,9 +2892,22 @@ document.addEventListener("DOMContentLoaded", () => {
     const filtersRow = document.querySelector(".filters-row");
     if (!filtersRow) return;
 
+    let scrollTimeout;
+
     function updateScrollIndicators() {
       const scrollLeft = filtersRow.scrollLeft;
       const maxScroll = filtersRow.scrollWidth - filtersRow.clientWidth;
+
+      // Add scrolling class during scroll
+      filtersRow.classList.add("scrolling");
+
+      // Clear existing timeout
+      clearTimeout(scrollTimeout);
+
+      // Remove scrolling class after scroll ends
+      scrollTimeout = setTimeout(() => {
+        filtersRow.classList.remove("scrolling");
+      }, 150);
 
       // Remove existing classes
       filtersRow.classList.remove("scrollable-left", "scrollable-right");
