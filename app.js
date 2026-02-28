@@ -428,6 +428,7 @@ const optionsMenu = $("optionsMenu");
 const themeToggle = $("themeToggle");
 const exportOption = $("exportOption");
 const importOption = $("importOption");
+const clearOption = $("clearOption");
 // Tabs and title
 const screenTitle = $("screenTitle");
 const homeTabEl = $("homeTab");
@@ -458,6 +459,7 @@ const closePurchaseModal = $("closePurchaseModal");
 const purchaseForm = $("purchaseForm");
 const cancelPurchaseBtn = $("cancelPurchaseBtn");
 const purchaseNameInput = $("purchaseName");
+const addPurchaseBtn = $("addPurchaseBtn");
 let editPurchaseId = null;
 let donutChart = null;
 let editId = null; // track transaction being edited
@@ -894,6 +896,38 @@ function isDateInRange(dateStr, startDate, endDate) {
 }
 
 // ---------- Import / Export ----------
+function clearData() {
+  if (
+    confirm(
+      "Are you sure you want to clear all data? This action cannot be undone.\n\nAll transactions, categories, and settings will be permanently deleted.",
+    )
+  ) {
+    // Clear all data from localStorage
+    localStorage.clear();
+
+    // Reset data arrays
+    data = [];
+    expiryData = [];
+    purchaseData = [];
+
+    // Reset app version to trigger fresh initialization
+    localStorage.setItem("app-version", APP_VERSION);
+
+    // Re-initialize the app
+    populateCategories();
+    computeTotals();
+    renderList();
+    if (!summaryTabEl.classList.contains("hidden")) renderChart();
+    renderExpiry();
+    renderPurchase();
+
+    // Show success message
+    alert("All data has been cleared successfully.");
+
+    hapticFeedback("success");
+  }
+}
+
 function normalizeTx(raw) {
   if (!raw || typeof raw !== "object") return null;
   const t = { ...raw };
@@ -1048,6 +1082,7 @@ function populateCategories() {
       "Land Investment",
       "Property Investment",
       "Mutual Fund",
+      "Emergency Fund",
       "Other",
     ],
   };
@@ -1062,11 +1097,18 @@ function populateCategories() {
       ? Object.values(categoriesByType).flat()
       : categoriesByType[currentFilterType] || categoriesByType.expense;
 
-  // Combine with existing data categories for form
+  // Combine with existing data categories for form (filter out invalid categories for investment type)
   const existingFormCategories = data
     .filter((d) => d.type === currentType)
     .map((d) => d.category)
-    .filter(Boolean);
+    .filter((cat) => {
+      // For investment type, explicitly exclude groceries and other non-investment categories
+      if (currentType === "investment") {
+        return categoriesByType.investment.includes(cat) || cat === "Other";
+      }
+      // For other types, only include valid categories for that type
+      return categoriesByType[currentType].includes(cat);
+    });
 
   // Combine with existing data categories for filter
   const existingFilterCategories =
@@ -1135,21 +1177,21 @@ function computeTotals() {
     }
 
     if (t.type === "income") income += Number(t.amount);
-    else expense += Math.abs(Number(t.amount));
+    else if (t.type === "expense") expense += Math.abs(Number(t.amount));
   }
   totalIncomeEl.textContent = formatMoney(income);
   totalExpensesEl.textContent = formatMoney(-Math.abs(expense) || 0);
   const savings = income - expense;
   savingsEl.textContent = formatMoney(savings);
 
-  // Calculate investments (sum of all Investment category transactions)
+  // Calculate investments (sum of all investment type transactions)
   let investments = 0;
   for (const t of data) {
     // Apply same date filtering to investments
     if (dateRange && !isDateInRange(t.date, dateRange.start, dateRange.end)) {
       continue;
     }
-    if (t.category === "Investment") {
+    if (t.type === "investment") {
       investments += Math.abs(Number(t.amount));
     }
   }
@@ -2032,17 +2074,11 @@ if (importOption && importFileInput) {
     importFileInput.click();
     closeMenu();
   });
-  importFileInput.addEventListener("change", async (e) => {
-    const file = e.target.files && e.target.files[0];
-    if (!file) return;
-    try {
-      await importFromFile(file);
-    } catch (err) {
-      console.error(err);
-      alert("Import failed: " + err.message);
-    } finally {
-      e.target.value = ""; // reset so same file can be chosen again
-    }
+}
+if (clearOption) {
+  clearOption.addEventListener("click", () => {
+    clearData();
+    closeMenu();
   });
 }
 // Tab events
@@ -2652,18 +2688,31 @@ function requestNotificationPermission() {
   try {
     if (!("Notification" in window)) return;
 
+    // Check if we've already handled permission for this session
+    const sessionHandled = sessionStorage.getItem(
+      "notification-permission-handled",
+    );
+    if (sessionHandled) return;
+
     // Check if user has already made a choice
     const notificationChoice = localStorage.getItem("notification-choice");
-    if (notificationChoice === "dismissed") return;
-    if (notificationChoice === "granted") return;
+    if (
+      notificationChoice === "dismissed" ||
+      notificationChoice === "granted"
+    ) {
+      sessionStorage.setItem("notification-permission-handled", "true");
+      return;
+    }
 
-    // If permission is already granted or denied, save the choice
+    // If permission is already granted or denied, save the choice and mark as handled
     if (Notification.permission === "granted") {
       localStorage.setItem("notification-choice", "granted");
+      sessionStorage.setItem("notification-permission-handled", "true");
       return;
     }
     if (Notification.permission === "denied") {
       localStorage.setItem("notification-choice", "dismissed");
+      sessionStorage.setItem("notification-permission-handled", "true");
       return;
     }
 
@@ -2677,10 +2726,13 @@ function requestNotificationPermission() {
           } else if (permission === "denied") {
             localStorage.setItem("notification-choice", "dismissed");
           }
+          // Mark as handled for this session
+          sessionStorage.setItem("notification-permission-handled", "true");
         })
         .catch(() => {
           // If request fails, mark as dismissed to avoid repeated prompts
           localStorage.setItem("notification-choice", "dismissed");
+          sessionStorage.setItem("notification-permission-handled", "true");
         });
     }
   } catch (_) {}
@@ -2985,6 +3037,15 @@ document.addEventListener("DOMContentLoaded", () => {
     closePurchaseModal.addEventListener("click", closePurchaseModalFn);
   if (cancelPurchaseBtn)
     cancelPurchaseBtn.addEventListener("click", closePurchaseModalFn);
+  if (addPurchaseBtn) {
+    addPurchaseBtn.addEventListener("click", () => {
+      openPurchaseModal();
+      // Focus on product name field after modal opens
+      setTimeout(() => {
+        if (purchaseNameInput) purchaseNameInput.focus();
+      }, 100);
+    });
+  }
   if (purchaseForm) {
     purchaseForm.addEventListener("submit", (e) => {
       e.preventDefault();
