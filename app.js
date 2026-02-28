@@ -2775,6 +2775,44 @@ document.addEventListener("DOMContentLoaded", () => {
   } catch (_) {}
   initExpiryNotifications();
 
+  // Add scroll indicators for filters
+  function initScrollIndicators() {
+    const filtersRow = document.querySelector(".filters-row");
+    if (!filtersRow) return;
+
+    function updateScrollIndicators() {
+      const scrollLeft = filtersRow.scrollLeft;
+      const maxScroll = filtersRow.scrollWidth - filtersRow.clientWidth;
+
+      // Remove existing classes
+      filtersRow.classList.remove("scrollable-left", "scrollable-right");
+
+      // Add classes based on scroll position
+      if (scrollLeft > 0) {
+        filtersRow.classList.add("scrollable-left");
+      }
+      if (scrollLeft < maxScroll - 1) {
+        filtersRow.classList.add("scrollable-right");
+      }
+    }
+
+    // Initial check
+    updateScrollIndicators();
+
+    // Update on scroll
+    filtersRow.addEventListener("scroll", updateScrollIndicators);
+
+    // Update on window resize
+    window.addEventListener("resize", updateScrollIndicators);
+  }
+
+  // Initialize scroll indicators when DOM is ready
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initScrollIndicators);
+  } else {
+    initScrollIndicators();
+  }
+
   // Wire bottom nav tabs
   if (tabHome) tabHome.addEventListener("click", () => switchTab("home"));
   if (tabSummary)

@@ -693,6 +693,50 @@ html:not([data-theme="dark"]) .summary .card:nth-child(4) {
   overflow-x: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
+  position: relative;
+}
+
+/* Scroll indicators for filters */
+.filters-row::before,
+.filters-row::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 20px;
+  pointer-events: none;
+  z-index: 10;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.filters-row::before {
+  left: 0;
+  background: linear-gradient(to right, rgba(255, 255, 255, 0.9), transparent);
+}
+
+.filters-row::after {
+  right: 0;
+  background: linear-gradient(to left, rgba(255, 255, 255, 0.9), transparent);
+}
+
+[data-theme="dark"] .filters-row::before {
+  background: linear-gradient(to right, rgba(15, 23, 42, 0.9), transparent);
+}
+
+[data-theme="dark"] .filters-row::after {
+  background: linear-gradient(to left, rgba(15, 23, 42, 0.9), transparent);
+}
+
+/* Show scroll indicators when content is scrollable */
+.filters-row.scrollable-left::before {
+  opacity: 1;
+}
+
+.filters-row.scrollable-right::after {
+  opacity: 1;
+}
+  -ms-overflow-style: none;
   flex-wrap: nowrap; /* Keep all items in single row */
 }
 
@@ -2586,7 +2630,7 @@ footer {
   }
 
   .summary {
-    grid-template-columns: 1fr; /* Single column on mobile */
+    grid-template-columns: 1fr 1fr; /* Maintain 2x2 grid on mobile */
     gap: 12px;
   }
 
