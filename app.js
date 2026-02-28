@@ -2,7 +2,7 @@
 // Data: array of {id, amount (number), type: 'expense'|'income', category, date, description}
 
 // Version control for cache busting
-const APP_VERSION = "4.0";
+const APP_VERSION = "5.0";
 
 // Force reload if version mismatch
 if (localStorage.getItem("app-version") !== APP_VERSION) {
@@ -28,6 +28,145 @@ document.addEventListener("DOMContentLoaded", () => {
   meta3.content = "0";
   document.head.appendChild(meta3);
 });
+
+// ---------- Import / Export ----------
+function showExportOptions() {
+  const formats = [
+    {
+      name: "JSON (Standard)",
+      format: "json",
+      extension: "json",
+      mimeType: "application/json",
+    },
+    {
+      name: "JSON (WhatsApp)",
+      format: "json",
+      extension: "json",
+      mimeType: "application/json;charset=utf-8",
+    },
+    {
+      name: "CSV (Excel)",
+      format: "csv",
+      extension: "csv",
+      mimeType: "text/csv;charset=utf-8",
+    },
+  ];
+
+  const formatOptions = formats
+    .map((fmt, index) => `<option value="${index}">${fmt.name}</option>`)
+    .join("");
+
+  const modal = document.createElement("div");
+  modal.style.cssText = `
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.8); z-index: 1000; display: flex;
+    align-items: center; justify-content: center;
+  `;
+
+  modal.innerHTML = `
+    <div style="background: white; padding: 20px; border-radius: 12px; max-width: 400px; width: 90%;">
+      <h3 style="margin: 0 0 15px 0; color: #333;">Export Data</h3>
+      <p style="margin: 0 0 15px 0; color: #666;">Choose export format:</p>
+      <select id="exportFormatSelect" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+        ${formatOptions}
+      </select>
+      <div style="display: flex; gap: 10px; margin-top: 20px;">
+        <button id="exportConfirmBtn" style="flex: 1; padding: 10px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Export</button>
+        <button id="exportCancelBtn" style="flex: 1; padding: 10px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer;">Cancel</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  // Handle export confirmation
+  document.getElementById("exportConfirmBtn").onclick = () => {
+    const selectedIndex = document.getElementById("exportFormatSelect").value;
+    const selectedFormat = formats[selectedIndex];
+    performExport(selectedFormat);
+    document.body.removeChild(modal);
+  };
+
+  document.getElementById("exportCancelBtn").onclick = () => {
+    document.body.removeChild(modal);
+  };
+
+  // Close modal on background click
+  modal.onclick = (e) => {
+    if (e.target === modal) {
+      document.body.removeChild(modal);
+    }
+  };
+}
+
+function performExport(format) {
+  try {
+    let content, filename, mimeType;
+
+    if (format.format === "csv") {
+      content = convertToCSV(data);
+      filename = `expense-tracker-${new Date().toISOString().slice(0, 10)}.csv`;
+      mimeType = "text/csv;charset=utf-8";
+    } else {
+      // JSON export
+      const payload = {
+        version: 1,
+        exportedAt: new Date().toISOString(),
+        items: data,
+        metadata: {
+          appName: "Expense Tracker PWA",
+          description:
+            "Personal expense tracking data with categories, dates, and amounts",
+          fileType: format.mimeType,
+          encoding: "UTF-8",
+          createdWith: "Expense Tracker PWA v1.0",
+        },
+      };
+      content = JSON.stringify(payload, null, 2);
+      filename = `expense-tracker-data-${new Date().toISOString().slice(0, 10)}-${new Date().toTimeString().slice(0, 5).replace(/:/g, "-")}.json`;
+      mimeType = format.mimeType;
+    }
+
+    const blob = new Blob([content], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.setAttribute("type", mimeType);
+    a.setAttribute("charset", "utf-8");
+
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+
+    console.log(`Export completed: ${filename}`);
+    alert(`Exported ${data.length} items to ${filename}`);
+  } catch (err) {
+    console.error(err);
+    alert("Export failed");
+  }
+}
+
+function convertToCSV(data) {
+  if (!data || data.length === 0) return "";
+
+  const headers = ["Date", "Description", "Category", "Amount", "Type"];
+  const csvContent = [
+    headers.join(","),
+    ...data.map((item) =>
+      [
+        `"${item.date}"`,
+        `"${item.description || ""}"`,
+        `"${item.category || ""}"`,
+        `"${item.amount}"`,
+        `"${item.type || "expense"}"`,
+      ].join(","),
+    ),
+  ].join("\n");
+
+  return csvContent;
+}
 
 // ---------- Purchase Feature ----------
 function getPurchaseIconSVG(size = 20) {
@@ -802,18 +941,41 @@ function exportData() {
       version: 1,
       exportedAt: new Date().toISOString(),
       items: data,
+      metadata: {
+        appName: "Expense Tracker PWA",
+        description:
+          "Personal expense tracking data with categories, dates, and amounts",
+        fileType: "application/json",
+        encoding: "UTF-8",
+        createdWith: "Expense Tracker PWA v1.0",
+      },
     };
+
     const blob = new Blob([JSON.stringify(payload, null, 2)], {
-      type: "application/json",
+      type: "application/json;charset=utf-8",
     });
+
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `expenses-${new Date().toISOString().slice(0, 10)}.json`;
+
+    // Create more descriptive filename that WhatsApp can recognize
+    const now = new Date();
+    const dateStr = now.toISOString().slice(0, 10); // YYYY-MM-DD format
+    const timeStr = now.toTimeString().slice(0, 5).replace(/:/g, "-"); // HH-MM-SS format
+
+    a.download = `expense-tracker-data-${dateStr}-${timeStr}.json`;
+    a.setAttribute("type", "application/json");
+    a.setAttribute("charset", "utf-8");
+
+    // Add additional attributes for better compatibility
     document.body.appendChild(a);
     a.click();
     a.remove();
     URL.revokeObjectURL(url);
+
+    console.log("Export completed:", a.download);
+    alert(`Exported ${data.length} expense items to ${a.download}`);
   } catch (err) {
     console.error(err);
     alert("Export failed");
@@ -1763,7 +1925,7 @@ if (themeToggle) {
 }
 if (exportOption) {
   exportOption.addEventListener("click", () => {
-    exportData();
+    showExportOptions();
     closeMenu();
   });
 }
