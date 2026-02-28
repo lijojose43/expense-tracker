@@ -213,6 +213,7 @@ const transactionsEl = $("transactions");
 const totalIncomeEl = $("totalIncome");
 const totalExpensesEl = $("totalExpenses");
 const savingsEl = $("savings");
+const investmentsEl = $("investments");
 const modal = $("modal");
 const addBtn = $("addBtn");
 const closeModal = $("closeModal");
@@ -868,6 +869,12 @@ function computeTotals() {
   totalExpensesEl.textContent = formatMoney(-Math.abs(expense) || 0);
   const savings = income - expense;
   savingsEl.textContent = formatMoney(savings);
+
+  // Calculate investments (sum of all Investment category transactions)
+  const investments = filteredData
+    .filter((t) => t.category === "Investment")
+    .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+  investmentsEl.textContent = formatMoney(investments);
 }
 
 // Aggregate expenses by category for the donut chart
