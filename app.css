@@ -2881,11 +2881,14 @@ div.app {
     min-width: 45%; /* ensure buttons don't get too narrow */
   }
   /* Improve tap targets and avoid iOS zooming */
+  input:not([type="checkbox"]):not([type="radio"]),
+  select,
+  textarea,
   .filters select,
   .filters input,
   .modal-content input,
   .modal-content select {
-    font-size: 16px; /* iOS: >=16px prevents zoom */
+    font-size: 16px !important; /* iOS: >=16px prevents zoom */
     min-height: 44px; /* Apple HIG minimum touch target */
     padding: 12px;
   }
@@ -3117,6 +3120,17 @@ div.app {
 
 /* Enhanced iPhone/iOS input focus and keyboard behavior */
 @supports (-webkit-touch-callout: none) {
+  /* Prevent iOS zoom on all form inputs across the app */
+  input:not([type="checkbox"]):not([type="radio"]),
+  select,
+  textarea {
+    font-size: 16px !important; /* iOS: >=16px prevents zoom */
+    min-height: 44px; /* Apple HIG minimum touch target */
+    -webkit-user-select: text;
+    user-select: text;
+    -webkit-touch-callout: default;
+  }
+
   /* Ensure all form inputs trigger keyboard properly on iOS */
   .modal-content input,
   .modal-content select {
