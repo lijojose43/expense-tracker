@@ -1929,9 +1929,9 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
 .type-checkboxes {
   display: flex;
   flex-wrap: nowrap;
-  gap: 12px;
+  gap: 8px;
   justify-content: space-between;
-  margin-top: 0;
+  margin-bottom: 20px;
 }
 
 .checkbox-group {
@@ -1962,6 +1962,57 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Style type checkboxes as buttons */
+.type-checkboxes .checkbox-label {
+  padding: 7px 7px;
+  border: 1px solid rgba(2, 6, 23, 0.12);
+  border-radius: 8px;
+  background: var(--card);
+  transition: all 0.2s ease;
+  justify-content: center;
+  text-align: center;
+  flex: 0 0 80px;
+  min-height: 36px;
+}
+
+.type-checkboxes .checkbox-custom {
+  display: inline-flex;
+  background: transparent;
+}
+
+.type-checkboxes
+  .checkbox-group
+  input[type="radio"]:checked
+  + .checkbox-label
+  .checkbox-custom {
+  background: white;
+  border-color: var(--accent);
+}
+
+.type-checkboxes
+  .checkbox-group
+  input[type="radio"]:checked
+  + .checkbox-label
+  .checkbox-custom::after {
+  color: var(--accent);
+}
+
+.type-checkboxes .checkbox-label:hover {
+  background: rgba(2, 6, 23, 0.06);
+}
+
+.checkbox-group input[type="radio"]:checked + .checkbox-label {
+  color: var(--accent);
+}
+
+/* Override for type checkboxes */
+.type-checkboxes .checkbox-group input[type="radio"]:checked + .checkbox-label {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
 .checkbox-custom {
   width: 16px;
   height: 16px;
@@ -1970,7 +2021,6 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  margin-right: 8px;
   position: relative;
   transition: all 0.2s ease;
 }
@@ -2010,6 +2060,17 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
 [data-theme="dark"] .checkbox-label:hover .checkbox-custom {
   border-color: var(--accent);
 }
+
+/* Dark theme for type buttons */
+[data-theme="dark"] .type-checkboxes .checkbox-label {
+  border-color: rgba(148, 163, 184, 0.2);
+  background: var(--card);
+}
+
+[data-theme="dark"] .type-checkboxes .checkbox-label:hover {
+  background: rgba(148, 163, 184, 0.1);
+}
+
 .modal-content input,
 .modal-content select {
   padding: 10px 6px;

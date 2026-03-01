@@ -1806,7 +1806,6 @@ function renderList() {
       // Open edit on row click (ignore if a swipe occurred)
       el.addEventListener("click", () => {
         if (moved) return; // don't treat swipe as click
-        populateCategories();
         editId = t.id;
         const modalTitle = document.getElementById("modalTitle");
         if (modalTitle) modalTitle.textContent = "Edit Transaction";
@@ -1936,11 +1935,13 @@ function openModal(defaults) {
 
     setDateInputValue("date", toDateInputValue(defaults.date));
     $("description").value = defaults.description || "";
+    populateCategories();
   } else {
     txForm.reset();
     setDateInputValue("date", todayIsoDate());
     // default to expense on new entry
     setSelectedType("expense");
+    populateCategories();
   }
 }
 
@@ -3069,27 +3070,27 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Wire type radio buttons to update categories
-  const typeExpense = $("typeExpense");
-  const typeIncome = $("typeIncome");
-  const typeInvestment = $("typeInvestment");
+  document
+    .getElementById("typeExpense")
+    .addEventListener("change", () => populateCategories());
+  document
+    .getElementById("typeIncome")
+    .addEventListener("change", () => populateCategories());
+  document
+    .getElementById("typeInvestment")
+    .addEventListener("change", () => populateCategories());
 
-  if (typeExpense) {
-    typeExpense.addEventListener("change", () => {
+  // Wire add button to open modal
+  if (addBtn)
+    addBtn.addEventListener("click", () => {
+      modal.classList.remove("hide");
+      setTimeout(() => modal.classList.add("show"), 10);
+      editId = null;
+      txForm.reset();
+      setSelectedType("expense");
+      openModal();
       populateCategories();
     });
-  }
-
-  if (typeIncome) {
-    typeIncome.addEventListener("change", () => {
-      populateCategories();
-    });
-  }
-
-  if (typeInvestment) {
-    typeInvestment.addEventListener("change", () => {
-      populateCategories();
-    });
-  }
 
   // Wire bottom nav tabs
   if (tabHome) tabHome.addEventListener("click", () => switchTab("home"));
