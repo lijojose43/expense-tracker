@@ -30,29 +30,6 @@
   box-sizing: border-box;
 }
 
-/* Hide all scrollbars globally */
-* {
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* Internet Explorer 10+ */
-}
-
-*::-webkit-scrollbar {
-  display: none; /* Safari and Chrome */
-  width: 0 !important;
-  height: 0 !important;
-}
-
-*::-webkit-scrollbar-track {
-  display: none !important;
-}
-
-*::-webkit-scrollbar-thumb {
-  display: none !important;
-}
-
-*::-webkit-scrollbar-corner {
-  display: none !important;
-}
 
 html,
 body {
@@ -2709,8 +2686,6 @@ div.app {
 body.pwa-mode .content,
 body.standalone .content,
 html body .content {
-  min-height: calc(100vh - var(--topbar-h) - var(--bottombar-h)) !important;
-  min-height: calc(100dvh - var(--topbar-h) - var(--bottombar-h)) !important;
   height: auto !important;
   max-height: calc(100vh - var(--topbar-h) - var(--bottombar-h)) !important;
   overflow-y: scroll !important;
