@@ -623,6 +623,7 @@ function initDatePickers() {
       dateFormat: "Y-m-d",
       allowInput: false,
       disableMobile: true,
+      closeOnSelect: true,
       monthSelectorType: "dropdown",
       onReady: (_, __, fp) => {
         ensureFlatpickrYearDropdown(fp);
