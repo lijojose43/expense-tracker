@@ -30,7 +30,6 @@
   box-sizing: border-box;
 }
 
-
 html,
 body {
   overflow-x: hidden; /* Prevent horizontal scroll */
@@ -665,9 +664,6 @@ html:not([data-theme="dark"]) .summary .card:nth-child(4) {
   scrollbar-width: none;
   -ms-overflow-style: none;
   position: relative;
-}
-
-  -ms-overflow-style: none;
   flex-wrap: nowrap; /* Keep all items in single row */
 }
 
@@ -2588,7 +2584,9 @@ footer {
 
   .summary .card:not(.wide) {
     flex: 1;
-    min-width: calc(50% - 6px); /* Maintain 2-column layout accounting for gap */
+    min-width: calc(
+      50% - 6px
+    ); /* Maintain 2-column layout accounting for gap */
   }
 
   .app {
@@ -2908,6 +2906,45 @@ div.app {
   *::-webkit-scrollbar-thumb {
     display: none !important;
     background: transparent !important;
+  }
+
+  /* Universal mobile scrollbar hiding - works in DevTools and real devices */
+  @media (max-width: 768px) {
+    /* Force hide scrollbars on all elements */
+    * {
+      scrollbar-width: none !important;
+      -ms-overflow-style: none !important;
+    }
+
+    html::-webkit-scrollbar,
+    body::-webkit-scrollbar,
+    .app::-webkit-scrollbar,
+    .content::-webkit-scrollbar,
+    .filters::-webkit-scrollbar,
+    .filters-row::-webkit-scrollbar,
+    .date-filter-buttons::-webkit-scrollbar,
+    .custom-date-range::-webkit-scrollbar,
+    .transactions::-webkit-scrollbar {
+      display: none !important;
+      width: 0 !important;
+      height: 0 !important;
+      background: transparent !important;
+    }
+
+    /* Specific element overrides */
+    html,
+    body,
+    .app,
+    .content,
+    .filters,
+    .filters-row,
+    .date-filter-buttons,
+    .custom-date-range,
+    .transactions {
+      scrollbar-width: none !important;
+      -ms-overflow-style: none !important;
+      overscroll-behavior: none;
+    }
   }
 
   /* Additional iOS-specific scrollbar hiding */
