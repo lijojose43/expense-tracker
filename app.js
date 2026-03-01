@@ -2426,6 +2426,7 @@ endDate.addEventListener("change", () => {
 });
 
 filterType.addEventListener("change", () => {
+  populateCategories();
   renderList();
   setTimeout(() => checkPWAInstallPrompt(1000), 500);
 });
