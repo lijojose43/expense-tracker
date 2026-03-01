@@ -2071,25 +2071,17 @@ if (exportOption) {
 }
 if (importOption && importFileInput) {
   importOption.addEventListener("click", () => {
-    // In PWA mode, programmatic click() may not work due to security restrictions
-    const isPWA =
-      window.matchMedia("(display-mode: standalone)").matches ||
-      window.navigator.standalone === true ||
-      document.referrer.includes("android-app://");
-
-    if (isPWA) {
-      // For PWA mode, show instructions to use browser
-      alert(
-        "In PWA mode, please use your browser's import feature or visit the web version to import data.",
-      );
-      closeMenu();
-      return;
-    }
-
-    // Regular web mode - use programmatic click
     importFileInput.click();
     closeMenu();
   });
+}
+if (importFileInput) {
+  importFileInput.onchange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      importFromFile(file);
+    }
+  };
 }
 if (clearOption) {
   clearOption.addEventListener("click", () => {
