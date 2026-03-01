@@ -67,9 +67,7 @@ body {
   max-width: none;
   background: transparent;
   border-radius: 0;
-  padding-bottom: calc(
-    60px + env(safe-area-inset-bottom, 0px)
-  ); /* Adjusted for navbar with safe areas */
+  /* Adjusted for navbar with safe areas */
   box-shadow: none;
   position: relative;
   overflow-x: hidden; /* Prevent horizontal scroll in app container */
@@ -2790,6 +2788,7 @@ div.app {
   body,
   html,
   .app {
+    height: 100vh !important;
     scrollbar-width: none !important;
     -ms-overflow-style: none !important;
     overflow-y: auto !important;
