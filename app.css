@@ -75,6 +75,12 @@ body {
   -webkit-overflow-scrolling: touch; /* Enable smooth scrolling on iOS */
 }
 
+/* Prevent select dropdowns from closing automatically */
+.select-open body,
+.select-open .app {
+  overflow: hidden !important;
+}
+
 /* Forcefully hide scrollbars in installed PWA only */
 @media (display-mode: standalone) {
   /* Make header sticky with safe area support for PWA */
@@ -156,6 +162,12 @@ body {
     width: 0 !important;
     height: 0 !important;
     background: transparent !important;
+  }
+
+  /* Prevent select dropdowns from closing automatically in iOS */
+  .select-open body,
+  .select-open .app {
+    overflow: hidden !important;
   }
 }
 

@@ -2434,6 +2434,17 @@ filterCategory.addEventListener("change", () => {
   renderList();
   setTimeout(() => checkPWAInstallPrompt(1000), 500);
 });
+
+// Prevent select dropdowns from closing automatically on mobile/PWA
+[filterType, filterCategory].forEach((select) => {
+  select.addEventListener("focus", () =>
+    document.body.classList.add("select-open"),
+  );
+  select.addEventListener("blur", () =>
+    document.body.classList.remove("select-open"),
+  );
+});
+
 // Search input event listener removed
 
 // PWA Install functionality
