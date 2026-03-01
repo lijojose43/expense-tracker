@@ -49,9 +49,6 @@ body {
   height: 100vh;
   display: block;
   padding: 0;
-  padding-bottom: calc(
-    80px + env(safe-area-inset-bottom, 0px)
-  ); /* Adjusted space for bottom bar with safe areas */
   overflow-x: hidden; /* Prevent horizontal scroll */
   overflow-y: auto; /* Allow vertical scroll but hide scrollbar */
   /* Force hide scrollbars on all mobile devices */
