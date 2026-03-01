@@ -972,10 +972,12 @@ function exportData() {
       version: 1,
       exportedAt: new Date().toISOString(),
       items: data,
+      expiries: expiryData,
+      shoppingList: purchaseData,
       metadata: {
         appName: "Expense Tracker PWA",
         description:
-          "Personal expense tracking data with categories, dates, and amounts",
+          "Personal expense tracking data with categories, dates, amounts, expiries, and shopping list",
         fileType: "application/json",
         encoding: "UTF-8",
         createdWith: "Expense Tracker PWA v1.0",
@@ -1006,7 +1008,10 @@ function exportData() {
     URL.revokeObjectURL(url);
 
     console.log("Export completed:", a.download);
-    alert(`Exported ${data.length} expense items to ${a.download}`);
+    const totalItems = data.length + expiryData.length + purchaseData.length;
+    alert(
+      `Exported ${totalItems} items (${data.length} expenses, ${expiryData.length} expiries, ${purchaseData.length} shopping items) to ${a.download}`,
+    );
   } catch (err) {
     console.error(err);
     alert("Export failed");
@@ -1021,6 +1026,8 @@ async function importFromFile(file) {
   } catch (e) {
     throw new Error("Invalid JSON");
   }
+
+  // Handle expenses (transactions)
   const items = Array.isArray(json)
     ? json
     : json && Array.isArray(json.items)
@@ -1031,24 +1038,78 @@ async function importFromFile(file) {
   const cleaned = items.map(normalizeTx).filter(Boolean);
   if (cleaned.length === 0) throw new Error("No valid transactions found");
 
+  // Handle expiries
+  const importedExpiries =
+    json && Array.isArray(json.expiries) ? json.expiries : [];
+  const cleanedExpiries = importedExpiries
+    .filter((e) => e && e.name && e.expiry)
+    .map((e) => ({
+      id: e.id || uid(),
+      name: e.name,
+      expiry: e.expiry,
+      createdAt: e.createdAt || Date.now(),
+    }));
+
+  // Handle shopping list
+  const importedShopping =
+    json && Array.isArray(json.shoppingList) ? json.shoppingList : [];
+  const cleanedShopping = importedShopping
+    .filter((s) => s && s.name)
+    .map((s) => ({
+      id: s.id || uid(),
+      name: s.name,
+      createdAt: s.createdAt || Date.now(),
+    }));
+
   const replace = confirm(
-    "Replace existing data with imported items?\nOK = Replace, Cancel = Merge",
+    `Replace existing data with imported items?\n\nExpenses: ${cleaned.length}\nExpiries: ${cleanedExpiries.length}\nShopping: ${cleanedShopping.length}\n\nOK = Replace, Cancel = Merge`,
   );
+
   if (replace) {
     data = cleaned;
+    expiryData = cleanedExpiries;
+    purchaseData = cleanedShopping;
   } else {
+    // Merge expenses
     const existing = new Set(data.map((t) => t.id));
     for (const t of cleaned) {
       if (!t.id || existing.has(t.id)) t.id = uid();
       data.push(t);
     }
+
+    // Merge expiries
+    const existingExpiries = new Set(expiryData.map((e) => e.id));
+    for (const e of cleanedExpiries) {
+      if (!e.id || existingExpiries.has(e.id)) e.id = uid();
+      expiryData.push(e);
+    }
+
+    // Merge shopping list
+    const existingShopping = new Set(purchaseData.map((s) => s.id));
+    for (const s of cleanedShopping) {
+      if (!s.id || existingShopping.has(s.id)) s.id = uid();
+      purchaseData.push(s);
+    }
   }
+
+  // Save all data
   save();
+  saveExpiry();
+  savePurchase();
+
+  // Update UI
   populateCategories();
   computeTotals();
   renderList();
+  renderExpiry();
+  renderPurchase();
   if (!summaryTabEl.classList.contains("hidden")) renderChart();
-  alert("Import successful");
+
+  const totalImported =
+    cleaned.length + cleanedExpiries.length + cleanedShopping.length;
+  alert(
+    `Import successful!\n\nImported ${totalImported} items:\n• ${cleaned.length} expenses\n• ${cleanedExpiries.length} expiries\n• ${cleanedShopping.length} shopping items`,
+  );
 }
 
 function populateCategories() {
