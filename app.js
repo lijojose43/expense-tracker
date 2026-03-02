@@ -113,10 +113,12 @@ function performExport(format) {
         version: 1,
         exportedAt: new Date().toISOString(),
         items: data,
+        expiries: expiryData,
+        shoppingList: purchaseData,
         metadata: {
           appName: "Expense Tracker PWA",
           description:
-            "Personal expense tracking data with categories, dates, and amounts",
+            "Personal expense tracking data with categories, dates, amounts, expiries, and shopping list",
           fileType: format.mimeType,
           encoding: "UTF-8",
           createdWith: "Expense Tracker PWA v1.0",
@@ -125,6 +127,12 @@ function performExport(format) {
       content = JSON.stringify(payload, null, 2);
       filename = `expense-tracker-data-${new Date().toISOString().slice(0, 10)}-${new Date().toTimeString().slice(0, 5).replace(/:/g, "-")}.json`;
       mimeType = format.mimeType;
+
+      console.log(`Export completed: ${filename}`);
+      const totalItems = data.length + expiryData.length + purchaseData.length;
+      alert(
+        `Exported ${totalItems} items (${data.length} expenses, ${expiryData.length} expiries, ${purchaseData.length} shopping items) to ${filename}`,
+      );
     }
 
     const blob = new Blob([content], { type: mimeType });
@@ -1028,20 +1036,20 @@ async function importFromFile(file) {
     throw new Error("Invalid JSON");
   }
 
-  // Handle expenses (transactions)
+  // Handle expenses (transactions) - support multiple field names for compatibility
   const items = Array.isArray(json)
     ? json
-    : json && Array.isArray(json.items)
-      ? json.items
-      : null;
+    : json.items || json.transactions || json.expenses || null;
   if (!items)
-    throw new Error("Invalid file format: expected an array or {items: []}");
+    throw new Error(
+      "Invalid file format: expected an array or object with items/transactions/expenses array",
+    );
   const cleaned = items.map(normalizeTx).filter(Boolean);
   if (cleaned.length === 0) throw new Error("No valid transactions found");
 
-  // Handle expiries
+  // Handle expiries - support multiple field names
   const importedExpiries =
-    json && Array.isArray(json.expiries) ? json.expiries : [];
+    json.expiries || json.expiry || json.expiryData || [];
   const cleanedExpiries = importedExpiries
     .filter((e) => e && e.name && e.expiry)
     .map((e) => ({
@@ -1051,9 +1059,13 @@ async function importFromFile(file) {
       createdAt: e.createdAt || Date.now(),
     }));
 
-  // Handle shopping list
+  // Handle shopping list - support multiple field names
   const importedShopping =
-    json && Array.isArray(json.shoppingList) ? json.shoppingList : [];
+    json.shoppingList ||
+    json.shopping ||
+    json.purchaseData ||
+    json.purchases ||
+    [];
   const cleanedShopping = importedShopping
     .filter((s) => s && s.name)
     .map((s) => ({
@@ -1959,12 +1971,12 @@ function closeModalFn() {
 addBtn.addEventListener("click", () => {
   hapticFeedback("light");
   // If Expiry tab is active, open expiry modal instead
-  if (expiryTabEl && !expiryTabEl.classList.contains("hidden")) {
+  if (tabExpiry && tabExpiry.classList.contains("active")) {
     openExpiryModal();
     return;
   }
   // If Purchase tab is active, open purchase modal
-  if (purchaseTabEl && !purchaseTabEl.classList.contains("hidden")) {
+  if (tabPurchase && tabPurchase.classList.contains("active")) {
     openPurchaseModal();
     return;
   }
@@ -3084,18 +3096,6 @@ document.addEventListener("DOMContentLoaded", () => {
   document
     .getElementById("typeInvestment")
     .addEventListener("change", () => populateCategories());
-
-  // Wire add button to open modal
-  if (addBtn)
-    addBtn.addEventListener("click", () => {
-      modal.classList.remove("hide");
-      setTimeout(() => modal.classList.add("show"), 10);
-      editId = null;
-      txForm.reset();
-      setSelectedType("expense");
-      openModal();
-      populateCategories();
-    });
 
   // Wire bottom nav tabs
   if (tabHome) tabHome.addEventListener("click", () => switchTab("home"));
