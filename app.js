@@ -2139,10 +2139,15 @@ if (importOption && importFileInput) {
   });
 }
 if (importFileInput) {
-  importFileInput.onchange = (e) => {
+  importFileInput.onchange = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      importFromFile(file);
+      try {
+        await importFromFile(file);
+      } catch (err) {
+        console.error("Import failed:", err);
+        alert("Import failed: " + err.message);
+      }
     }
   };
 }
