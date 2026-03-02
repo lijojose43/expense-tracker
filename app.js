@@ -1986,6 +1986,10 @@ addBtn.addEventListener("click", () => {
   // If Purchase tab is active, open purchase modal
   if (tabPurchase && tabPurchase.classList.contains("active")) {
     openPurchaseModal();
+    // Focus on product name field after modal opens
+    setTimeout(() => {
+      if (purchaseNameInput) purchaseNameInput.focus();
+    }, 100);
     return;
   }
 
@@ -3162,15 +3166,6 @@ document.addEventListener("DOMContentLoaded", () => {
     closePurchaseModal.addEventListener("click", closePurchaseModalFn);
   if (cancelPurchaseBtn)
     cancelPurchaseBtn.addEventListener("click", closePurchaseModalFn);
-  if (addPurchaseBtn) {
-    addPurchaseBtn.addEventListener("click", () => {
-      openPurchaseModal();
-      // Focus on product name field after modal opens
-      setTimeout(() => {
-        if (purchaseNameInput) purchaseNameInput.focus();
-      }, 100);
-    });
-  }
   if (purchaseForm) {
     purchaseForm.addEventListener("submit", (e) => {
       e.preventDefault();
