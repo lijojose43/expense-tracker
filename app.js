@@ -2869,6 +2869,8 @@ document.addEventListener("DOMContentLoaded", () => {
   // ensure transaction date cannot be set in the future
   setMaxTodayForTxDate();
 
+  let applyPwaViewport = null;
+
   // Detect PWA/standalone mode and apply appropriate classes
   if (
     window.matchMedia("(display-mode: standalone)").matches ||
@@ -2882,8 +2884,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Setup proper scrolling for mouse wheel and touchpad on ALL tabs
     const app = document.querySelector(".app");
-    const viewportHeight = window.innerHeight;
-    const contentHeight = viewportHeight - 120; // Account for header and nav
+    const topbar = document.querySelector(".topbar");
+    const bottombar = document.querySelector(".bottombar");
+
+    const getViewportHeight = () =>
+      window.visualViewport?.height || window.innerHeight;
+
+    const getContentHeight = () => {
+      const viewportHeight = getViewportHeight();
+      const topbarHeight = topbar ? topbar.getBoundingClientRect().height : 0;
+      const bottombarTop = bottombar
+        ? bottombar.getBoundingClientRect().top
+        : viewportHeight;
+      // Distance between nav top and viewport bottom is the blocked area.
+      const blockedBottom = Math.max(0, viewportHeight - bottombarTop);
+      return Math.max(
+        180,
+        Math.floor(viewportHeight - topbarHeight - blockedBottom),
+      );
+    };
 
     // Apply scrolling setup to all main content tabs
     const allTabs = [
@@ -2893,18 +2912,20 @@ document.addEventListener("DOMContentLoaded", () => {
       { id: "#purchaseTab", name: "Shopping" },
     ];
 
-    allTabs.forEach((tab) => {
-      const tabContent = document.querySelector(tab.id);
-      if (tabContent) {
-        // Make tab content scrollable with proper height
-        tabContent.style.setProperty(
-          "height",
-          contentHeight + 1000 + "px",
-          "important",
-        );
+    applyPwaViewport = () => {
+      const contentHeight = getContentHeight();
+      document.documentElement.style.setProperty(
+        "--pwa-content-height",
+        `${contentHeight}px`,
+      );
+
+      allTabs.forEach((tab) => {
+        const tabContent = document.querySelector(tab.id);
+        if (!tabContent) return;
+        tabContent.style.setProperty("height", `${contentHeight}px`, "important");
         tabContent.style.setProperty(
           "max-height",
-          contentHeight + "px",
+          `${contentHeight}px`,
           "important",
         );
         tabContent.style.setProperty("overflow-y", "scroll", "important");
@@ -2914,25 +2935,14 @@ document.addEventListener("DOMContentLoaded", () => {
           "important",
         );
         tabContent.style.setProperty("position", "relative", "important");
+      });
+    };
 
-        // Add scroll event listeners for debugging
-        tabContent.addEventListener("scroll", () => {
-          console.log(`${tab.name} tab scrolled to:`, tabContent.scrollTop);
-        });
+    applyPwaViewport();
 
-        tabContent.addEventListener(
-          "wheel",
-          (e) => {
-            console.log(
-              `Wheel event on ${tab.name} tab:`,
-              e.deltaY,
-              "target:",
-              e.target.className,
-            );
-          },
-          { passive: false },
-        );
-
+    allTabs.forEach((tab) => {
+      const tabContent = document.querySelector(tab.id);
+      if (tabContent) {
         // Handle wheel events on items within each tab
         const itemSelector =
           tab.id === "#expiryTab"
@@ -2972,10 +2982,14 @@ document.addEventListener("DOMContentLoaded", () => {
             );
           });
         });
-
-        console.log(`${tab.name} tab scrolling setup complete`);
       }
     });
+
+    window.addEventListener("resize", applyPwaViewport);
+    window.addEventListener("orientationchange", applyPwaViewport);
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener("resize", applyPwaViewport);
+    }
 
     if (app) {
       // Make app container non-scrollable
@@ -2992,6 +3006,9 @@ document.addEventListener("DOMContentLoaded", () => {
       if (e.matches) {
         document.body.classList.add("pwa-mode");
         document.body.classList.add("standalone");
+        if (typeof applyPwaViewport === "function") {
+          applyPwaViewport();
+        }
         // Force app height to auto for scrolling
         if (app) {
           app.style.setProperty("height", "auto", "important");

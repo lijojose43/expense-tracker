@@ -2761,7 +2761,9 @@ body.pwa-mode .content,
 body.standalone .content,
 html body .content {
   height: auto !important;
-  max-height: calc(100vh - var(--topbar-h) - var(--bottombar-h)) !important;
+  max-height: calc(
+    100dvh - var(--topbar-h) - var(--bottombar-h) - env(safe-area-inset-bottom, 0px)
+  ) !important;
   overflow-y: scroll !important;
   -webkit-overflow-scrolling: touch !important;
   position: relative !important;
@@ -2857,8 +2859,12 @@ div.app {
 
 /* Content section should be able to grow */
 .content {
-  min-height: calc(100vh - var(--topbar-h) - var(--bottombar-h));
-  min-height: calc(100dvh - var(--topbar-h) - var(--bottombar-h));
+  min-height: calc(
+    100vh - var(--topbar-h) - var(--bottombar-h) - env(safe-area-inset-bottom, 0px)
+  );
+  min-height: calc(
+    100dvh - var(--topbar-h) - var(--bottombar-h) - env(safe-area-inset-bottom, 0px)
+  );
   height: auto !important;
 }
 
