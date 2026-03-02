@@ -1,9 +1,9 @@
-const CACHE = "expense-pwa-v11";
+const CACHE = "expense-pwa-v12";
 const FILES = [
   "/",
   "/index.html",
-  "/app.css?v=11",
-  "/app.js?v=11",
+  "/app.css?v=13",
+  "/app.js?v=13",
   "/manifest.json",
 ];
 

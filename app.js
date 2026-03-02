@@ -2898,30 +2898,24 @@ document.addEventListener("DOMContentLoaded", () => {
     const app = document.querySelector(".app");
     const topbar = document.querySelector(".topbar");
     const bottombar = document.querySelector(".bottombar");
-    const fabCenter = document.querySelector(".fab-center");
 
-    const getViewportHeight = () =>
-      window.visualViewport?.height || window.innerHeight;
+    const getViewportHeight = () => window.innerHeight;
 
-    const getContentHeight = () => {
+    const getContentMetrics = () => {
       const viewportHeight = getViewportHeight();
       const topbarHeight = topbar ? topbar.getBoundingClientRect().height : 0;
       const bottombarTop = bottombar
         ? bottombar.getBoundingClientRect().top
         : viewportHeight;
-      const fabTop = fabCenter
-        ? fabCenter.getBoundingClientRect().top
-        : viewportHeight;
-      const bottomUiTop = Math.min(bottombarTop, fabTop);
-      // Distance between nav top and viewport bottom is the blocked area.
-      const blockedBottom = Math.max(0, viewportHeight - bottomUiTop);
+      // Reserve only up to navbar top; do not reserve raised FAB overlap.
+      const blockedBottom = Math.max(0, viewportHeight - bottombarTop);
       const clearanceBuffer = 8;
-      return Math.max(
+      const bottomObstruction = blockedBottom + clearanceBuffer;
+      const contentHeight = Math.max(
         180,
-        Math.floor(
-          viewportHeight - topbarHeight - blockedBottom - clearanceBuffer,
-        ),
+        Math.floor(viewportHeight - topbarHeight - bottomObstruction),
       );
+      return { contentHeight, bottomObstruction };
     };
 
     // Apply scrolling setup to all main content tabs
@@ -2933,10 +2927,14 @@ document.addEventListener("DOMContentLoaded", () => {
     ];
 
     applyPwaViewport = () => {
-      const contentHeight = getContentHeight();
+      const { contentHeight, bottomObstruction } = getContentMetrics();
       document.documentElement.style.setProperty(
         "--pwa-content-height",
         `${contentHeight}px`,
+      );
+      document.documentElement.style.setProperty(
+        "--pwa-bottom-obstruction",
+        `${Math.ceil(bottomObstruction)}px`,
       );
 
       allTabs.forEach((tab) => {
@@ -3014,6 +3012,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (window.visualViewport) {
       window.visualViewport.addEventListener("resize", applyPwaViewport);
     }
+    setTimeout(applyPwaViewport, 120);
 
     if (app) {
       // Make app container non-scrollable
