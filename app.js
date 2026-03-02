@@ -1729,10 +1729,18 @@ function renderList() {
       const info = document.createElement("div");
       const title = document.createElement("div");
       title.className = "title";
-      title.textContent = t.description || t.category || "Transaction";
+      title.textContent = t.category; // Category as main title (big text)
       const cat = document.createElement("div");
       cat.className = "category";
-      cat.textContent = t.category; // Remove date from here since it's now in the header
+      // Description as secondary text with truncation, show date if empty
+      const description = t.description || "";
+      const maxLength = 30; // Limit description length to prevent design break
+      const truncatedDesc =
+        description.length > maxLength
+          ? description.substring(0, maxLength) + ".."
+          : description;
+      const displayText = truncatedDesc || formatDateDisplay(t.date);
+      cat.textContent = displayText;
       info.appendChild(title);
       info.appendChild(cat);
       meta.appendChild(box);
@@ -2906,7 +2914,9 @@ document.addEventListener("DOMContentLoaded", () => {
       const clearanceBuffer = 8;
       return Math.max(
         180,
-        Math.floor(viewportHeight - topbarHeight - blockedBottom - clearanceBuffer),
+        Math.floor(
+          viewportHeight - topbarHeight - blockedBottom - clearanceBuffer,
+        ),
       );
     };
 
@@ -2928,7 +2938,11 @@ document.addEventListener("DOMContentLoaded", () => {
       allTabs.forEach((tab) => {
         const tabContent = document.querySelector(tab.id);
         if (!tabContent) return;
-        tabContent.style.setProperty("height", `${contentHeight}px`, "important");
+        tabContent.style.setProperty(
+          "height",
+          `${contentHeight}px`,
+          "important",
+        );
         tabContent.style.setProperty(
           "max-height",
           `${contentHeight}px`,
