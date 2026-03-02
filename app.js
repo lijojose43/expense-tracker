@@ -2886,6 +2886,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const app = document.querySelector(".app");
     const topbar = document.querySelector(".topbar");
     const bottombar = document.querySelector(".bottombar");
+    const fabCenter = document.querySelector(".fab-center");
 
     const getViewportHeight = () =>
       window.visualViewport?.height || window.innerHeight;
@@ -2896,11 +2897,16 @@ document.addEventListener("DOMContentLoaded", () => {
       const bottombarTop = bottombar
         ? bottombar.getBoundingClientRect().top
         : viewportHeight;
+      const fabTop = fabCenter
+        ? fabCenter.getBoundingClientRect().top
+        : viewportHeight;
+      const bottomUiTop = Math.min(bottombarTop, fabTop);
       // Distance between nav top and viewport bottom is the blocked area.
-      const blockedBottom = Math.max(0, viewportHeight - bottombarTop);
+      const blockedBottom = Math.max(0, viewportHeight - bottomUiTop);
+      const clearanceBuffer = 8;
       return Math.max(
         180,
-        Math.floor(viewportHeight - topbarHeight - blockedBottom),
+        Math.floor(viewportHeight - topbarHeight - blockedBottom - clearanceBuffer),
       );
     };
 
