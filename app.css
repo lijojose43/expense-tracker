@@ -5,7 +5,7 @@
   --accent: #1e90ff;
   --danger: #ef4444;
   --glass: rgba(255, 255, 255, 0.6);
-  --topbar-h: 44px;
+  --topbar-h: 60px;
   --bottombar-h: 56px;
   font-family:
     Inter,
@@ -218,6 +218,8 @@ body {
   align-items: center;
   position: absolute;
   right: 16px;
+  top: calc(12px + env(safe-area-inset-top, 0px));
+  bottom: 12px;
 }
 .icon {
   background: none;
@@ -2767,7 +2769,7 @@ html body .content {
   height: auto !important;
   max-height: calc(
     100dvh - var(--topbar-h) - var(--bottombar-h) -
-      env(safe-area-inset-bottom, 0px) - 36px
+      env(safe-area-inset-bottom, 0px)
   ) !important;
   overflow-y: scroll !important;
   -webkit-overflow-scrolling: touch !important;
@@ -2866,11 +2868,11 @@ div.app {
 .content {
   min-height: calc(
     100vh - var(--topbar-h) - var(--bottombar-h) -
-      env(safe-area-inset-bottom, 0px) - 36px
+      env(safe-area-inset-bottom, 0px)
   );
   min-height: calc(
     100dvh - var(--topbar-h) - var(--bottombar-h) -
-      env(safe-area-inset-bottom, 0px) - 36px
+      env(safe-area-inset-bottom, 0px)
   );
   height: auto !important;
 }
