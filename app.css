@@ -1144,7 +1144,7 @@ textarea:focus {
 
 [data-theme="dark"] .date-header {
   background: var(--bg);
-  border-bottom-color: rgba(148, 163, 184, 0.05);
+  border-bottom-color: rgba(148, 163, 184, 0.2);
 }
 
 .tx {
