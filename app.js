@@ -1438,9 +1438,8 @@ function getCategoryIcon(category) {
     </svg>`,
 
     terminsurance: `<svg viewBox="0 0 24 24" width="${iconSize}" height="${iconSize}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 1.5-.37 2.89-.96 4.13-1.72"/>
-      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67"/>
-      <path d="M12 5.67l-1.06-1.06a5.5 5.0 0 0 0-7.78 7.78"/>
+      <path d="M12 2l8 4.5v6.5c0 5.5-3.5 10.5-8 12-4.5-1.5-8-6.5-8-12V6.5L12 2z"/>
+      <path d="M9 12l2 2 4-4"/>
     </svg>`,
 
     goldinvestment: `<svg viewBox="0 0 24 24" width="${iconSize}" height="${iconSize}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
