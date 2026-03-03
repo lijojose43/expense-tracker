@@ -458,6 +458,7 @@ const closeExpiryModal = $("closeExpiryModal");
 const expiryForm = $("expiryForm");
 const cancelExpiryBtn = $("cancelExpiryBtn");
 const expiryNameInput = $("expiryName");
+const expiryQuantityInput = $("expiryQuantity");
 const expiryDateInput = $("expiryDate");
 let editExpiryId = null;
 // Purchase modal elements
@@ -1059,6 +1060,7 @@ async function importFromFile(file) {
     .map((e) => ({
       id: e.id || uid(),
       name: e.name,
+      quantity: e.quantity || 1,
       expiry: e.expiry,
       createdAt: e.createdAt || Date.now(),
     }));
@@ -3210,17 +3212,18 @@ function openExpiryModal(defaults) {
   const submitBtn =
     expiryForm && expiryForm.querySelector('button[type="submit"]');
   if (defaults) {
+    editExpiryId = defaults.id;
     if (title) title.textContent = "Edit Expiry Item";
     if (submitBtn) submitBtn.textContent = "Update";
-    expiryNameInput && (expiryNameInput.value = defaults.name || "");
-    expiryDateInput &&
-      setDateInputValue(expiryDateInput, toDateInputValue(defaults.expiry));
-    editExpiryId = defaults.id;
+    expiryNameInput.value = defaults.name || "";
+    expiryQuantityInput.value = defaults.quantity || 1;
+    setDateInputValue(expiryDateInput, toDateInputValue(defaults.expiry));
   } else {
     if (title) title.textContent = "Add Expiry Item";
     if (submitBtn) submitBtn.textContent = "Save";
-    if (expiryForm) expiryForm.reset();
-    if (expiryDateInput) setDateInputValue(expiryDateInput, todayIsoDate());
+    expiryForm.reset();
+    expiryQuantityInput.value = 1;
+    setDateInputValue(expiryDateInput, todayIsoDate());
   }
 
   // Focus on product name field with enhanced mobile handling
@@ -3260,32 +3263,21 @@ function closeExpiryModalFn() {
   expiryModal.classList.add("hide");
 }
 
-function validateExpiry(name, dateStr) {
-  if (!name || !name.trim()) return { ok: false, msg: "Name is required" };
-  if (!dateStr) return { ok: false, msg: "Expiry date is required" };
-  const d = new Date(dateStr);
-  if (isNaN(d.getTime()))
-    return { ok: false, msg: "Enter a valid expiry date" };
-  return { ok: true };
-}
-
 function submitExpiryForm() {
-  const name = ((expiryNameInput && expiryNameInput.value) || "").trim();
-  const dateStr = expiryDateInput && expiryDateInput.value;
-  const v = validateExpiry(name, dateStr);
-  if (!v.ok) {
-    hapticFeedback("error");
-    return;
-  }
+  const name = expiryNameInput.value.trim();
+  const quantity = parseInt(expiryQuantityInput.value) || 1;
+  const dateStr = expiryDateInput.value;
+  if (!validateExpiry(name, dateStr)) return;
   if (editExpiryId) {
     const idx = expiryData.findIndex((x) => x.id === editExpiryId);
     if (idx !== -1) {
-      expiryData[idx] = { ...expiryData[idx], name, expiry: dateStr };
+      expiryData[idx] = { ...expiryData[idx], name, quantity, expiry: dateStr };
     }
   } else {
     expiryData.push({
       id: uid(),
       name,
+      quantity,
       expiry: dateStr,
       createdAt: Date.now(),
     });
@@ -3303,6 +3295,15 @@ function submitExpiryForm() {
 
   // After saving an expiry item, re-check notifications
   setTimeout(checkAndNotifyExpiringToday, 500);
+}
+
+function validateExpiry(name, dateStr) {
+  if (!name || !name.trim()) return { ok: false, msg: "Name is required" };
+  if (!dateStr) return { ok: false, msg: "Expiry date is required" };
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime()))
+    return { ok: false, msg: "Enter a valid expiry date" };
+  return { ok: true };
 }
 
 function getExpiryIconSVG(size = 20) {
@@ -3419,7 +3420,8 @@ function renderExpiry() {
     title.textContent = item.name || "Product";
     const subtitle = document.createElement("div");
     subtitle.className = "category";
-    subtitle.textContent = `Expires ${formatDateDisplay(
+    const quantityText = item.quantity > 1 ? `Qty: ${item.quantity} · ` : "";
+    subtitle.textContent = `${quantityText}Expires ${formatDateDisplay(
       item.expiry,
     )} · ${statusText}`;
     info.appendChild(title);
@@ -3520,7 +3522,12 @@ function renderExpiry() {
     // Click to edit (ignore if a swipe occurred)
     row.addEventListener("click", () => {
       if (moved) return; // don't treat swipe as click
-      openExpiryModal({ id: item.id, name: item.name, expiry: item.expiry });
+      openExpiryModal({
+        id: item.id,
+        name: item.name,
+        quantity: item.quantity,
+        expiry: item.expiry,
+      });
     });
 
     // Long press context menu to delete (fallback)
