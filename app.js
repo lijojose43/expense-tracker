@@ -947,7 +947,11 @@ function normalizeTx(raw) {
   if (!isFinite(amt)) return null;
   t.amount = Math.abs(amt);
   // type
-  t.type = t.type === "income" ? "income" : "expense";
+  const normalizedType =
+    typeof t.type === "string" ? t.type.trim().toLowerCase() : "";
+  t.type = ["income", "expense", "investment"].includes(normalizedType)
+    ? normalizedType
+    : "expense";
   // category
   if (typeof t.category !== "string" || !t.category.trim())
     t.category = "Other";
@@ -1269,7 +1273,8 @@ function computeTotals() {
       investments += Math.abs(Number(t.amount));
     }
   }
-  investmentsEl.textContent = formatMoney(investments);
+  const formattedInvestments = formatMoney(Math.abs(investments));
+  investmentsEl.textContent = `+${formattedInvestments}`;
 }
 
 // Aggregate expenses by category for the donut chart
@@ -1942,20 +1947,22 @@ function openModal(defaults) {
     $("amount").value = defaults.amount;
     // set radio selection for type
     setSelectedType(defaults.type);
+    populateCategories();
 
-    // Handle special categories with radio buttons
-    const investmentRadio = $("typeInvestment");
-
-    if (isInvestmentCategory(defaults.category)) {
-      if (investmentRadio) investmentRadio.checked = true;
-      $("category").value = defaults.category; // Keep the specific investment category
-    } else {
-      $("category").value = defaults.category;
+    const defaultCategory = defaults.category || "Other";
+    const categoryExists = Array.from(categorySelect.options).some(
+      (opt) => opt.value === defaultCategory,
+    );
+    if (!categoryExists) {
+      const opt = document.createElement("option");
+      opt.value = defaultCategory;
+      opt.textContent = defaultCategory;
+      categorySelect.appendChild(opt);
     }
+    categorySelect.value = defaultCategory;
 
     setDateInputValue("date", toDateInputValue(defaults.date));
     $("description").value = defaults.description || "";
-    populateCategories();
   } else {
     txForm.reset();
     setDateInputValue("date", todayIsoDate());
