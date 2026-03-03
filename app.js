@@ -1441,14 +1441,22 @@ function getCategoryIcon(category) {
       <path d="M12 5.67l-1.06-1.06a5.5 5.0 0 0 0-7.78 7.78"/>
     </svg>`,
 
-    "land-investment": `<svg viewBox="0 0 24 24" width="${iconSize}" height="${iconSize}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    goldinvestment: `<svg viewBox="0 0 24 24" width="${iconSize}" height="${iconSize}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="9"/>
+      <path d="M12 7v10"/>
+      <path d="M9 12h6"/>
+      <path d="M9 9h6"/>
+      <path d="M9 15h6"/>
+    </svg>`,
+
+    landinvestment: `<svg viewBox="0 0 24 24" width="${iconSize}" height="${iconSize}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/>
       <path d="M2 12l10 10 10-10"/>
       <path d="M12 2v20"/>
       <rect x="8" y="8" width="8" height="8" rx="1"/>
     </svg>`,
 
-    "property-investment": `<svg viewBox="0 0 24 24" width="${iconSize}" height="${iconSize}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    propertyinvestment: `<svg viewBox="0 0 24 24" width="${iconSize}" height="${iconSize}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
       <polyline points="9,22 9,12 15,12 15,22"/>
       <path d="M5 12h14"/>

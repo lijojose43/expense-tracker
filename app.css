@@ -1375,12 +1375,17 @@ html:not([data-theme="dark"]) .iconBox[data-cat="gold"] {
   color: #713f12; /* yellow-800 */
   border-color: #fde047; /* yellow-300 */
 }
-html:not([data-theme="dark"]) .iconBox[data-cat="land"] {
+html:not([data-theme="dark"]) .iconBox[data-cat="goldinvestment"] {
+  background: #fefce8; /* yellow-50 */
+  color: #713f12; /* yellow-800 */
+  border-color: #fde047; /* yellow-300 */
+}
+html:not([data-theme="dark"]) .iconBox[data-cat="landinvestment"] {
   background: #f7fee7; /* lime-50 */
   color: #365314; /* lime-800 */
   border-color: #bef264; /* lime-300 */
 }
-html:not([data-theme="dark"]) .iconBox[data-cat="property"] {
+html:not([data-theme="dark"]) .iconBox[data-cat="propertyinvestment"] {
   background: #faf5ff; /* purple-50 */
   color: #6b21a8; /* purple-800 */
   border-color: #e9d5ff; /* purple-300 */
@@ -1495,14 +1500,24 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
   color: #fde047; /* yellow-300 */
   border-color: #854d0e; /* yellow-800 */
 }
+[data-theme="dark"] .iconBox[data-cat="gold"] {
+  background: #713f12; /* yellow-900 */
+  color: #fde047; /* yellow-300 */
+  border-color: #854d0e; /* yellow-800 */
+}
+[data-theme="dark"] .iconBox[data-cat="goldinvestment"] {
+  background: #713f12; /* yellow-900 */
+  color: #fde047; /* yellow-300 */
+  border-color: #854d0e; /* yellow-800 */
+}
 /* Dark mode: Land */
-[data-theme="dark"] .iconBox[data-cat="land"] {
+[data-theme="dark"] .iconBox[data-cat="landinvestment"] {
   background: #365314; /* lime-900 */
   color: #bef264; /* lime-300 */
   border-color: #4d7c0f; /* lime-800 */
 }
 /* Dark mode: Property */
-[data-theme="dark"] .iconBox[data-cat="property"] {
+[data-theme="dark"] .iconBox[data-cat="propertyinvestment"] {
   background: #581c87; /* purple-900 */
   color: #e9d5ff; /* purple-300 */
   border-color: #6b21a8; /* purple-800 */
