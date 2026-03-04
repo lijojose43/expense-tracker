@@ -2770,9 +2770,9 @@ async function showExpiryNotification(items) {
       body,
       tag: "expiry-today",
       renotify: false,
-      data: { url: "#expiry" },
-      icon: "icons/icon-192.png",
-      badge: "icons/icon-192.png",
+      data: { url: "./#expiry" },
+      icon: "../icons/icon-192.png",
+      badge: "../icons/icon-192.png",
     });
   } catch (_) {}
 }

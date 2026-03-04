@@ -1,10 +1,12 @@
-const CACHE = "expense-pwa-v12";
+const CACHE = "expense-pwa-v13";
 const FILES = [
-  "/",
-  "/index.html",
-  "/app.css?v=13",
-  "/app.js?v=13",
-  "/manifest.json",
+  "./",
+  "./index.html",
+  "./app.css?v=15",
+  "./app.js?v=14",
+  "./manifest.json",
+  "../icons/icon-192.png",
+  "../icons/icon-512.png",
 ];
 
 self.addEventListener("install", (evt) => {
@@ -32,8 +34,8 @@ self.addEventListener("fetch", (evt) => {
 
   // For versioned files, always fetch from network
   if (
-    url.pathname.includes("app.css?v=") ||
-    url.pathname.includes("app.js?v=")
+    (url.pathname.endsWith("/app.css") && url.search.includes("v=")) ||
+    (url.pathname.endsWith("/app.js") && url.search.includes("v="))
   ) {
     evt.respondWith(
       fetch(request)
@@ -77,8 +79,11 @@ self.addEventListener("notificationclick", (event) => {
     (event.notification &&
       event.notification.data &&
       event.notification.data.url) ||
-    "#expiry";
-  const targetURL = new URL(urlFromData, self.location.origin).href;
+    "./#expiry";
+  const targetURL = new URL(
+    urlFromData,
+    self.registration.scope || self.location.origin,
+  ).href;
   event.waitUntil(
     (async () => {
       const allClients = await self.clients.matchAll({
