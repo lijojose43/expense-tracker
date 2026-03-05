@@ -1,5 +1,5 @@
 {
-  "name": "Expense Tracker PWA",
+  "name": "Expense Tracker",
   "short_name": "Expenses",
   "start_url": "./",
   "scope": "./",

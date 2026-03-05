@@ -1,4 +1,4 @@
-// Simple Expense Tracker PWA (localStorage)
+// Simple Expense Tracker (localStorage)
 // Data: array of {id, amount (number), type: 'expense'|'income', category, date, description}
 
 // Version control for cache busting
@@ -116,12 +116,12 @@ function performExport(format) {
         expiries: expiryData,
         shoppingList: purchaseData,
         metadata: {
-          appName: "Expense Tracker PWA",
+          appName: "Expense Tracker",
           description:
             "Personal expense tracking data with categories, dates, amounts, expiries, and shopping list",
           fileType: format.mimeType,
           encoding: "UTF-8",
-          createdWith: "Expense Tracker PWA v1.0",
+          createdWith: "Expense Tracker v1.0",
         },
       };
       content = JSON.stringify(payload, null, 2);
@@ -989,12 +989,12 @@ function exportData() {
       expiries: expiryData,
       shoppingList: purchaseData,
       metadata: {
-        appName: "Expense Tracker PWA",
+        appName: "Expense Tracker",
         description:
           "Personal expense tracking data with categories, dates, amounts, expiries, and shopping list",
         fileType: "application/json",
         encoding: "UTF-8",
-        createdWith: "Expense Tracker PWA v1.0",
+        createdWith: "Expense Tracker v1.0",
       },
     };
 

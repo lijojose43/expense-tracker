@@ -1,4 +1,4 @@
-# 📱 Expense Tracker PWA Installation Guide
+# 📱 Expense Tracker Installation Guide
 
 This guide will help you install the Expense Tracker as a Progressive Web App (PWA) on your device for a native app-like experience.
 
@@ -94,12 +94,14 @@ This guide will help you install the Expense Tracker as a Progressive Web App (P
 ### Installation Option Not Available?
 
 **Check Requirements:**
+
 - ✅ HTTPS connection (required for PWA)
 - ✅ Valid manifest.json file
 - ✅ Service worker registered
 - ✅ App meets PWA criteria
 
 **Common Solutions:**
+
 1. **Refresh the page** and wait 30 seconds
 2. **Clear browser cache** and reload
 3. **Try a different browser** (Chrome/Edge work best)
@@ -134,18 +136,21 @@ Before installing, ensure:
 ## 🚀 Post-Installation Tips
 
 ### Getting Started
+
 1. **Add Your First Transaction**: Use the floating + button
 2. **Set Up Categories**: Customize categories for your needs
 3. **Try Filters**: Use date filters to analyze spending
 4. **Export Data**: Backup your data regularly
 
 ### Best Practices
+
 - **Regular Backups**: Export your data monthly
 - **Consistent Categories**: Use consistent category names
 - **Detailed Descriptions**: Add meaningful descriptions
 - **Date Accuracy**: Always set correct transaction dates
 
 ### Maintenance
+
 - **Updates**: PWA updates automatically when you're online
 - **Storage**: Monitor local storage usage
 - **Backup**: Regular data exports recommended
@@ -167,6 +172,7 @@ If you encounter issues during installation:
 ## 🎉 Enjoy Your PWA!
 
 Once installed, you'll have:
+
 - **Quick Access**: Launch from home screen/desktop
 - **Offline Support**: Use without internet
 - **Native Feel**: Full-screen app experience
