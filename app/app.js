@@ -56,47 +56,207 @@ function showExportOptions() {
     .map((fmt, index) => `<option value="${index}">${fmt.name}</option>`)
     .join("");
 
-  const modal = document.createElement("div");
-  modal.style.cssText = `
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.8); z-index: 1000; display: flex;
-    align-items: center; justify-content: center;
-  `;
+  // Create bottom sheet modal
+  const exportModal = document.createElement("div");
+  exportModal.id = "exportModal";
+  exportModal.className = "modal hide";
+  exportModal.setAttribute("role", "dialog");
+  exportModal.setAttribute("aria-modal", "true");
 
-  modal.innerHTML = `
-    <div style="background: white; padding: 20px; border-radius: 12px; max-width: 400px; width: 90%;">
-      <h3 style="margin: 0 0 15px 0; color: #333;">Export Data</h3>
-      <p style="margin: 0 0 15px 0; color: #666;">Choose export format:</p>
-      <select id="exportFormatSelect" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-        ${formatOptions}
-      </select>
-      <div style="display: flex; gap: 10px; margin-top: 20px;">
-        <button id="exportConfirmBtn" style="flex: 1; padding: 10px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Export</button>
-        <button id="exportCancelBtn" style="flex: 1; padding: 10px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer;">Cancel</button>
-      </div>
+  exportModal.innerHTML = `
+    <div class="modal-content export-modal-content">
+      <header>
+        <h3>Export Data</h3>
+        <button id="closeExportModal" class="icon">✕</button>
+      </header>
+      <form id="exportForm">
+        <div class="form-group">
+          <label for="exportFormatSelect">Choose export format:</label>
+          <select id="exportFormatSelect">
+            ${formatOptions}
+          </select>
+        </div>
+        <div class="export-info">
+          <div class="info-item">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+            <span>Export includes transactions, expiries, and shopping list</span>
+          </div>
+          <div class="info-item">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+            <span>Your data stays private and secure</span>
+          </div>
+        </div>
+        <div class="actions">
+          <button type="button" id="exportCancelBtn" class="secondary">Cancel</button>
+          <button type="button" id="exportConfirmBtn" class="primary">Export</button>
+        </div>
+      </form>
     </div>
   `;
 
-  document.body.appendChild(modal);
+  document.body.appendChild(exportModal);
+
+  // Initialize drag to close for export modal
+  initExportModalDragToClose();
+
+  // Show modal with animation
+  setTimeout(() => {
+    exportModal.classList.remove("hide");
+    exportModal.classList.add("show");
+  }, 10);
 
   // Handle export confirmation
   document.getElementById("exportConfirmBtn").onclick = () => {
     const selectedIndex = document.getElementById("exportFormatSelect").value;
     const selectedFormat = formats[selectedIndex];
     performExport(selectedFormat);
-    document.body.removeChild(modal);
+    closeExportModal();
   };
 
-  document.getElementById("exportCancelBtn").onclick = () => {
-    document.body.removeChild(modal);
-  };
+  document.getElementById("exportCancelBtn").onclick = closeExportModal;
+  document.getElementById("closeExportModal").onclick = closeExportModal;
 
   // Close modal on background click
-  modal.onclick = (e) => {
-    if (e.target === modal) {
-      document.body.removeChild(modal);
+  exportModal.onclick = (e) => {
+    if (e.target === exportModal) {
+      closeExportModal();
     }
   };
+}
+
+function closeExportModal() {
+  const exportModal = document.getElementById("exportModal");
+  if (exportModal) {
+    exportModal.classList.remove("show");
+    exportModal.classList.add("hide");
+
+    // Reset modal transform when closing
+    const modalContent = exportModal.querySelector(".modal-content");
+    if (modalContent) {
+      modalContent.style.transform = "";
+      modalContent.style.transition = "";
+    }
+
+    setTimeout(() => {
+      document.body.removeChild(exportModal);
+    }, 300);
+  }
+}
+
+// Export modal drag to close functionality
+let exportModalStartY = 0;
+let exportModalCurrentY = 0;
+let exportModalIsDragging = false;
+let exportModalDragThreshold = 100;
+
+function initExportModalDragToClose() {
+  const modalContent = document.querySelector("#exportModal .modal-content");
+  const modalHeader = document.querySelector(
+    "#exportModal .modal-content header",
+  );
+
+  if (!modalContent || !modalHeader) return;
+
+  modalHeader.addEventListener(
+    "touchstart",
+    (e) => {
+      exportModalStartY = e.touches[0].clientY;
+      exportModalCurrentY = exportModalStartY;
+      exportModalIsDragging = true;
+      modalContent.style.transition = "none";
+    },
+    { passive: true },
+  );
+
+  modalHeader.addEventListener(
+    "touchmove",
+    (e) => {
+      if (!exportModalIsDragging) return;
+
+      exportModalCurrentY = e.touches[0].clientY;
+      const deltaY = exportModalCurrentY - exportModalStartY;
+
+      // Only allow downward drag
+      if (deltaY > 0) {
+        modalContent.style.transform = `translateY(${deltaY}px)`;
+      }
+    },
+    { passive: true },
+  );
+
+  modalHeader.addEventListener(
+    "touchend",
+    () => {
+      if (!exportModalIsDragging) return;
+
+      const deltaY = exportModalCurrentY - exportModalStartY;
+      exportModalIsDragging = false;
+
+      // Reset transition
+      modalContent.style.transition =
+        "transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)";
+
+      if (deltaY > exportModalDragThreshold) {
+        // Close modal if dragged far enough
+        hapticFeedback("medium");
+        closeExportModal();
+      } else {
+        // Snap back to original position
+        modalContent.style.transform = "translateY(0)";
+      }
+    },
+    { passive: true },
+  );
+
+  // Also handle mouse events for desktop
+  modalHeader.addEventListener("mousedown", (e) => {
+    exportModalStartY = e.clientY;
+    exportModalCurrentY = exportModalStartY;
+    exportModalIsDragging = true;
+    modalContent.style.transition = "none";
+
+    const handleMouseMove = (e) => {
+      if (!exportModalIsDragging) return;
+
+      exportModalCurrentY = e.clientY;
+      const deltaY = exportModalCurrentY - exportModalStartY;
+
+      // Only allow downward drag
+      if (deltaY > 0) {
+        modalContent.style.transform = `translateY(${deltaY}px)`;
+      }
+    };
+
+    const handleMouseUp = () => {
+      if (!exportModalIsDragging) return;
+
+      const deltaY = exportModalCurrentY - exportModalStartY;
+      exportModalIsDragging = false;
+
+      // Reset transition
+      modalContent.style.transition =
+        "transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)";
+
+      if (deltaY > exportModalDragThreshold) {
+        // Close modal if dragged far enough
+        hapticFeedback("medium");
+        closeExportModal();
+      } else {
+        // Snap back to original position
+        modalContent.style.transform = "translateY(0)";
+      }
+
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+    };
+
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+  });
 }
 
 function performExport(format) {
