@@ -1990,7 +1990,7 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
   display: flex;
   flex-wrap: nowrap;
   gap: 8px;
-  justify-content: space-between;
+  justify-content: flex-start;
   margin-bottom: 20px;
 }
 
@@ -3463,7 +3463,6 @@ div.app {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  margin-bottom: 20px;
 }
 
 .settings-modal-content .form-group label {
@@ -3496,7 +3495,6 @@ div.app {
 }
 
 .settings-info {
-  margin: 20px 0;
   padding: 16px;
   background: rgba(15, 110, 253, 0.05);
   border-radius: 12px;
