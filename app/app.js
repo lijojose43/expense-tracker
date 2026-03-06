@@ -278,14 +278,14 @@ function showSettingsOptions() {
         <button id="closeSettingsModal" class="icon">✕</button>
       </header>
       <form id="settingsForm">
-        <div class="form-group">
-          <label for="currencySelect">Currency Symbol</label>
-          <select id="currencySelect">
+        <div class="form-group floating">
+          <select id="currencySelect" required>
+            <option value="" disabled selected hidden></option>
+            <option value="₹" ${currentCurrency === "₹" ? "selected" : ""}>₹ - Indian Rupee</option>
             <option value="$" ${currentCurrency === "$" ? "selected" : ""}>$ - US Dollar</option>
             <option value="€" ${currentCurrency === "€" ? "selected" : ""}>€ - Euro</option>
             <option value="£" ${currentCurrency === "£" ? "selected" : ""}>£ - British Pound</option>
             <option value="¥" ${currentCurrency === "¥" ? "selected" : ""}>¥ - Japanese Yen</option>
-            <option value="₹" ${currentCurrency === "₹" ? "selected" : ""}>₹ - Indian Rupee</option>
             <option value="₽" ${currentCurrency === "₽" ? "selected" : ""}>₽ - Russian Ruble</option>
             <option value="₩" ${currentCurrency === "₩" ? "selected" : ""}>₩ - South Korean Won</option>
             <option value="₺" ${currentCurrency === "₺" ? "selected" : ""}>₺ - Turkish Lira</option>
@@ -302,6 +302,7 @@ function showSettingsOptions() {
             <option value="₯" ${currentCurrency === "₯" ? "selected" : ""}>₯ - Armenian Dram</option>
             <option value="₰" ${currentCurrency === "₰" ? "selected" : ""}>₰ - Bitcoin</option>
           </select>
+          <label for="currencySelect" class="floating-label">Currency Symbol</label>
         </div>
         
         <div class="form-group">
@@ -2822,7 +2823,13 @@ addBtn.addEventListener("click", () => {
   if (modalTitle) modalTitle.textContent = "Create Transaction";
   const submitBtn = txForm.querySelector('button[type="submit"]');
   if (submitBtn) submitBtn.textContent = "Save";
-  openModal();
+  openModal({
+    amount: "",
+    type: "expense",
+    category: "Other",
+    date: new Date().toISOString().split("T")[0],
+    description: "",
+  });
 });
 closeModal.addEventListener("click", closeModalFn);
 if (cancelBtn) cancelBtn.addEventListener("click", closeModalFn);
