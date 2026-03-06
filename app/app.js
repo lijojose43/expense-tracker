@@ -305,7 +305,7 @@ function showSettingsOptions() {
           <label for="currencySelect" class="floating-label">Currency Symbol</label>
         </div>
         <div class="form-group">
-          <label>Manage Categories</label>
+          <label>Categories</label>
           <div class="type-checkboxes">
             <div class="checkbox-group">
               <input type="radio" id="catTypeExpense" name="categoryType" value="expense" checked>
@@ -335,21 +335,59 @@ function showSettingsOptions() {
                 <span>Expense Categories</span>
                 <button type="button" id="addExpenseCategory" class="add-category-btn">+ Add</button>
               </div>
-              <div id="expenseCategoriesList" class="categories-container"></div>
+              <div class="categories-container">
+                ${defaultCategories
+                  .filter(
+                    (cat) =>
+                      ![
+                        "Salary",
+                        "Business",
+                        "Gold Investment",
+                        "Land Investment",
+                        "Property Investment",
+                        "Chit Fund",
+                        "LIC",
+                        "Term Insurance",
+                      ].includes(cat),
+                  )
+                  .map((cat) => `<span class="category-chip">${cat}</span>`)
+                  .join("")}
+              </div>
             </div>
             <div id="incomeCategories" class="category-list">
               <div class="category-header">
                 <span>Income Categories</span>
                 <button type="button" id="addIncomeCategory" class="add-category-btn">+ Add</button>
               </div>
-              <div id="incomeCategoriesList" class="categories-container"></div>
+              <div class="categories-container">
+                ${defaultCategories
+                  .filter((cat) => ["Salary", "Business"].includes(cat))
+                  .map((cat) => `<span class="category-chip">${cat}</span>`)
+                  .join("")}
+              </div>
             </div>
             <div id="investmentCategories" class="category-list">
               <div class="category-header">
                 <span>Investment Categories</span>
                 <button type="button" id="addInvestmentCategory" class="add-category-btn">+ Add</button>
               </div>
-              <div id="investmentCategoriesList" class="categories-container"></div>
+              <div class="categories-container">
+                ${defaultCategories
+                  .filter((cat) =>
+                    [
+                      "Gold Investment",
+                      "Land Investment",
+                      "Property Investment",
+                      "Emergency Fund",
+                      "Mutual Fund",
+                      "Chit Fund",
+                      "LIC",
+                      "Term Insurance",
+                    ].includes(cat),
+                  )
+                  .map((cat) => `<span class="category-chip">${cat}</span>`)
+                  .join("")}
+              </div>
             </div>
           </div>
         </div>
@@ -1102,6 +1140,7 @@ const defaultCategories = [
   "Gold Investment",
   "Land Investment",
   "Property Investment",
+  "Emergency Fund",
   "Mutual Fund",
   "Other",
 ];

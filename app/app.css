@@ -3625,6 +3625,36 @@ div.app {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.category-chip {
+  display: inline-block;
+  padding: 6px 12px;
+  margin: 4px;
+  background: rgba(15, 110, 253, 0.1);
+  border: 1px solid rgba(15, 110, 253, 0.2);
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text);
+  transition: all 0.2s ease;
+  cursor: default;
+}
+
+.category-chip:hover {
+  background: rgba(15, 110, 253, 0.15);
+  border-color: rgba(15, 110, 253, 0.3);
+  transform: translateY(-1px);
+}
+
+.category-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
   font-weight: 600;
   color: var(--text);
 }
@@ -3649,7 +3679,6 @@ div.app {
 .categories-container {
   border: 1px solid var(--line);
   border-radius: 8px;
-  padding: 8px;
 }
 
 .category-item {
