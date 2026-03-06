@@ -7,7 +7,6 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-title" content="Expense Tracker">
-  <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
   <link rel="stylesheet" href="app.css?v=15">
   <title>Expense Tracker</title>
@@ -170,7 +169,7 @@
       </section>
       
       <section class="summary">
-        <div class="card wide" style="padding:16px">
+        <div id="summaryChartCard" class="card wide summary-chart-card">
           <canvas id="categoryDonut" width="360" height="360" aria-label="Spending by Category" role="img"></canvas>
         </div>
       </section>
@@ -392,10 +391,18 @@
   </div>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-  <script src="app.js?v=14"></script>
+  <script src="app.js?v=15"></script>
   <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js').catch(console.error);
+    const isWebOrigin = location.protocol === "http:" || location.protocol === "https:";
+    if (isWebOrigin) {
+      const manifestLink = document.createElement("link");
+      manifestLink.rel = "manifest";
+      manifestLink.href = "manifest.json";
+      document.head.appendChild(manifestLink);
+    }
+
+    if (isWebOrigin && "serviceWorker" in navigator) {
+      navigator.serviceWorker.register("sw.js").catch(console.error);
     }
   </script>
 </body>

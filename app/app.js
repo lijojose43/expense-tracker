@@ -682,71 +682,49 @@ function renderCategoryList(type, categories) {
 }
 
 function addCategoryFromSettings(type) {
-  const input = document.createElement("input");
-  input.type = "text";
-  input.placeholder = "Enter category name...";
-  input.className = "category-input";
+  const newCategory = prompt(`Enter new ${type} category name:`);
+  if (newCategory && newCategory.trim()) {
+    // Get existing categories
+    const savedCategories = localStorage.getItem("categories");
+    const categories = savedCategories
+      ? JSON.parse(savedCategories)
+      : {
+        expense: [
+          "Groceries",
+          "Dining",
+          "Rent",
+          "Transportation",
+          "Shopping",
+          "Healthcare",
+          "Entertainment",
+          "Other",
+        ],
+        income: ["Salary", "Business", "Other"],
+        investment: [
+          "Gold Investment",
+          "Land Investment",
+          "Property Investment",
+          "Emergency Fund",
+          "Mutual Fund",
+          "Chit Fund",
+          "LIC",
+          "Term Insurance",
+          "Other",
+        ],
+      };
 
-  const container = document.getElementById(`${type}CategoriesList`);
-  const addButton = document.getElementById(
-    `add${type.charAt(0).toUpperCase() + type.slice(1)}Category`,
-  );
-
-  // Insert input before add button
-  container.parentNode.insertBefore(input, addButton);
-  input.focus();
-
-  const handleAddCategory = (e) => {
-    if (e.key === "Enter" && e.target.value.trim()) {
-      const newCategory = e.target.value.trim();
-
-      // Get existing categories
-      const savedCategories = localStorage.getItem("categories");
-      const categories = savedCategories
-        ? JSON.parse(savedCategories)
-        : {
-            expense: [
-              "Groceries",
-              "Dining",
-              "Rent",
-              "Utilities",
-              "Transportation",
-              "Shopping",
-              "Healthcare",
-              "Entertainment",
-              "Other",
-            ],
-            income: ["Salary", "Business", "Other"],
-            investment: [
-              "Stocks",
-              "Real Estate",
-              "Mutual Funds",
-              "Crypto",
-              "Other",
-            ],
-          };
-
-      // Add new category
-      if (!categories[type].includes(newCategory)) {
-        categories[type].push(newCategory);
-        localStorage.setItem("categories", JSON.stringify(categories));
-
-        // Re-render category list
-        renderCategoryList(type, categories[type]);
-
-        // Update app categories
-        populateCategories();
-      }
-
-      // Remove input
-      input.remove();
-
+    // Add new category
+    if (!categories[type].includes(newCategory.trim())) {
+      categories[type].push(newCategory.trim());
+      localStorage.setItem("categories", JSON.stringify(categories));
+      
+      // Update app categories
+      populateCategories();
+      
+      // Show success message
       hapticFeedback("light");
     }
-  };
-
-  input.addEventListener("keypress", handleAddCategory);
-  input.addEventListener("blur", () => setTimeout(() => input.remove(), 200));
+  }
 }
 
 function saveCategoriesFromSettings() {
@@ -2333,8 +2311,10 @@ function getCategoryIcon(category) {
 function renderDonut() {
   const canvas = document.getElementById("categoryDonut");
   if (!canvas || typeof Chart === "undefined") return;
+  const chartCard = document.getElementById("summaryChartCard");
   const { labels, values } = expensesByCategory();
   const ctx = canvas.getContext("2d");
+  const isMobile = window.matchMedia("(max-width: 768px)").matches;
   const palette = [
     "#60a5fa",
     "#34d399",
@@ -2386,6 +2366,24 @@ function renderDonut() {
 
   // Ensure canvas is visible
   canvas.style.display = "block";
+  canvas.style.width = "100%";
+
+  // Grow chart card as categories increase so legend gets extra space
+  // and donut size stays consistent.
+  const categoryCount = hasData ? labels.length : 0;
+  const itemsPerRow = isMobile ? 2 : 3;
+  const baseLegendRows = 2;
+  const legendRows = Math.max(
+    baseLegendRows,
+    Math.ceil(categoryCount / itemsPerRow),
+  );
+  const legendExtraHeight = Math.max(0, legendRows - baseLegendRows) * 28;
+  const chartBaseHeight = isMobile ? 360 : 390;
+  const computedCanvasHeight = chartBaseHeight + legendExtraHeight;
+  canvas.style.height = `${computedCanvasHeight}px`;
+  if (chartCard) {
+    chartCard.style.minHeight = `${computedCanvasHeight + 32}px`;
+  }
 
   if (donutChart) {
     donutChart.destroy();
@@ -2400,6 +2398,7 @@ function renderDonut() {
           data: chartValues,
           backgroundColor: chartColors,
           borderWidth: 0,
+          radius: isMobile ? 125 : 140,
         },
       ],
     },

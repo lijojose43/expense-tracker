@@ -418,6 +418,18 @@ html:not([data-theme="dark"]) #sunIcon {
   flex-basis: 100%;
   width: 100%;
 }
+
+.summary-chart-card {
+  padding: 16px;
+  display: flex;
+  align-items: stretch;
+}
+
+#categoryDonut {
+  width: 100%;
+  min-height: 360px;
+  display: block;
+}
 .label {
   font-size: 13px;
   font-weight: 600;
@@ -3466,7 +3478,7 @@ div.app {
 }
 
 .settings-modal-content .form-group label {
-  font-weight: 600;
+  font-weight: 500;
   color: var(--text);
   font-size: 16px;
 }
