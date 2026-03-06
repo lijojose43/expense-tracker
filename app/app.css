@@ -3700,6 +3700,7 @@ div.app {
 .categories-container {
   border: 1px solid var(--line);
   border-radius: 8px;
+  min-height: 108px;
 }
 
 .category-item {
