@@ -706,8 +706,50 @@ function addCategoryFromSettings(type) {
     transition: all 0.2s ease;
   `;
 
-  // Insert input at the end of the container
-  categoriesContainer.appendChild(input);
+  // Create remove button container
+  const removeBtnContainer = document.createElement("div");
+  removeBtnContainer.style.cssText = `
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: 8px;
+  `;
+
+  // Create remove button
+  const removeBtn = document.createElement("button");
+  removeBtn.type = "button";
+  removeBtn.className = "remove-category-btn";
+  removeBtn.textContent = "✕";
+  removeBtn.style.cssText = `
+    width: 20px;
+    height: 20px;
+    border: none;
+    background: rgba(239, 68, 68, 0.8);
+    color: white;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+  `;
+
+  // Add remove button to container
+  removeBtnContainer.appendChild(removeBtn);
+
+  // Insert input and remove button at the end of container
+  const inputContainer = document.createElement("div");
+  inputContainer.style.cssText = `
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  `;
+  inputContainer.appendChild(input);
+  inputContainer.appendChild(removeBtnContainer);
+
+  // Insert the entire input container at the end of categories container
+  categoriesContainer.appendChild(inputContainer);
   input.focus();
 
   const handleAddCategory = (e) => {
@@ -770,26 +812,26 @@ function addCategoryFromSettings(type) {
           animation: chipSlideIn 0.3s ease;
         `;
 
-        // Replace input with chip
-        input.replaceWith(chip);
+        // Replace input container with chip
+        inputContainer.replaceWith(chip);
 
         // Show success feedback
         hapticFeedback("light");
       } else {
-        // Category already exists, remove input
-        input.remove();
+        // Category already exists, remove input container
+        inputContainer.remove();
       }
     } else if (e.key === "Escape") {
       // Cancel on Escape key
-      input.remove();
+      inputContainer.remove();
     }
   };
 
   const handleBlur = () => {
-    // Remove input if it loses focus and is empty
+    // Remove input container if it loses focus and is empty
     setTimeout(() => {
-      if (input.parentNode) {
-        input.remove();
+      if (inputContainer.parentNode) {
+        inputContainer.remove();
       }
     }, 200);
   };
