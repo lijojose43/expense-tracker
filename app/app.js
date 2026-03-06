@@ -303,6 +303,39 @@ function showSettingsOptions() {
             <option value="₰" ${currentCurrency === "₰" ? "selected" : ""}>₰ - Bitcoin</option>
           </select>
         </div>
+        
+        <div class="form-group">
+          <label>Manage Categories</label>
+          <div class="category-tabs">
+            <button type="button" class="category-tab active" data-type="expense">Expense</button>
+            <button type="button" class="category-tab" data-type="income">Income</button>
+            <button type="button" class="category-tab" data-type="investment">Investment</button>
+          </div>
+          <div class="category-content">
+            <div id="expenseCategories" class="category-list active">
+              <div class="category-header">
+                <span>Expense Categories</span>
+                <button type="button" id="addExpenseCategory" class="add-category-btn">+ Add</button>
+              </div>
+              <div id="expenseCategoriesList" class="categories-container"></div>
+            </div>
+            <div id="incomeCategories" class="category-list">
+              <div class="category-header">
+                <span>Income Categories</span>
+                <button type="button" id="addIncomeCategory" class="add-category-btn">+ Add</button>
+              </div>
+              <div id="incomeCategoriesList" class="categories-container"></div>
+            </div>
+            <div id="investmentCategories" class="category-list">
+              <div class="category-header">
+                <span>Investment Categories</span>
+                <button type="button" id="addInvestmentCategory" class="add-category-btn">+ Add</button>
+              </div>
+              <div id="investmentCategoriesList" class="categories-container"></div>
+            </div>
+          </div>
+        </div>
+        
         <div class="settings-info">
           <div class="info-item">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
@@ -315,7 +348,7 @@ function showSettingsOptions() {
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
             </svg>
-            <span>Your currency preference is saved locally on this device</span>
+            <span>Add, modify, or remove categories to customize your expense tracking</span>
           </div>
         </div>
         <div class="actions">
@@ -342,7 +375,10 @@ function showSettingsOptions() {
     const selectedCurrency = document.getElementById("currencySelect").value;
     localStorage.setItem("currency", selectedCurrency);
 
-    // Update all currency displays in the app
+    // Save categories
+    saveCategoriesFromSettings();
+
+    // Update all currency displays in app
     updateCurrencyDisplays(selectedCurrency);
 
     closeSettingsModal();
@@ -350,6 +386,40 @@ function showSettingsOptions() {
 
   document.getElementById("settingsCancelBtn").onclick = closeSettingsModal;
   document.getElementById("closeSettingsModal").onclick = closeSettingsModal;
+
+  // Category tabs functionality
+  const categoryTabs = document.querySelectorAll(".category-tab");
+  const categoryLists = {
+    expense: document.getElementById("expenseCategories"),
+    income: document.getElementById("incomeCategories"),
+    investment: document.getElementById("investmentCategories"),
+  };
+
+  categoryTabs.forEach((tab) => {
+    tab.addEventListener("click", () => {
+      // Remove active class from all tabs and lists
+      categoryTabs.forEach((t) => t.classList.remove("active"));
+      Object.values(categoryLists).forEach((list) =>
+        list.classList.remove("active"),
+      );
+
+      // Add active class to clicked tab and corresponding list
+      tab.classList.add("active");
+      const type = tab.getAttribute("data-type");
+      categoryLists[type].classList.add("active");
+    });
+  });
+
+  // Add category buttons
+  document.getElementById("addExpenseCategory").onclick = () =>
+    addCategoryFromSettings("expense");
+  document.getElementById("addIncomeCategory").onclick = () =>
+    addCategoryFromSettings("income");
+  document.getElementById("addInvestmentCategory").onclick = () =>
+    addCategoryFromSettings("investment");
+
+  // Load categories into settings
+  loadCategoriesIntoSettings();
 
   // Close modal on background click
   settingsModal.onclick = (e) => {
@@ -512,6 +582,205 @@ function initSettingsModalDragToClose() {
   });
 }
 
+function loadCategoriesIntoSettings() {
+  // Get categories from localStorage or use defaults
+  const savedCategories = localStorage.getItem("categories");
+  const categories = savedCategories
+    ? JSON.parse(savedCategories)
+    : {
+        expense: [
+          "Groceries",
+          "Dining",
+          "Rent",
+          "Utilities",
+          "Transportation",
+          "Shopping",
+          "Healthcare",
+          "Entertainment",
+          "Other",
+        ],
+        income: ["Salary", "Business", "Other"],
+        investment: [
+          "Stocks",
+          "Real Estate",
+          "Mutual Funds",
+          "Crypto",
+          "Other",
+        ],
+      };
+
+  // Load categories into respective lists
+  renderCategoryList("expense", categories.expense);
+  renderCategoryList("income", categories.income);
+  renderCategoryList("investment", categories.investment);
+}
+
+function renderCategoryList(type, categories) {
+  const container = document.getElementById(`${type}CategoriesList`);
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  categories.forEach((category, index) => {
+    const categoryItem = document.createElement("div");
+    categoryItem.className = "category-item";
+    categoryItem.innerHTML = `
+      <span class="category-name">${category}</span>
+      <button type="button" class="remove-category-btn" data-type="${type}" data-index="${index}">✕</button>
+    `;
+    container.appendChild(categoryItem);
+  });
+}
+
+function addCategoryFromSettings(type) {
+  const input = document.createElement("input");
+  input.type = "text";
+  input.placeholder = "Enter category name...";
+  input.className = "category-input";
+
+  const container = document.getElementById(`${type}CategoriesList`);
+  const addButton = document.getElementById(
+    `add${type.charAt(0).toUpperCase() + type.slice(1)}Category`,
+  );
+
+  // Insert input before add button
+  container.parentNode.insertBefore(input, addButton);
+  input.focus();
+
+  const handleAddCategory = (e) => {
+    if (e.key === "Enter" && e.target.value.trim()) {
+      const newCategory = e.target.value.trim();
+
+      // Get existing categories
+      const savedCategories = localStorage.getItem("categories");
+      const categories = savedCategories
+        ? JSON.parse(savedCategories)
+        : {
+            expense: [
+              "Groceries",
+              "Dining",
+              "Rent",
+              "Utilities",
+              "Transportation",
+              "Shopping",
+              "Healthcare",
+              "Entertainment",
+              "Other",
+            ],
+            income: ["Salary", "Business", "Other"],
+            investment: [
+              "Stocks",
+              "Real Estate",
+              "Mutual Funds",
+              "Crypto",
+              "Other",
+            ],
+          };
+
+      // Add new category
+      if (!categories[type].includes(newCategory)) {
+        categories[type].push(newCategory);
+        localStorage.setItem("categories", JSON.stringify(categories));
+
+        // Re-render category list
+        renderCategoryList(type, categories[type]);
+
+        // Update app categories
+        populateCategories();
+      }
+
+      // Remove input
+      input.remove();
+
+      hapticFeedback("light");
+    }
+  };
+
+  input.addEventListener("keypress", handleAddCategory);
+  input.addEventListener("blur", () => setTimeout(() => input.remove(), 200));
+}
+
+function saveCategoriesFromSettings() {
+  // Collect categories from all three lists
+  const categories = {
+    expense: [],
+    income: [],
+    investment: [],
+  };
+
+  // Get expense categories
+  const expenseItems = document.querySelectorAll(
+    "#expenseCategoriesList .category-name",
+  );
+  categories.expense = Array.from(expenseItems).map((item) => item.textContent);
+
+  // Get income categories
+  const incomeItems = document.querySelectorAll(
+    "#incomeCategoriesList .category-name",
+  );
+  categories.income = Array.from(incomeItems).map((item) => item.textContent);
+
+  // Get investment categories
+  const investmentItems = document.querySelectorAll(
+    "#investmentCategoriesList .category-name",
+  );
+  categories.investment = Array.from(investmentItems).map(
+    (item) => item.textContent,
+  );
+
+  // Save to localStorage
+  localStorage.setItem("categories", JSON.stringify(categories));
+
+  // Update app categories
+  populateCategories();
+}
+
+// Add event delegation for remove buttons
+document.addEventListener("click", (e) => {
+  if (e.target.classList.contains("remove-category-btn")) {
+    const type = e.target.getAttribute("data-type");
+    const index = parseInt(e.target.getAttribute("data-index"));
+
+    // Get existing categories
+    const savedCategories = localStorage.getItem("categories");
+    const categories = savedCategories
+      ? JSON.parse(savedCategories)
+      : {
+          expense: [
+            "Groceries",
+            "Dining",
+            "Rent",
+            "Utilities",
+            "Transportation",
+            "Shopping",
+            "Healthcare",
+            "Entertainment",
+            "Other",
+          ],
+          income: ["Salary", "Business", "Other"],
+          investment: [
+            "Stocks",
+            "Real Estate",
+            "Mutual Funds",
+            "Crypto",
+            "Other",
+          ],
+        };
+
+    // Remove category
+    categories[type].splice(index, 1);
+    localStorage.setItem("categories", JSON.stringify(categories));
+
+    // Re-render category list
+    renderCategoryList(type, categories[type]);
+
+    // Update app categories
+    populateCategories();
+
+    hapticFeedback("light");
+  }
+});
+
 function performExport(format) {
   try {
     let content, filename, mimeType;
@@ -522,16 +791,44 @@ function performExport(format) {
       mimeType = "text/csv;charset=utf-8";
     } else {
       // JSON export
+      // Get categories from localStorage or use defaults
+      const savedCategories = localStorage.getItem("categories");
+      const categories = savedCategories
+        ? JSON.parse(savedCategories)
+        : {
+            expense: [
+              "Groceries",
+              "Dining",
+              "Rent",
+              "Utilities",
+              "Transportation",
+              "Shopping",
+              "Healthcare",
+              "Entertainment",
+              "Other",
+            ],
+            income: ["Salary", "Business", "Other"],
+            investment: [
+              "Stocks",
+              "Real Estate",
+              "Mutual Funds",
+              "Crypto",
+              "Other",
+            ],
+          };
+
       const payload = {
         version: 1,
         exportedAt: new Date().toISOString(),
         items: data,
         expiries: expiryData,
         shoppingList: purchaseData,
+        categories: categories,
+        currency: localStorage.getItem("currency") || "₹",
         metadata: {
           appName: "Expense Tracker",
           description:
-            "Personal expense tracking data with categories, dates, amounts, expiries, and shopping list",
+            "Personal expense tracking data with categories, dates, amounts, expiries, shopping list, and custom categories",
           fileType: format.mimeType,
           encoding: "UTF-8",
           createdWith: "Expense Tracker v1.0",
@@ -543,8 +840,12 @@ function performExport(format) {
 
       console.log(`Export completed: ${filename}`);
       const totalItems = data.length + expiryData.length + purchaseData.length;
+      const totalCategories = Object.keys(categories).reduce(
+        (sum, type) => sum + categories[type].length,
+        0,
+      );
       alert(
-        `Exported ${totalItems} items (${data.length} expenses, ${expiryData.length} expiries, ${purchaseData.length} shopping items) to ${filename}`,
+        `Exported ${totalItems} items (${data.length} expenses, ${expiryData.length} expiries, ${purchaseData.length} shopping items) and ${totalCategories} categories (${categories.expense.length} expense, ${categories.income.length} income, ${categories.investment.length} investment) to ${filename}`,
       );
     }
 
@@ -1496,14 +1797,45 @@ async function importFromFile(file) {
       createdAt: s.createdAt || Date.now(),
     }));
 
+  // Handle categories - import if available
+  const importedCategories = json.categories || null;
+  const importedCurrency = json.currency || null;
+
+  let categoryCount = 0;
+  let categoryDetails = { expense: 0, income: 0, investment: 0 };
+
+  if (importedCategories) {
+    categoryCount = Object.keys(importedCategories).reduce(
+      (sum, type) => sum + importedCategories[type].length,
+      0,
+    );
+    categoryDetails = {
+      expense: importedCategories.expense
+        ? importedCategories.expense.length
+        : 0,
+      income: importedCategories.income ? importedCategories.income.length : 0,
+      investment: importedCategories.investment
+        ? importedCategories.investment.length
+        : 0,
+    };
+  }
+
   const replace = confirm(
-    `Replace existing data with imported items?\n\nExpenses: ${cleaned.length}\nExpiries: ${cleanedExpiries.length}\nShopping: ${cleanedShopping.length}\n\nOK = Replace, Cancel = Merge`,
+    `Replace existing data with imported items?\n\nExpenses: ${cleaned.length}\nExpiries: ${cleanedExpiries.length}\nShopping: ${cleanedShopping.length}\nCategories: ${categoryCount}\n\nOK = Replace, Cancel = Merge`,
   );
 
   if (replace) {
     data = cleaned;
     expiryData = cleanedExpiries;
     purchaseData = cleanedShopping;
+
+    // Replace categories and currency if available
+    if (importedCategories) {
+      localStorage.setItem("categories", JSON.stringify(importedCategories));
+    }
+    if (importedCurrency) {
+      localStorage.setItem("currency", importedCurrency);
+    }
   } else {
     // Merge expenses
     const existing = new Set(data.map((t) => t.id));
@@ -1525,6 +1857,52 @@ async function importFromFile(file) {
       if (!s.id || existingShopping.has(s.id)) s.id = uid();
       purchaseData.push(s);
     }
+
+    // Merge categories if available
+    if (importedCategories) {
+      const existingCategories = localStorage.getItem("categories");
+      const currentCategories = existingCategories
+        ? JSON.parse(existingCategories)
+        : {
+            expense: [
+              "Groceries",
+              "Dining",
+              "Rent",
+              "Utilities",
+              "Transportation",
+              "Shopping",
+              "Healthcare",
+              "Entertainment",
+              "Other",
+            ],
+            income: ["Salary", "Business", "Other"],
+            investment: [
+              "Stocks",
+              "Real Estate",
+              "Mutual Funds",
+              "Crypto",
+              "Other",
+            ],
+          };
+
+      // Merge categories from import
+      ["expense", "income", "investment"].forEach((type) => {
+        if (importedCategories[type]) {
+          importedCategories[type].forEach((category) => {
+            if (!currentCategories[type].includes(category)) {
+              currentCategories[type].push(category);
+            }
+          });
+        }
+      });
+
+      localStorage.setItem("categories", JSON.stringify(currentCategories));
+    }
+
+    // Import currency if available and not already set
+    if (importedCurrency && !localStorage.getItem("currency")) {
+      localStorage.setItem("currency", importedCurrency);
+    }
   }
 
   // Save all data
@@ -1542,9 +1920,18 @@ async function importFromFile(file) {
 
   const totalImported =
     cleaned.length + cleanedExpiries.length + cleanedShopping.length;
-  alert(
-    `Import successful!\n\nImported ${totalImported} items:\n• ${cleaned.length} expenses\n• ${cleanedExpiries.length} expiries\n• ${cleanedShopping.length} shopping items`,
-  );
+
+  let importMessage = `Import successful!\n\nImported ${totalImported} items:\n• ${cleaned.length} expenses\n• ${cleanedExpiries.length} expiries\n• ${cleanedShopping.length} shopping items`;
+
+  if (categoryCount > 0) {
+    importMessage += `\n• ${categoryCount} categories (${categoryDetails.expense} expense, ${categoryDetails.income} income, ${categoryDetails.investment} investment)`;
+  }
+
+  if (importedCurrency) {
+    importMessage += `\n• Currency: ${importedCurrency}`;
+  }
+
+  alert(importMessage);
 }
 
 function populateCategories() {
