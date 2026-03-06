@@ -259,6 +259,259 @@ function initExportModalDragToClose() {
   });
 }
 
+// ---------- Settings ----------
+function showSettingsOptions() {
+  // Get current currency from localStorage or default to $
+  const currentCurrency = localStorage.getItem("currency") || "$";
+
+  // Create bottom sheet modal
+  const settingsModal = document.createElement("div");
+  settingsModal.id = "settingsModal";
+  settingsModal.className = "modal hide";
+  settingsModal.setAttribute("role", "dialog");
+  settingsModal.setAttribute("aria-modal", "true");
+
+  settingsModal.innerHTML = `
+    <div class="modal-content settings-modal-content">
+      <header>
+        <h3>Settings</h3>
+        <button id="closeSettingsModal" class="icon">✕</button>
+      </header>
+      <form id="settingsForm">
+        <div class="form-group">
+          <label for="currencySelect">Currency Symbol</label>
+          <select id="currencySelect">
+            <option value="$" ${currentCurrency === "$" ? "selected" : ""}>$ - US Dollar</option>
+            <option value="€" ${currentCurrency === "€" ? "selected" : ""}>€ - Euro</option>
+            <option value="£" ${currentCurrency === "£" ? "selected" : ""}>£ - British Pound</option>
+            <option value="¥" ${currentCurrency === "¥" ? "selected" : ""}>¥ - Japanese Yen</option>
+            <option value="₹" ${currentCurrency === "₹" ? "selected" : ""}>₹ - Indian Rupee</option>
+            <option value="₽" ${currentCurrency === "₽" ? "selected" : ""}>₽ - Russian Ruble</option>
+            <option value="₩" ${currentCurrency === "₩" ? "selected" : ""}>₩ - South Korean Won</option>
+            <option value="₺" ${currentCurrency === "₺" ? "selected" : ""}>₺ - Turkish Lira</option>
+            <option value="₴" ${currentCurrency === "₴" ? "selected" : ""}>₴ - Ukrainian Hryvnia</option>
+            <option value="₡" ${currentCurrency === "₡" ? "selected" : ""}>₡ - Costa Rican Colón</option>
+            <option value="₨" ${currentCurrency === "₨" ? "selected" : ""}>₨ - Pakistani Rupee</option>
+            <option value="₦" ${currentCurrency === "₦" ? "selected" : ""}>₦ - Nigerian Naira</option>
+            <option value="₱" ${currentCurrency === "₱" ? "selected" : ""}>₱ - Philippine Peso</option>
+            <option value="₲" ${currentCurrency === "₲" ? "selected" : ""}>₲ - Paraguayan Guaraní</option>
+            <option value="₪" ${currentCurrency === "₪" ? "selected" : ""}>₪ - Israeli New Shekel</option>
+            <option value="₫" ${currentCurrency === "₫" ? "selected" : ""}>₫ - Vietnamese Đồng</option>
+            <option value="₭" ${currentCurrency === "₭" ? "selected" : ""}>₭ - Cambodian Riel</option>
+            <option value="₮" ${currentCurrency === "₮" ? "selected" : ""}>₮ - Mongolian Tögrög</option>
+            <option value="₯" ${currentCurrency === "₯" ? "selected" : ""}>₯ - Armenian Dram</option>
+            <option value="₰" ${currentCurrency === "₰" ? "selected" : ""}>₰ - Bitcoin</option>
+          </select>
+        </div>
+        <div class="settings-info">
+          <div class="info-item">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <path d="M12 16v-4m0-4h.01"></path>
+            </svg>
+            <span>Choose your preferred currency symbol for all monetary displays</span>
+          </div>
+          <div class="info-item">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+            <span>Your currency preference is saved locally on this device</span>
+          </div>
+        </div>
+        <div class="actions">
+          <button type="button" id="settingsCancelBtn" class="secondary">Cancel</button>
+          <button type="button" id="settingsSaveBtn" class="primary">Save</button>
+        </div>
+      </form>
+    </div>
+  `;
+
+  document.body.appendChild(settingsModal);
+
+  // Initialize drag to close for settings modal
+  initSettingsModalDragToClose();
+
+  // Show modal with animation
+  setTimeout(() => {
+    settingsModal.classList.remove("hide");
+    settingsModal.classList.add("show");
+  }, 10);
+
+  // Handle save confirmation
+  document.getElementById("settingsSaveBtn").onclick = () => {
+    const selectedCurrency = document.getElementById("currencySelect").value;
+    localStorage.setItem("currency", selectedCurrency);
+
+    // Update all currency displays in the app
+    updateCurrencyDisplays(selectedCurrency);
+
+    closeSettingsModal();
+  };
+
+  document.getElementById("settingsCancelBtn").onclick = closeSettingsModal;
+  document.getElementById("closeSettingsModal").onclick = closeSettingsModal;
+
+  // Close modal on background click
+  settingsModal.onclick = (e) => {
+    if (e.target === settingsModal) {
+      closeSettingsModal();
+    }
+  };
+}
+
+function closeSettingsModal() {
+  const settingsModal = document.getElementById("settingsModal");
+  if (settingsModal) {
+    settingsModal.classList.remove("show");
+    settingsModal.classList.add("hide");
+
+    // Reset modal transform when closing
+    const modalContent = settingsModal.querySelector(".modal-content");
+    if (modalContent) {
+      modalContent.style.transform = "";
+      modalContent.style.transition = "";
+    }
+
+    setTimeout(() => {
+      document.body.removeChild(settingsModal);
+    }, 300);
+  }
+}
+
+function updateCurrencyDisplays(currency) {
+  // Update all amount displays with new currency
+  const amountElements = document.querySelectorAll(".amount");
+  amountElements.forEach((el) => {
+    const currentValue = el.textContent;
+    // Remove existing currency symbols and add new one
+    const cleanValue = currentValue.replace(/^[^\d.-]/, "");
+    el.textContent = currency + cleanValue;
+  });
+
+  // Re-render transaction list to update currency symbols there too
+  renderList();
+
+  // Re-compute totals to update summary cards
+  computeTotals();
+
+  // Update chart if visible
+  if (!summaryTabEl.classList.contains("hidden")) {
+    renderChart();
+  }
+}
+
+// Settings modal drag to close functionality
+let settingsModalStartY = 0;
+let settingsModalCurrentY = 0;
+let settingsModalIsDragging = false;
+let settingsModalDragThreshold = 100;
+
+function initSettingsModalDragToClose() {
+  const modalContent = document.querySelector("#settingsModal .modal-content");
+  const modalHeader = document.querySelector(
+    "#settingsModal .modal-content header",
+  );
+
+  if (!modalContent || !modalHeader) return;
+
+  modalHeader.addEventListener(
+    "touchstart",
+    (e) => {
+      settingsModalStartY = e.touches[0].clientY;
+      settingsModalCurrentY = settingsModalStartY;
+      settingsModalIsDragging = true;
+      modalContent.style.transition = "none";
+    },
+    { passive: true },
+  );
+
+  modalHeader.addEventListener(
+    "touchmove",
+    (e) => {
+      if (!settingsModalIsDragging) return;
+
+      settingsModalCurrentY = e.touches[0].clientY;
+      const deltaY = settingsModalCurrentY - settingsModalStartY;
+
+      // Only allow downward drag
+      if (deltaY > 0) {
+        modalContent.style.transform = `translateY(${deltaY}px)`;
+      }
+    },
+    { passive: true },
+  );
+
+  modalHeader.addEventListener(
+    "touchend",
+    () => {
+      if (!settingsModalIsDragging) return;
+
+      const deltaY = settingsModalCurrentY - settingsModalStartY;
+      settingsModalIsDragging = false;
+
+      // Reset transition
+      modalContent.style.transition =
+        "transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)";
+
+      if (deltaY > settingsModalDragThreshold) {
+        // Close modal if dragged far enough
+        hapticFeedback("medium");
+        closeSettingsModal();
+      } else {
+        // Snap back to original position
+        modalContent.style.transform = "translateY(0)";
+      }
+    },
+    { passive: true },
+  );
+
+  // Also handle mouse events for desktop
+  modalHeader.addEventListener("mousedown", (e) => {
+    settingsModalStartY = e.clientY;
+    settingsModalCurrentY = settingsModalStartY;
+    settingsModalIsDragging = true;
+    modalContent.style.transition = "none";
+
+    const handleMouseMove = (e) => {
+      if (!settingsModalIsDragging) return;
+
+      settingsModalCurrentY = e.clientY;
+      const deltaY = settingsModalCurrentY - settingsModalStartY;
+
+      // Only allow downward drag
+      if (deltaY > 0) {
+        modalContent.style.transform = `translateY(${deltaY}px)`;
+      }
+    };
+
+    const handleMouseUp = () => {
+      if (!settingsModalIsDragging) return;
+
+      const deltaY = settingsModalCurrentY - settingsModalStartY;
+      settingsModalIsDragging = false;
+
+      // Reset transition
+      modalContent.style.transition =
+        "transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)";
+
+      if (deltaY > settingsModalDragThreshold) {
+        // Close modal if dragged far enough
+        hapticFeedback("medium");
+        closeSettingsModal();
+      } else {
+        // Snap back to original position
+        modalContent.style.transform = "translateY(0)";
+      }
+
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+    };
+
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+  });
+}
+
 function performExport(format) {
   try {
     let content, filename, mimeType;
@@ -596,6 +849,7 @@ const optionsMenu = $("optionsMenu");
 const themeToggle = $("themeToggle");
 const exportOption = $("exportOption");
 const importOption = $("importOption");
+const settingsOption = $("settingsOption");
 const clearOption = $("clearOption");
 // Tabs and title
 const screenTitle = $("screenTitle");
@@ -831,7 +1085,9 @@ function formatMoney(n) {
   const amount = Math.abs(n).toFixed(2);
   // Add comma separation for thousands
   const formattedAmount = amount.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  return sign + "₹" + formattedAmount;
+  // Get saved currency or default to $
+  const currency = localStorage.getItem("currency") || "$";
+  return sign + currency + formattedAmount;
 }
 
 function uid() {
@@ -1925,8 +2181,9 @@ function renderList() {
       amt.className = "amount " + (t.type === "expense" ? "expense" : "income");
       const amountValue = Math.abs(Number(t.amount)).toFixed(2);
       const formattedAmount = amountValue.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-      amt.textContent =
-        (t.type === "expense" ? "-" : "+") + "₹" + formattedAmount;
+      // Get saved currency or default to $
+      const currency = localStorage.getItem("currency") || "$";
+      amt.textContent = currency + formattedAmount;
       el.appendChild(meta);
       el.appendChild(amt);
 
@@ -2331,6 +2588,12 @@ if (themeToggle) {
 if (exportOption) {
   exportOption.addEventListener("click", () => {
     showExportOptions();
+    closeMenu();
+  });
+}
+if (settingsOption) {
+  settingsOption.addEventListener("click", () => {
+    showSettingsOptions();
     closeMenu();
   });
 }
