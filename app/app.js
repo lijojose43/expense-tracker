@@ -1260,9 +1260,7 @@ function computeTotals() {
     else if (t.type === "expense") expense += Math.abs(Number(t.amount));
   }
   totalIncomeEl.textContent = formatMoney(income);
-  totalExpensesEl.textContent = formatMoney(-Math.abs(expense) || 0);
-  const savings = income - expense;
-  savingsEl.textContent = formatMoney(savings);
+  totalExpensesEl.textContent = formatMoney(Math.abs(expense) || 0);
 
   // Calculate investments (sum of all investment type transactions)
   let investments = 0;
@@ -1276,7 +1274,11 @@ function computeTotals() {
     }
   }
   const formattedInvestments = formatMoney(Math.abs(investments));
-  investmentsEl.textContent = `+${formattedInvestments}`;
+  investmentsEl.textContent = formattedInvestments;
+
+  // Calculate savings after subtracting investments
+  const savings = income - expense - investments;
+  savingsEl.textContent = formatMoney(savings);
 }
 
 // Aggregate expenses by category for the donut chart
