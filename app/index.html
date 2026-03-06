@@ -168,9 +168,18 @@
         <input id="summaryEndDate" type="text" class="date-input" placeholder="End date" autocomplete="off" />
       </section>
       
-      <section class="summary">
-        <div id="summaryChartCard" class="card wide summary-chart-card">
-          <canvas id="categoryDonut" width="360" height="360" aria-label="Spending by Category" role="img"></canvas>
+      <section class="summary summary-graphs">
+        <div id="summaryIncomeChartCard" class="card wide summary-chart-card">
+          <div class="summary-chart-title">Income</div>
+          <canvas id="incomeDonut" class="summary-donut-canvas" width="360" height="360" aria-label="Income by Category" role="img"></canvas>
+        </div>
+        <div id="summaryExpenseChartCard" class="card wide summary-chart-card">
+          <div class="summary-chart-title">Expense</div>
+          <canvas id="expenseDonut" class="summary-donut-canvas" width="360" height="360" aria-label="Expense by Category" role="img"></canvas>
+        </div>
+        <div id="summaryInvestmentChartCard" class="card wide summary-chart-card">
+          <div class="summary-chart-title">Investment</div>
+          <canvas id="investmentDonut" class="summary-donut-canvas" width="360" height="360" aria-label="Investment by Category" role="img"></canvas>
         </div>
       </section>
     </main>
@@ -391,7 +400,7 @@
   </div>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-  <script src="app.js?v=15"></script>
+  <script src="app.js?v=17"></script>
   <script>
     const isWebOrigin = location.protocol === "http:" || location.protocol === "https:";
     if (isWebOrigin) {

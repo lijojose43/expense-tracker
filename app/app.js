@@ -682,49 +682,131 @@ function renderCategoryList(type, categories) {
 }
 
 function addCategoryFromSettings(type) {
-  const newCategory = prompt(`Enter new ${type} category name:`);
-  if (newCategory && newCategory.trim()) {
-    // Get existing categories
-    const savedCategories = localStorage.getItem("categories");
-    const categories = savedCategories
-      ? JSON.parse(savedCategories)
-      : {
-        expense: [
-          "Groceries",
-          "Dining",
-          "Rent",
-          "Transportation",
-          "Shopping",
-          "Healthcare",
-          "Entertainment",
-          "Other",
-        ],
-        income: ["Salary", "Business", "Other"],
-        investment: [
-          "Gold Investment",
-          "Land Investment",
-          "Property Investment",
-          "Emergency Fund",
-          "Mutual Fund",
-          "Chit Fund",
-          "LIC",
-          "Term Insurance",
-          "Other",
-        ],
-      };
+  // Find the categories container for the given type
+  const categoriesContainer = document.querySelector(
+    `#${type}Categories .categories-container`,
+  );
+  if (!categoriesContainer) return;
 
-    // Add new category
-    if (!categories[type].includes(newCategory.trim())) {
-      categories[type].push(newCategory.trim());
-      localStorage.setItem("categories", JSON.stringify(categories));
-      
-      // Update app categories
-      populateCategories();
-      
-      // Show success message
-      hapticFeedback("light");
+  // Create input field
+  const input = document.createElement("input");
+  input.type = "text";
+  input.placeholder = "Enter category name...";
+  input.className = "category-input";
+  input.style.cssText = `
+    padding: 6px 12px;
+    margin: 4px;
+    background: rgba(15, 110, 253, 0.1);
+    border: 2px dashed rgba(15, 110, 253, 0.3);
+    border-radius: 16px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text);
+    outline: none;
+    transition: all 0.2s ease;
+  `;
+
+  // Insert input at the end of the container
+  categoriesContainer.appendChild(input);
+  input.focus();
+
+  const handleAddCategory = (e) => {
+    if (e.key === "Enter" && e.target.value.trim()) {
+      const newCategory = e.target.value.trim();
+
+      // Get existing categories
+      const savedCategories = localStorage.getItem("categories");
+      const categories = savedCategories
+        ? JSON.parse(savedCategories)
+        : {
+            expense: [
+              "Groceries",
+              "Dining",
+              "Rent",
+              "Transportation",
+              "Shopping",
+              "Healthcare",
+              "Entertainment",
+              "Other",
+            ],
+            income: ["Salary", "Business", "Other"],
+            investment: [
+              "Gold Investment",
+              "Land Investment",
+              "Property Investment",
+              "Emergency Fund",
+              "Mutual Fund",
+              "Chit Fund",
+              "LIC",
+              "Term Insurance",
+              "Other",
+            ],
+          };
+
+      // Add new category
+      if (!categories[type].includes(newCategory)) {
+        categories[type].push(newCategory);
+        localStorage.setItem("categories", JSON.stringify(categories));
+
+        // Update app categories
+        populateCategories();
+
+        // Create chip element to replace input
+        const chip = document.createElement("span");
+        chip.className = "category-chip";
+        chip.textContent = newCategory;
+        chip.style.cssText = `
+          display: inline-block;
+          padding: 6px 12px;
+          margin: 4px;
+          background: rgba(15, 110, 253, 0.1);
+          border: 1px solid rgba(15, 110, 253, 0.2);
+          border-radius: 16px;
+          font-size: 12px;
+          font-weight: 500;
+          color: var(--text);
+          transition: all 0.2s ease;
+          cursor: default;
+          animation: chipSlideIn 0.3s ease;
+        `;
+
+        // Replace input with chip
+        input.replaceWith(chip);
+
+        // Show success feedback
+        hapticFeedback("light");
+      } else {
+        // Category already exists, remove input
+        input.remove();
+      }
+    } else if (e.key === "Escape") {
+      // Cancel on Escape key
+      input.remove();
     }
-  }
+  };
+
+  const handleBlur = () => {
+    // Remove input if it loses focus and is empty
+    setTimeout(() => {
+      if (input.parentNode) {
+        input.remove();
+      }
+    }, 200);
+  };
+
+  input.addEventListener("keydown", handleAddCategory);
+  input.addEventListener("blur", handleBlur);
+
+  // Add focus styles
+  input.addEventListener("focus", () => {
+    input.style.borderColor = "rgba(15, 110, 253, 0.5)";
+    input.style.background = "rgba(15, 110, 253, 0.15)";
+  });
+
+  input.addEventListener("blur", () => {
+    input.style.borderColor = "rgba(15, 110, 253, 0.3)";
+    input.style.background = "rgba(15, 110, 253, 0.1)";
+  });
 }
 
 function saveCategoriesFromSettings() {
@@ -1213,7 +1295,11 @@ const cancelPurchaseBtn = $("cancelPurchaseBtn");
 const purchaseNameInput = $("purchaseName");
 const addPurchaseBtn = $("addPurchaseBtn");
 let editPurchaseId = null;
-let donutChart = null;
+const donutCharts = {
+  expense: null,
+  income: null,
+  investment: null,
+};
 let editId = null; // track transaction being edited
 
 const DATE_INPUT_IDS = [
@@ -2112,11 +2198,7 @@ function computeTotals() {
   savingsEl.textContent = formatMoney(savings);
 }
 
-// Aggregate expenses by category for the donut chart
-function expensesByCategory() {
-  const map = new Map();
-
-  // Get current date filter settings for summary page
+function getSummaryDateRange() {
   let dateRange = null;
   if (summaryDateFilter === "thisMonth") {
     dateRange = getThisMonthRange();
@@ -2129,9 +2211,16 @@ function expensesByCategory() {
       dateRange = { start: new Date(start), end: new Date(end) };
     }
   }
+  return dateRange;
+}
+
+// Aggregate by category for a specific type on summary page
+function totalsByCategoryForType(type) {
+  const map = new Map();
+  const dateRange = getSummaryDateRange();
 
   for (const t of data) {
-    if (t.type !== "expense") continue;
+    if (t.type !== type) continue;
 
     // Apply date filtering to chart data as well
     if (dateRange && !isDateInRange(t.date, dateRange.start, dateRange.end)) {
@@ -2141,8 +2230,9 @@ function expensesByCategory() {
     const cat = t.category || "Other";
     map.set(cat, (map.get(cat) || 0) + Math.abs(Number(t.amount)));
   }
-  const labels = Array.from(map.keys());
-  const values = Array.from(map.values());
+  const sorted = Array.from(map.entries()).sort((a, b) => b[1] - a[1]);
+  const labels = sorted.map((entry) => entry[0]);
+  const values = sorted.map((entry) => entry[1]);
   return { labels, values };
 }
 
@@ -2308,11 +2398,10 @@ function getCategoryIcon(category) {
   return icons[slug] || icons.other;
 }
 
-function renderDonut() {
-  const canvas = document.getElementById("categoryDonut");
+function renderDonutForType(type, canvasId) {
+  const canvas = document.getElementById(canvasId);
   if (!canvas || typeof Chart === "undefined") return;
-  const chartCard = document.getElementById("summaryChartCard");
-  const { labels, values } = expensesByCategory();
+  const { labels, values } = totalsByCategoryForType(type);
   const ctx = canvas.getContext("2d");
   const isMobile = window.matchMedia("(max-width: 768px)").matches;
   const palette = [
@@ -2354,9 +2443,10 @@ function renderDonut() {
   const colors = labels.map(
     (label, i) => categoryColors[catSlug(label)] || palette[i % palette.length],
   );
+  const typeTitle = type.charAt(0).toUpperCase() + type.slice(1);
   // Build dataset depending on availability
   const hasData = values.length > 0;
-  const chartLabels = hasData ? labels : ["No data"];
+  const chartLabels = hasData ? labels : [`No ${typeTitle} data`];
   const chartValues = hasData ? values : [1];
   const chartColors = hasData
     ? colors.length
@@ -2367,29 +2457,21 @@ function renderDonut() {
   // Ensure canvas is visible
   canvas.style.display = "block";
   canvas.style.width = "100%";
+  canvas.style.height = isMobile ? "300px" : "320px";
 
-  // Grow chart card as categories increase so legend gets extra space
-  // and donut size stays consistent.
-  const categoryCount = hasData ? labels.length : 0;
-  const itemsPerRow = isMobile ? 2 : 3;
-  const baseLegendRows = 2;
-  const legendRows = Math.max(
-    baseLegendRows,
-    Math.ceil(categoryCount / itemsPerRow),
-  );
-  const legendExtraHeight = Math.max(0, legendRows - baseLegendRows) * 28;
-  const chartBaseHeight = isMobile ? 360 : 390;
-  const computedCanvasHeight = chartBaseHeight + legendExtraHeight;
-  canvas.style.height = `${computedCanvasHeight}px`;
-  if (chartCard) {
-    chartCard.style.minHeight = `${computedCanvasHeight + 32}px`;
+  if (donutCharts[type]) {
+    const existingChart = donutCharts[type];
+    existingChart.data.labels = chartLabels;
+    existingChart.data.datasets[0].data = chartValues;
+    existingChart.data.datasets[0].backgroundColor = chartColors;
+    existingChart.options.plugins.legend.display = hasData;
+    existingChart.options.plugins.tooltip.enabled = hasData;
+    existingChart.options.events = hasData ? undefined : [];
+    existingChart.update("none");
+    return;
   }
 
-  if (donutChart) {
-    donutChart.destroy();
-    donutChart = null;
-  }
-  donutChart = new Chart(ctx, {
+  donutCharts[type] = new Chart(ctx, {
     type: "doughnut",
     data: {
       labels: chartLabels,
@@ -2398,13 +2480,19 @@ function renderDonut() {
           data: chartValues,
           backgroundColor: chartColors,
           borderWidth: 0,
-          radius: isMobile ? 125 : 140,
+          hoverOffset: 0,
+          radius: isMobile ? 112 : 126,
         },
       ],
     },
     options: {
+      animation: false,
       plugins: {
-        legend: { position: "bottom", display: hasData },
+        legend: {
+          position: "bottom",
+          display: hasData,
+          maxHeight: isMobile ? 88 : 96,
+        },
         tooltip: { enabled: hasData },
       },
       events: hasData ? undefined : [],
@@ -2418,8 +2506,9 @@ function renderDonut() {
 // Line chart rendering removed
 
 function renderChart() {
-  // Always render donut chart; swipe and line chart removed
-  renderDonut();
+  renderDonutForType("expense", "expenseDonut");
+  renderDonutForType("income", "incomeDonut");
+  renderDonutForType("investment", "investmentDonut");
 }
 
 // Swipe detection removed
