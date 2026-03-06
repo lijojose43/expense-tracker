@@ -304,13 +304,30 @@ function showSettingsOptions() {
           </select>
           <label for="currencySelect" class="floating-label">Currency Symbol</label>
         </div>
-        
         <div class="form-group">
           <label>Manage Categories</label>
-          <div class="category-tabs">
-            <button type="button" class="category-tab active" data-type="expense">Expense</button>
-            <button type="button" class="category-tab" data-type="income">Income</button>
-            <button type="button" class="category-tab" data-type="investment">Investment</button>
+          <div class="type-checkboxes">
+            <div class="checkbox-group">
+              <input type="radio" id="catTypeExpense" name="categoryType" value="expense" checked>
+              <label for="catTypeExpense" class="checkbox-label">
+                <span class="checkbox-custom"></span>
+                Expense
+              </label>
+            </div>
+            <div class="checkbox-group">
+              <input type="radio" id="catTypeIncome" name="categoryType" value="income">
+              <label for="catTypeIncome" class="checkbox-label">
+                <span class="checkbox-custom"></span>
+                Income
+              </label>
+            </div>
+            <div class="checkbox-group">
+              <input type="radio" id="catTypeInvestment" name="categoryType" value="investment">
+              <label for="catTypeInvestment" class="checkbox-label">
+                <span class="checkbox-custom"></span>
+                Investment
+              </label>
+            </div>
           </div>
           <div class="category-content">
             <div id="expenseCategories" class="category-list active">
@@ -338,13 +355,6 @@ function showSettingsOptions() {
         </div>
         
         <div class="settings-info">
-          <div class="info-item">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10"></circle>
-              <path d="M12 16v-4m0-4h.01"></path>
-            </svg>
-            <span>Choose your preferred currency symbol for all monetary displays</span>
-          </div>
           <div class="info-item">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
@@ -388,25 +398,25 @@ function showSettingsOptions() {
   document.getElementById("settingsCancelBtn").onclick = closeSettingsModal;
   document.getElementById("closeSettingsModal").onclick = closeSettingsModal;
 
-  // Category tabs functionality
-  const categoryTabs = document.querySelectorAll(".category-tab");
+  // Category radio buttons functionality
+  const categoryTypeRadios = document.querySelectorAll(
+    "input[name='categoryType']",
+  );
   const categoryLists = {
     expense: document.getElementById("expenseCategories"),
     income: document.getElementById("incomeCategories"),
     investment: document.getElementById("investmentCategories"),
   };
 
-  categoryTabs.forEach((tab) => {
-    tab.addEventListener("click", () => {
-      // Remove active class from all tabs and lists
-      categoryTabs.forEach((t) => t.classList.remove("active"));
+  categoryTypeRadios.forEach((radio) => {
+    radio.addEventListener("change", () => {
+      // Remove active class from all lists
       Object.values(categoryLists).forEach((list) =>
         list.classList.remove("active"),
       );
 
-      // Add active class to clicked tab and corresponding list
-      tab.classList.add("active");
-      const type = tab.getAttribute("data-type");
+      // Add active class to corresponding list based on selected radio
+      const type = radio.value;
       categoryLists[type].classList.add("active");
     });
   });
