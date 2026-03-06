@@ -333,7 +333,7 @@ function showSettingsOptions() {
             <div id="expenseCategories" class="category-list active">
               <div class="category-header">
                 <span>Expense Categories</span>
-                <button type="button" id="addExpenseCategory" class="add-category-btn">+ Add</button>
+                <button type="button" id="addExpenseCategory" class="add-category-btn primary">+ Add</button>
               </div>
               <div class="categories-container">
                 ${defaultCategories
@@ -357,7 +357,7 @@ function showSettingsOptions() {
             <div id="incomeCategories" class="category-list">
               <div class="category-header">
                 <span>Income Categories</span>
-                <button type="button" id="addIncomeCategory" class="add-category-btn">+ Add</button>
+                <button type="button" id="addIncomeCategory" class="add-category-btn primary">+ Add</button>
               </div>
               <div class="categories-container">
                 ${defaultCategories
@@ -369,7 +369,7 @@ function showSettingsOptions() {
             <div id="investmentCategories" class="category-list">
               <div class="category-header">
                 <span>Investment Categories</span>
-                <button type="button" id="addInvestmentCategory" class="add-category-btn">+ Add</button>
+                <button type="button" id="addInvestmentCategory" class="add-category-btn primary">+ Add</button>
               </div>
               <div class="categories-container">
                 ${defaultCategories
@@ -2446,7 +2446,7 @@ function switchTab(name) {
     tabSummary.classList.add("active");
     tabExpiry && tabExpiry.classList.remove("active");
     tabPurchase && tabPurchase.classList.remove("active");
-    screenTitle.textContent = "Expense Summary";
+    screenTitle.textContent = "Summary";
     if (optionsMenu) optionsMenu.classList.remove("open");
     // ensure chart reflects latest data
     renderChart();
