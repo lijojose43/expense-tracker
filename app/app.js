@@ -261,8 +261,8 @@ function initExportModalDragToClose() {
 
 // ---------- Settings ----------
 function showSettingsOptions() {
-  // Get current currency from localStorage or default to $
-  const currentCurrency = localStorage.getItem("currency") || "$";
+  // Get current currency from localStorage or default to Indian Rupee
+  const currentCurrency = localStorage.getItem("currency") || "₹";
 
   // Create bottom sheet modal
   const settingsModal = document.createElement("div");
@@ -1085,8 +1085,8 @@ function formatMoney(n) {
   const amount = Math.abs(n).toFixed(2);
   // Add comma separation for thousands
   const formattedAmount = amount.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  // Get saved currency or default to $
-  const currency = localStorage.getItem("currency") || "$";
+  // Get saved currency or default to Indian Rupee
+  const currency = localStorage.getItem("currency") || "₹";
   return sign + currency + formattedAmount;
 }
 
