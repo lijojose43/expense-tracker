@@ -304,6 +304,12 @@ function showSettingsOptions() {
           </select>
           <label for="currencySelect" class="floating-label">Currency Symbol</label>
         </div>
+        <div class="currency-info">
+          <div class="info-item">
+            <span style="font-size: 16px; font-weight: 600; color: var(--text); opacity: 0.7;">₹</span>
+            <span>Select your preferred currency for all financial calculations and displays</span>
+          </div>
+        </div>
         <div class="form-group">
           <label>Categories</label>
           <div class="type-checkboxes">
@@ -774,8 +780,8 @@ function renderCategoryList(type, categories) {
           align-items: center;
           justify-content: center;
           transition: all 0.2s ease;
-          margin-left: -10px;
-          z-index: 10;
+          margin-left: -8px;
+          z-index: 1;
           position: relative;
         `;
 
@@ -968,8 +974,8 @@ function addCategoryFromSettings(type) {
           align-items: center;
           justify-content: center;
           transition: all 0.2s ease;
-          margin-left: -10px;
-          z-index: 10;
+          margin-left: -8px;
+          z-index: 1;
           position: relative;
         `;
 
@@ -1103,8 +1109,8 @@ function addCategoryFromSettings(type) {
           align-items: center;
           justify-content: center;
           transition: all 0.2s ease;
-          margin-left: -10px;
-          z-index: 10;
+          margin-left: -8px;
+          z-index: 1;
           position: relative;
         `;
 

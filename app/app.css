@@ -3534,6 +3534,27 @@ div.app {
   padding-right: 40px;
 }
 
+.currency-info {
+  padding: 16px;
+  background: rgba(15, 110, 253, 0.05);
+  border-radius: 12px;
+  border: 1px solid rgba(15, 110, 253, 0.1);
+  margin-top: 8px;
+}
+
+.currency-info .info-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.currency-info .info-item svg {
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
 .settings-info {
   padding: 16px;
   background: rgba(15, 110, 253, 0.05);
