@@ -345,6 +345,8 @@ function showSettingsOptions() {
                         "Gold Investment",
                         "Land Investment",
                         "Property Investment",
+                        "Emergency Fund",
+                        "Mutual Fund",
                         "Chit Fund",
                         "LIC",
                         "Term Insurance",
@@ -828,10 +830,81 @@ function addCategoryFromSettings(type) {
   };
 
   const handleBlur = () => {
-    // Remove input container if it loses focus and is empty
+    // Save category if it loses focus and has content
     setTimeout(() => {
-      if (inputContainer.parentNode) {
-        inputContainer.remove();
+      if (inputContainer.parentNode && input.value.trim()) {
+        const newCategory = input.value.trim();
+
+        // Get existing categories
+        const savedCategories = localStorage.getItem("categories");
+        const categories = savedCategories
+          ? JSON.parse(savedCategories)
+          : {
+              expense: [
+                "Groceries",
+                "Dining",
+                "Rent",
+                "Transportation",
+                "Shopping",
+                "Healthcare",
+                "Entertainment",
+                "Other",
+              ],
+              income: ["Salary", "Business", "Other"],
+              investment: [
+                "Gold Investment",
+                "Land Investment",
+                "Property Investment",
+                "Emergency Fund",
+                "Mutual Fund",
+                "Chit Fund",
+                "LIC",
+                "Term Insurance",
+                "Other",
+              ],
+            };
+
+        // Add new category
+        if (!categories[type].includes(newCategory)) {
+          categories[type].push(newCategory);
+          localStorage.setItem("categories", JSON.stringify(categories));
+
+          // Update app categories
+          populateCategories();
+
+          // Create chip element to replace input
+          const chip = document.createElement("span");
+          chip.className = "category-chip";
+          chip.textContent = newCategory;
+          chip.style.cssText = `
+            display: inline-block;
+            padding: 8px 15px;
+            margin: 4px;
+            background: rgba(15, 110, 253, 0.1);
+            border: 1px solid rgba(15, 110, 253, 0.2);
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text);
+            transition: all 0.2s ease;
+            cursor: default;
+            animation: chipSlideIn 0.3s ease;
+          `;
+
+          // Replace input container with chip
+          inputContainer.replaceWith(chip);
+
+          // Show success feedback
+          hapticFeedback("light");
+        } else {
+          // Category already exists, remove input container
+          inputContainer.remove();
+        }
+      } else {
+        // Remove input container if empty or no parent
+        if (inputContainer.parentNode) {
+          inputContainer.remove();
+        }
       }
     }, 200);
   };

@@ -2090,11 +2090,7 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
   border-color: var(--accent);
 }
 
-.type-checkboxes
-  .checkbox-group
-  input[type="radio"]:checked
-  + .checkbox-label
-  .checkbox-custom:[data-theme="dark"] .type-checkboxes .checkbox-label:hover:after {
+[data-theme="dark"] .type-checkboxes .checkbox-label:hover:after {
   color: white;
 }
 
@@ -3598,13 +3594,15 @@ div.app {
   }
 
   .settings-modal-content .actions {
-    flex-direction: column;
-    gap: 8px;
+    justify-content: stretch; /* allow full-width buttons when wrapping */
+    flex-wrap: wrap; /* allow buttons to wrap */
     margin-top: 16px;
     padding-top: 16px;
   }
 
   .settings-modal-content .actions button {
+    flex: 1 1 45%;
+    min-width: 45%; /* ensure buttons don't get too narrow */
     min-height: 48px;
   }
 
@@ -3674,7 +3672,7 @@ div.app {
 
 .category-chip {
   display: inline-block;
-  padding: 8px 15px;
+  padding: 8px 20px;
   margin: 4px;
   background: rgba(15, 110, 253, 0.1);
   border: 1px solid rgba(15, 110, 253, 0.2);
