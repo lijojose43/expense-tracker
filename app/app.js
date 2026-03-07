@@ -652,10 +652,14 @@ function loadCategoriesIntoSettings() {
         ],
         income: ["Salary", "Business", "Other"],
         investment: [
-          "Stocks",
-          "Real Estate",
-          "Mutual Funds",
-          "Crypto",
+          "Gold Investment",
+          "Land Investment",
+          "Property Investment",
+          "Emergency Fund",
+          "Mutual Fund",
+          "Chit Fund",
+          "LIC",
+          "Term Insurance",
           "Other",
         ],
       };
@@ -667,19 +671,135 @@ function loadCategoriesIntoSettings() {
 }
 
 function renderCategoryList(type, categories) {
-  const container = document.getElementById(`${type}CategoriesList`);
+  const container = document.querySelector(
+    `#${type}Categories .categories-container`,
+  );
   if (!container) return;
 
-  container.innerHTML = "";
+  // Define default categories for each type
+  const defaultCategoriesByType = {
+    expense: [
+      "Groceries",
+      "Dining",
+      "Rent",
+      "Utilities",
+      "Transportation",
+      "Shopping",
+      "Healthcare",
+      "Entertainment",
+      "Other",
+    ],
+    income: ["Salary", "Business", "Other"],
+    investment: [
+      "Chit Fund",
+      "LIC",
+      "Term Insurance",
+      "Gold Investment",
+      "Land Investment",
+      "Property Investment",
+      "Mutual Fund",
+      "Emergency Fund",
+      "Other",
+    ],
+  };
 
-  categories.forEach((category, index) => {
-    const categoryItem = document.createElement("div");
-    categoryItem.className = "category-item";
-    categoryItem.innerHTML = `
-      <span class="category-name">${category}</span>
-      <button type="button" class="remove-category-btn" data-type="${type}" data-index="${index}">✕</button>
-    `;
-    container.appendChild(categoryItem);
+  const defaultCategories = defaultCategoriesByType[type] || [];
+
+  // Clear existing chips except the default ones that were rendered initially
+  const existingChips = container.querySelectorAll(
+    '.category-chip[data-dynamic="true"]',
+  );
+  existingChips.forEach((chip) => chip.remove());
+
+  // Add saved categories as chips
+  categories.forEach((category) => {
+    // Skip if this category already exists in the default chips
+    const existingChips = container.querySelectorAll(".category-chip");
+    let alreadyExists = false;
+    existingChips.forEach((chip) => {
+      if (chip.textContent === category) {
+        alreadyExists = true;
+      }
+    });
+
+    if (!alreadyExists) {
+      // Check if this is a custom category (not in default list)
+      const isCustomCategory = !defaultCategories.includes(category);
+
+      if (isCustomCategory) {
+        // Create container for chip and remove button (custom category)
+        const chipContainer = document.createElement("div");
+        chipContainer.style.cssText = `
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+          margin: 4px;
+        `;
+
+        // Create chip element
+        const chip = document.createElement("span");
+        chip.className = "category-chip";
+        chip.setAttribute("data-dynamic", "true");
+        chip.textContent = category;
+        chip.style.cssText = `
+          display: inline-block;
+          padding: 6px 12px;
+          background: rgba(15, 110, 253, 0.1);
+          border: 1px solid rgba(15, 110, 253, 0.2);
+          border-radius: 16px;
+          font-size: 12px;
+          font-weight: 500;
+          color: var(--text);
+          transition: all 0.2s ease;
+          cursor: default;
+        `;
+
+        // Create remove button for the chip
+        const chipRemoveBtn = document.createElement("button");
+        chipRemoveBtn.type = "button";
+        chipRemoveBtn.className = "remove-category-btn";
+        chipRemoveBtn.textContent = "✕";
+        chipRemoveBtn.setAttribute("data-category", category);
+        chipRemoveBtn.setAttribute("data-type", type);
+        chipRemoveBtn.style.cssText = `
+          width: 20px;
+          height: 20px;
+          border: 1px solid rgba(255, 255, 255, 0.5);
+          background: rgba(239, 68, 68, 0.9);
+          color: white;
+          border-radius: 50%;
+          cursor: pointer;
+          font-size: 10px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.2s ease;
+          margin-left: -10px;
+          z-index: 10;
+          position: relative;
+        `;
+
+        // Add hover effect
+        chipRemoveBtn.addEventListener("mouseenter", () => {
+          chipRemoveBtn.style.background = "rgba(239, 68, 68, 1)";
+        });
+        chipRemoveBtn.addEventListener("mouseleave", () => {
+          chipRemoveBtn.style.background = "rgba(239, 68, 68, 0.8)";
+        });
+
+        // Assemble the container
+        chipContainer.appendChild(chip);
+        chipContainer.appendChild(chipRemoveBtn);
+        container.appendChild(chipContainer);
+      } else {
+        // Create simple chip without remove button (default category)
+        const chip = document.createElement("span");
+        chip.className = "category-chip";
+        chip.setAttribute("data-dynamic", "true");
+        chip.textContent = category;
+        container.appendChild(chip);
+      }
+    }
   });
 }
 
@@ -706,6 +826,7 @@ function addCategoryFromSettings(type) {
     color: var(--text);
     outline: none;
     transition: all 0.2s ease;
+    max-width: 150px;
   `;
 
   // Create remove button container
@@ -757,6 +878,10 @@ function addCategoryFromSettings(type) {
   const handleAddCategory = (e) => {
     if (e.key === "Enter" && e.target.value.trim()) {
       const newCategory = e.target.value.trim();
+      // Auto-capitalize: first letter uppercase, rest lowercase
+      const capitalizedCategory =
+        newCategory.charAt(0).toUpperCase() +
+        newCategory.slice(1).toLowerCase();
 
       // Get existing categories
       const savedCategories = localStorage.getItem("categories");
@@ -788,21 +913,30 @@ function addCategoryFromSettings(type) {
           };
 
       // Add new category
-      if (!categories[type].includes(newCategory)) {
-        categories[type].push(newCategory);
+      if (!categories[type].includes(capitalizedCategory)) {
+        categories[type].push(capitalizedCategory);
         localStorage.setItem("categories", JSON.stringify(categories));
 
         // Update app categories
         populateCategories();
 
-        // Create chip element to replace input
+        // Create container for chip and remove button
+        const chipContainer = document.createElement("div");
+        chipContainer.style.cssText = `
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+          margin: 4px;
+        `;
+
+        // Create chip element
         const chip = document.createElement("span");
         chip.className = "category-chip";
-        chip.textContent = newCategory;
+        chip.setAttribute("data-dynamic", "true");
+        chip.textContent = capitalizedCategory;
         chip.style.cssText = `
           display: inline-block;
           padding: 6px 12px;
-          margin: 4px;
           background: rgba(15, 110, 253, 0.1);
           border: 1px solid rgba(15, 110, 253, 0.2);
           border-radius: 16px;
@@ -814,8 +948,53 @@ function addCategoryFromSettings(type) {
           animation: chipSlideIn 0.3s ease;
         `;
 
-        // Replace input container with chip
-        inputContainer.replaceWith(chip);
+        // Create remove button for the chip
+        const chipRemoveBtn = document.createElement("button");
+        chipRemoveBtn.type = "button";
+        chipRemoveBtn.className = "remove-category-btn";
+        chipRemoveBtn.textContent = "✕";
+        chipRemoveBtn.setAttribute("data-category", newCategory);
+        chipRemoveBtn.setAttribute("data-type", type);
+        chipRemoveBtn.style.cssText = `
+          width: 20px;
+          height: 20px;
+          border: 1px solid rgba(255, 255, 255, 0.5);
+          background: rgba(239, 68, 68, 0.9);
+          color: white;
+          border-radius: 50%;
+          cursor: pointer;
+          font-size: 10px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.2s ease;
+          margin-left: -10px;
+          z-index: 10;
+          position: relative;
+        `;
+
+        // Add hover effect
+        chipRemoveBtn.addEventListener("mouseenter", () => {
+          chipRemoveBtn.style.background = "rgba(239, 68, 68, 1)";
+        });
+        chipRemoveBtn.addEventListener("mouseleave", () => {
+          chipRemoveBtn.style.background = "rgba(239, 68, 68, 0.8)";
+        });
+
+        // Assemble the container
+        chipContainer.appendChild(chip);
+        chipContainer.appendChild(chipRemoveBtn);
+
+        // Debug: Log the creation
+        console.log(
+          "Created chip with remove button for:",
+          newCategory,
+          "type:",
+          type,
+        );
+
+        // Replace input container with chip container
+        inputContainer.replaceWith(chipContainer);
 
         // Show success feedback
         hapticFeedback("light");
@@ -834,6 +1013,10 @@ function addCategoryFromSettings(type) {
     setTimeout(() => {
       if (inputContainer.parentNode && input.value.trim()) {
         const newCategory = input.value.trim();
+        // Auto-capitalize: first letter uppercase, rest lowercase
+        const capitalizedCategory =
+          newCategory.charAt(0).toUpperCase() +
+          newCategory.slice(1).toLowerCase();
 
         // Get existing categories
         const savedCategories = localStorage.getItem("categories");
@@ -872,27 +1055,81 @@ function addCategoryFromSettings(type) {
           // Update app categories
           populateCategories();
 
-          // Create chip element to replace input
+          // Create container for chip and remove button
+          const chipContainer = document.createElement("div");
+          chipContainer.style.cssText = `
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+          margin: 4px;
+        `;
+
+          // Create chip element
           const chip = document.createElement("span");
           chip.className = "category-chip";
-          chip.textContent = newCategory;
+          chip.setAttribute("data-dynamic", "true");
+          chip.textContent = capitalizedCategory;
           chip.style.cssText = `
-            display: inline-block;
-            padding: 8px 15px;
-            margin: 4px;
-            background: rgba(15, 110, 253, 0.1);
-            border: 1px solid rgba(15, 110, 253, 0.2);
-            border-radius: 16px;
-            font-size: 12px;
-            font-weight: 500;
-            color: var(--text);
-            transition: all 0.2s ease;
-            cursor: default;
-            animation: chipSlideIn 0.3s ease;
-          `;
+          display: inline-block;
+          padding: 6px 12px;
+          background: rgba(15, 110, 253, 0.1);
+          border: 1px solid rgba(15, 110, 253, 0.2);
+          border-radius: 16px;
+          font-size: 12px;
+          font-weight: 500;
+          color: var(--text);
+          transition: all 0.2s ease;
+          cursor: default;
+          animation: chipSlideIn 0.3s ease;
+        `;
 
-          // Replace input container with chip
-          inputContainer.replaceWith(chip);
+          // Create remove button for the chip
+          const chipRemoveBtn = document.createElement("button");
+          chipRemoveBtn.type = "button";
+          chipRemoveBtn.className = "remove-category-btn";
+          chipRemoveBtn.textContent = "✕";
+          chipRemoveBtn.setAttribute("data-category", newCategory);
+          chipRemoveBtn.setAttribute("data-type", type);
+          chipRemoveBtn.style.cssText = `
+          width: 20px;
+          height: 20px;
+          border: 1px solid rgba(255, 255, 255, 0.5);
+          background: rgba(239, 68, 68, 0.9);
+          color: white;
+          border-radius: 50%;
+          cursor: pointer;
+          font-size: 10px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.2s ease;
+          margin-left: -10px;
+          z-index: 10;
+          position: relative;
+        `;
+
+          // Add hover effect
+          chipRemoveBtn.addEventListener("mouseenter", () => {
+            chipRemoveBtn.style.background = "rgba(239, 68, 68, 1)";
+          });
+          chipRemoveBtn.addEventListener("mouseleave", () => {
+            chipRemoveBtn.style.background = "rgba(239, 68, 68, 0.8)";
+          });
+
+          // Assemble the container
+          chipContainer.appendChild(chip);
+          chipContainer.appendChild(chipRemoveBtn);
+
+          // Debug: Log the creation
+          console.log(
+            "Created chip with remove button for:",
+            newCategory,
+            "type:",
+            type,
+          );
+
+          // Replace input container with chip container
+          inputContainer.replaceWith(chipContainer);
 
           // Show success feedback
           hapticFeedback("light");
@@ -932,25 +1169,28 @@ function saveCategoriesFromSettings() {
     investment: [],
   };
 
-  // Get expense categories
+  // Get expense categories - look for category chips in the expense container
   const expenseItems = document.querySelectorAll(
-    "#expenseCategoriesList .category-name",
+    "#expenseCategories .category-chip",
   );
   categories.expense = Array.from(expenseItems).map((item) => item.textContent);
 
-  // Get income categories
+  // Get income categories - look for category chips in the income container
   const incomeItems = document.querySelectorAll(
-    "#incomeCategoriesList .category-name",
+    "#incomeCategories .category-chip",
   );
   categories.income = Array.from(incomeItems).map((item) => item.textContent);
 
-  // Get investment categories
+  // Get investment categories - look for category chips in the investment container
   const investmentItems = document.querySelectorAll(
-    "#investmentCategoriesList .category-name",
+    "#investmentCategories .category-chip",
   );
   categories.investment = Array.from(investmentItems).map(
     (item) => item.textContent,
   );
+
+  // Debug logging
+  console.log("Saving categories:", categories);
 
   // Save to localStorage
   localStorage.setItem("categories", JSON.stringify(categories));
@@ -961,9 +1201,23 @@ function saveCategoriesFromSettings() {
 
 // Add event delegation for remove buttons
 document.addEventListener("click", (e) => {
+  console.log("Click detected on:", e.target.className, e.target.classList);
+
   if (e.target.classList.contains("remove-category-btn")) {
+    console.log("Remove button clicked!");
+
     const type = e.target.getAttribute("data-type");
-    const index = parseInt(e.target.getAttribute("data-index"));
+    const category = e.target.getAttribute("data-category");
+    const index = e.target.getAttribute("data-index");
+
+    console.log(
+      "Remove data - type:",
+      type,
+      "category:",
+      category,
+      "index:",
+      index,
+    );
 
     // Get existing categories
     const savedCategories = localStorage.getItem("categories");
@@ -983,25 +1237,47 @@ document.addEventListener("click", (e) => {
           ],
           income: ["Salary", "Business", "Other"],
           investment: [
-            "Stocks",
-            "Real Estate",
-            "Mutual Funds",
-            "Crypto",
+            "Gold Investment",
+            "Land Investment",
+            "Property Investment",
+            "Emergency Fund",
+            "Mutual Fund",
+            "Chit Fund",
+            "LIC",
+            "Term Insurance",
             "Other",
           ],
         };
 
-    // Remove category
-    categories[type].splice(index, 1);
-    localStorage.setItem("categories", JSON.stringify(categories));
+    if (category) {
+      // Remove by category name (for newly created categories)
+      const categoryIndex = categories[type].indexOf(category);
+      if (categoryIndex > -1) {
+        categories[type].splice(categoryIndex, 1);
+        localStorage.setItem("categories", JSON.stringify(categories));
 
-    // Re-render category list
-    renderCategoryList(type, categories[type]);
+        // Remove the chip container from DOM
+        e.target.parentElement.remove();
 
-    // Update app categories
-    populateCategories();
+        // Update app categories
+        populateCategories();
 
-    hapticFeedback("light");
+        hapticFeedback("light");
+      }
+    } else if (index !== null) {
+      // Remove by index (for existing functionality)
+      const idx = parseInt(index);
+      categories[type].splice(idx, 1);
+      localStorage.setItem("categories", JSON.stringify(categories));
+
+      // Re-render category list
+      renderCategoryList(type, categories[type]);
+
+      // Update app categories
+      populateCategories();
+
+      hapticFeedback("light");
+    }
   }
 });
 
@@ -1033,10 +1309,14 @@ function performExport(format) {
             ],
             income: ["Salary", "Business", "Other"],
             investment: [
-              "Stocks",
-              "Real Estate",
-              "Mutual Funds",
-              "Crypto",
+              "Gold Investment",
+              "Land Investment",
+              "Property Investment",
+              "Emergency Fund",
+              "Mutual Fund",
+              "Chit Fund",
+              "LIC",
+              "Term Insurance",
               "Other",
             ],
           };
@@ -2106,10 +2386,14 @@ async function importFromFile(file) {
             ],
             income: ["Salary", "Business", "Other"],
             investment: [
-              "Stocks",
-              "Real Estate",
-              "Mutual Funds",
-              "Crypto",
+              "Gold Investment",
+              "Land Investment",
+              "Property Investment",
+              "Emergency Fund",
+              "Mutual Fund",
+              "Chit Fund",
+              "LIC",
+              "Term Insurance",
               "Other",
             ],
           };
@@ -2173,12 +2457,13 @@ function populateCategories() {
   // Get current filter type
   const currentFilterType = filterType.value;
 
-  // Define categories by type
-  const categoriesByType = {
+  // Define default hardcoded categories by type
+  const defaultCategoriesByType = {
     expense: [
       "Groceries",
       "Dining",
       "Rent",
+      "Utilities",
       "Transportation",
       "Shopping",
       "Healthcare",
@@ -2196,6 +2481,28 @@ function populateCategories() {
       "Mutual Fund",
       "Emergency Fund",
       "Other",
+    ],
+  };
+
+  // Get saved custom categories from localStorage
+  const savedCategories = localStorage.getItem("categories");
+  const customCategoriesByType = savedCategories
+    ? JSON.parse(savedCategories)
+    : { expense: [], income: [], investment: [] };
+
+  // Combine default categories with custom categories
+  const categoriesByType = {
+    expense: [
+      ...defaultCategoriesByType.expense,
+      ...(customCategoriesByType.expense || []),
+    ],
+    income: [
+      ...defaultCategoriesByType.income,
+      ...(customCategoriesByType.income || []),
+    ],
+    investment: [
+      ...defaultCategoriesByType.investment,
+      ...(customCategoriesByType.investment || []),
     ],
   };
 
@@ -2234,7 +2541,7 @@ function populateCategories() {
   const formCats = new Set(formCategories.concat(existingFormCategories));
   const filterCats = new Set(filterCategories.concat(existingFilterCategories));
 
-  // Sort categories: put Other at the end
+  // Sort categories alphabetically, but put "Other" at the end
   const sortedFormCats = Array.from(formCats).sort((a, b) => {
     if (a === "Other") return 1;
     if (b === "Other") return -1;
