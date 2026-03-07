@@ -819,30 +819,14 @@ function addCategoryFromSettings(type) {
   // Create input field
   const input = document.createElement("input");
   input.type = "text";
-  input.placeholder = "Enter category name...";
+  input.placeholder = "Enter category name";
   input.className = "category-input";
-  input.style.cssText = `
-    padding: 6px 12px;
-    margin: 4px;
-    background: rgba(15, 110, 253, 0.1);
-    border: 2px dashed rgba(15, 110, 253, 0.3);
-    border-radius: 16px;
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--text);
-    outline: none;
-    transition: all 0.2s ease;
-    max-width: 150px;
-  `;
 
   // Create remove button container
   const removeBtnContainer = document.createElement("div");
-  removeBtnContainer.style.cssText = `
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    margin-left: 8px;
-  `;
+  removeBtnContainer.style.display = "flex";
+  removeBtnContainer.style.alignItems = "center";
+  removeBtnContainer.style.flexShrink = "0";
 
   // Create remove button
   const removeBtn = document.createElement("button");
@@ -869,11 +853,7 @@ function addCategoryFromSettings(type) {
 
   // Insert input and remove button at the end of container
   const inputContainer = document.createElement("div");
-  inputContainer.style.cssText = `
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-  `;
+  inputContainer.className = "category-input-container";
   inputContainer.appendChild(input);
   inputContainer.appendChild(removeBtnContainer);
 
