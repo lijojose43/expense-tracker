@@ -3674,7 +3674,7 @@ div.app {
 
 .category-chip {
   display: inline-block;
-  padding: 6px 12px;
+  padding: 8px 15px;
   margin: 4px;
   background: rgba(15, 110, 253, 0.1);
   border: 1px solid rgba(15, 110, 253, 0.2);
