@@ -711,8 +711,7 @@ html:not([data-theme="dark"]) .summary .card:nth-child(4) {
 .filters {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  margin-bottom: 15px !important; /* Add space between filters and transactions */
+  margin-bottom: 20px !important; /* Add space between filters and transactions */
   overflow-x: hidden;
 }
 .filters select {
@@ -1306,7 +1305,6 @@ textarea:focus {
     ),
     var(--card);
   border: 1px solid rgba(2, 6, 23, 0.08);
-  box-shadow: 0 4px 14px rgba(2, 6, 23, 0.08);
   transition:
     transform 0.18s ease,
     box-shadow 0.2s ease,
@@ -1328,7 +1326,6 @@ textarea:focus {
 
 .tx:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 28px rgba(2, 6, 23, 0.12);
 }
 
 .tx:active {
