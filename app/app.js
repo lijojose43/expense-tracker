@@ -33,19 +33,13 @@ document.addEventListener("DOMContentLoaded", () => {
 function showExportOptions() {
   const formats = [
     {
-      name: "JSON (Standard)",
+      name: "JSON",
       format: "json",
       extension: "json",
       mimeType: "application/json",
     },
     {
-      name: "JSON (WhatsApp)",
-      format: "json",
-      extension: "json",
-      mimeType: "application/json;charset=utf-8",
-    },
-    {
-      name: "CSV (Excel)",
+      name: "Excel (CSV)",
       format: "csv",
       extension: "csv",
       mimeType: "text/csv;charset=utf-8",
@@ -118,9 +112,8 @@ function showExportOptions() {
 
   // Handle export confirmation
   document.getElementById("exportConfirmBtn").onclick = () => {
-    const selectedIndex =
-      document.getElementById("exportFormatSelect").selectedIndex;
-    const selectedFormat = formats[selectedIndex];
+    const selectedValue = document.getElementById("exportFormatSelect").value;
+    const selectedFormat = formats[Number(selectedValue)];
     performExport(selectedFormat);
     closeExportModal();
   };
@@ -1298,23 +1291,46 @@ function performExport(format) {
 }
 
 function convertToCSV(data) {
-  if (!data || data.length === 0) return "";
+  const rows = Array.isArray(data) ? data : [];
+  const csvEscape = (value) => {
+    const str = String(value ?? "");
+    return `"${str.replace(/"/g, '""')}"`;
+  };
+
+  const totalIncome = rows
+    .filter((item) => item.type === "income")
+    .reduce((sum, item) => sum + Number(item.amount || 0), 0);
+  const totalExpenses = rows
+    .filter((item) => item.type === "expense")
+    .reduce((sum, item) => sum + Number(item.amount || 0), 0);
+  const totalInvestments = rows
+    .filter((item) => item.type === "investment")
+    .reduce((sum, item) => sum + Number(item.amount || 0), 0);
+  const netBalance = totalIncome - totalExpenses - totalInvestments;
 
   const headers = ["Date", "Description", "Category", "Amount", "Type"];
-  const csvContent = [
-    headers.join(","),
-    ...data.map((item) =>
-      [
-        `"${item.date}"`,
-        `"${item.description || ""}"`,
-        `"${item.category || ""}"`,
-        `"${item.amount}"`,
-        `"${item.type || "expense"}"`,
-      ].join(","),
-    ),
-  ].join("\n");
+  const transactionRows = rows.map((item) =>
+    [
+      csvEscape(item.date || ""),
+      csvEscape(item.description || ""),
+      csvEscape(item.category || ""),
+      csvEscape(Number(item.amount || 0).toFixed(2)),
+      csvEscape(item.type || "expense"),
+    ].join(","),
+  );
 
-  return csvContent;
+  const summaryRows = [
+    "",
+    "Summary",
+    "Metric,Value",
+    `Total Transactions,${rows.length}`,
+    `Total Income,${totalIncome.toFixed(2)}`,
+    `Total Expenses,${totalExpenses.toFixed(2)}`,
+    `Total Investments,${totalInvestments.toFixed(2)}`,
+    `Net Balance,${netBalance.toFixed(2)}`,
+  ];
+
+  return [headers.join(","), ...transactionRows, ...summaryRows].join("\n");
 }
 
 // ---------- Purchase Feature ----------
@@ -2155,7 +2171,7 @@ function exportData() {
     const a = document.createElement("a");
     a.href = url;
 
-    // Create more descriptive filename that WhatsApp can recognize
+    // Create descriptive filename with date and time
     const now = new Date();
     const dateStr = now.toISOString().slice(0, 10); // YYYY-MM-DD format
     const timeStr = now.toTimeString().slice(0, 5).replace(/:/g, "-"); // HH-MM-SS format
