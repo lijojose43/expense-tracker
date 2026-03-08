@@ -70,11 +70,12 @@ function showExportOptions() {
         <button id="closeExportModal" class="icon">✕</button>
       </header>
       <form id="exportForm">
-        <div class="form-group">
-          <label for="exportFormatSelect">Choose export format:</label>
-          <select id="exportFormatSelect">
+        <div class="form-group floating">
+          <select id="exportFormatSelect" required>
+            <option value="" disabled selected hidden></option>
             ${formatOptions}
           </select>
+          <label for="exportFormatSelect" class="floating-label">Choose export format</label>
         </div>
         <div class="export-info">
           <div class="info-item">
@@ -107,11 +108,18 @@ function showExportOptions() {
   setTimeout(() => {
     exportModal.classList.remove("hide");
     exportModal.classList.add("show");
+
+    // Set default export format for floating label
+    const exportSelect = document.getElementById("exportFormatSelect");
+    if (exportSelect && exportSelect.options.length > 1) {
+      exportSelect.selectedIndex = 1; // Select first actual option (index 0 is placeholder)
+    }
   }, 10);
 
   // Handle export confirmation
   document.getElementById("exportConfirmBtn").onclick = () => {
-    const selectedIndex = document.getElementById("exportFormatSelect").value;
+    const selectedIndex =
+      document.getElementById("exportFormatSelect").selectedIndex;
     const selectedFormat = formats[selectedIndex];
     performExport(selectedFormat);
     closeExportModal();

@@ -1756,7 +1756,8 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
 .modal-content header #closeModal,
 .modal-content header #closeExpiryModal,
 .modal-content header #closePurchaseModal,
-.modal-content header #closeSettingsModal {
+.modal-content header #closeSettingsModal,
+.modal-content header #closeExportModal {
   position: absolute;
   top: 10px; /* keep away from top edge */
   right: 10px; /* keep away from right edge */
@@ -1777,7 +1778,8 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
 .modal-content header #closeModal:hover,
 .modal-content header #closeExpiryModal:hover,
 .modal-content header #closePurchaseModal:hover,
-.modal-content header #closeSettingsModal:hover {
+.modal-content header #closeSettingsModal:hover,
+.modal-content header #closeExportModal:hover {
   background: transparent;
   box-shadow: none;
 }
@@ -1785,14 +1787,16 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
 [data-theme="dark"] .modal-content header #closeModal,
 [data-theme="dark"] .modal-content header #closeExpiryModal,
 [data-theme="dark"] .modal-content header #closePurchaseModal,
-[data-theme="dark"] .modal-content header #closeSettingsModal {
+[data-theme="dark"] .modal-content header #closeSettingsModal,
+[data-theme="dark"] .modal-content header #closeExportModal {
   color: var(--muted);
 }
 
 [data-theme="dark"] .modal-content header #closeModal:hover,
 [data-theme="dark"] .modal-content header #closeExpiryModal:hover,
 [data-theme="dark"] .modal-content header #closePurchaseModal:hover,
-[data-theme="dark"] .modal-content header #closeSettingsModal:hover {
+[data-theme="dark"] .modal-content header #closeSettingsModal:hover,
+[data-theme="dark"] .modal-content header #closeExportModal:hover {
   background: transparent;
   box-shadow: none;
 }
@@ -2268,18 +2272,38 @@ select {
   padding-bottom: 10px !important;
 }
 
+/* Export format dropdown specific styling */
+#exportFormatSelect {
+  outline: none;
+  padding-left: 16px;
+  padding-top: 10px !important;
+  padding-bottom: 10px !important;
+  border: 1px solid rgba(2, 6, 23, 0.12);
+  background: var(--card);
+  color: inherit;
+}
+
 #category:focus,
-#currencySelect:focus {
+#currencySelect:focus,
+#exportFormatSelect:focus {
   outline: none;
   border-color: var(--accent) !important;
   box-shadow: 0 0 0 3px rgba(30, 144, 255, 0.25);
 }
 
 #category:focus-visible,
-#currencySelect:focus-visible {
+#currencySelect:focus-visible,
+#exportFormatSelect:focus-visible {
   outline: none;
   border-color: var(--accent) !important;
   box-shadow: 0 0 0 3px rgba(30, 144, 255, 0.25);
+}
+
+/* Dark theme for export format select */
+[data-theme="dark"] #exportFormatSelect {
+  border-color: rgba(148, 163, 184, 0.2);
+  background: var(--card);
+  color: inherit;
 }
 
 /* Custom scrollbar for select dropdown options */
@@ -3528,7 +3552,7 @@ div.app {
 
 /* Export Modal Specific Styles */
 .export-modal-content {
-  max-height: 85vh;
+  max-height: 75vh;
   border-radius: 20px 20px 0 0;
 }
 
@@ -3561,7 +3585,7 @@ div.app {
 }
 
 .export-info {
-  margin: 20px 0;
+  margin: 8px 0;
   padding: 16px;
   background: rgba(15, 110, 253, 0.05);
   border-radius: 12px;
@@ -3607,27 +3631,6 @@ div.app {
   min-height: 52px;
 }
 
-.export-modal-content .actions .primary {
-  background: var(--brand);
-  color: white;
-}
-
-.export-modal-content .actions .primary:hover {
-  background: #0056b3;
-  transform: translateY(-1px);
-}
-
-.export-modal-content .actions .secondary {
-  background: transparent;
-  color: var(--muted);
-  border: 1px solid var(--line);
-}
-
-.export-modal-content .actions .secondary:hover {
-  background: var(--bg);
-  color: var(--text);
-}
-
 /* Dark mode styles for export modal */
 [data-theme="dark"] .export-info {
   background: rgba(15, 110, 253, 0.1);
@@ -3640,25 +3643,24 @@ div.app {
   color: var(--text);
 }
 
-[data-theme="dark"] .export-modal-content .actions .secondary {
-  border-color: rgba(148, 163, 184, 0.2);
-  color: var(--muted);
+/* Ensure export modal cancel button has proper border */
+.export-modal-content .actions .secondary {
+  border: 1px solid rgba(2, 6, 23, 0.12);
 }
 
-[data-theme="dark"] .export-modal-content .actions .secondary:hover {
-  background: rgba(148, 163, 184, 0.1);
-  color: var(--text);
+[data-theme="dark"] .export-modal-content .actions .secondary {
+  border-color: rgba(148, 163, 184, 0.5);
 }
 
 /* Mobile optimizations for export modal */
 @media (max-width: 420px) {
   .export-modal-content {
     padding: 16px;
-    max-height: 90vh; /* Even more height on small mobile screens */
+    max-height: 80vh; /* Reduced height on small mobile screens */
   }
 
   .export-modal-content .actions {
-    flex-direction: column;
+    flex-direction: row;
     gap: 8px;
     margin-top: 16px;
     padding-top: 16px;
@@ -3670,7 +3672,7 @@ div.app {
 
   .export-info {
     padding: 12px;
-    margin: 16px 0;
+    margin: 8px 0;
   }
 
   .export-info .info-item {
