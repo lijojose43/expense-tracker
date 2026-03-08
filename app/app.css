@@ -2537,7 +2537,7 @@ footer {
   align-items: center;
   justify-content: center;
   box-shadow: 0 4px 16px rgba(30, 144, 255, 0.3);
-  transition: all 0.2s ease;
+  /* transition removed to eliminate animations */
   z-index: 1200; /* above bottombar */
 }
 
@@ -2581,12 +2581,13 @@ footer {
 }
 
 .fab-center:hover {
-  transform: scale(1.1);
+  /* transform removed */
   box-shadow: 0 6px 20px rgba(30, 144, 255, 0.4);
 }
 
 .fab-center:active {
-  transform: scale(0.95);
+  /* transform removed to eliminate click animation */
+  box-shadow: 0 4px 12px rgba(30, 144, 255, 0.6);
 }
 
 [data-theme="dark"] .fab-center {
@@ -2898,11 +2899,11 @@ footer {
   /* Enhanced Center FAB */
   .fab-center {
     box-shadow: 0 8px 24px rgba(30, 144, 255, 0.4);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    /* transition removed to eliminate animations */
   }
 
   .fab-center:active {
-    transform: translateY(-50%) scale(0.9);
+    /* transform removed to eliminate click animation */
     box-shadow: 0 4px 12px rgba(30, 144, 255, 0.6);
   }
 
