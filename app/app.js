@@ -1,12 +1,83 @@
 // Simple Expense Tracker (localStorage)
 // Data: array of {id, amount (number), type: 'expense'|'income', category, date, description}
 
+// ---------- Monetization ----------
+const LIMITS = {
+  free_entries: 10,
+};
+
+const FEATURES = {
+  entries: { free: LIMITS.free_entries, paid: "Unlimited" },
+  export_data: { free: false, paid: true },
+  cloud_backup: { free: false, paid: true },
+  advanced_analytics: { free: false, paid: true },
+  csv_backup: { free: false, paid: true },
+};
+
+const PREMIUM_CONFIG = {
+  paymentLink: "https://rzp.io/rzp/IkJEYH5w",
+  unlockCode: "HL-2026-PRO",
+};
+
+const PREMIUM_USER_KEY = "premium_user";
+const PREMIUM_HASH_KEY = "premium_hash";
+const PREMIUM_PAYMENT_ID_KEY = "premium_payment_id";
+const PREMIUM_MARKER_SALT = "homeledger-lite-2026";
+
+function buildPremiumMarker() {
+  return btoa(`${PREMIUM_CONFIG.unlockCode}:${PREMIUM_MARKER_SALT}`).slice(
+    0,
+    16,
+  );
+}
+
+function isPremium() {
+  return (
+    localStorage.getItem(PREMIUM_USER_KEY) === "true" &&
+    localStorage.getItem(PREMIUM_HASH_KEY) === buildPremiumMarker()
+  );
+}
+
+function unlockPremium() {
+  localStorage.setItem(PREMIUM_USER_KEY, "true");
+  localStorage.setItem(PREMIUM_HASH_KEY, buildPremiumMarker());
+  updatePremiumUI();
+}
+
+function applyCode(code) {
+  const normalized = (code || "").trim();
+  const upper = normalized.toUpperCase();
+
+  if (upper === PREMIUM_CONFIG.unlockCode) {
+    unlockPremium();
+    alert("Premium activated!");
+    return true;
+  }
+
+  // Razorpay payment IDs usually look like: pay_xxxxxxxxxxxxx
+  if (/^pay_[A-Za-z0-9]{10,}$/.test(normalized)) {
+    localStorage.setItem(PREMIUM_PAYMENT_ID_KEY, normalized);
+    unlockPremium();
+    alert("Premium activated from Razorpay payment ID.");
+    return true;
+  }
+
+  alert("Invalid code/payment ID. Please check and try again.");
+  return false;
+}
+
 // Version control for cache busting
 const APP_VERSION = "10.0";
 
 // Force reload if version mismatch
 if (localStorage.getItem("app-version") !== APP_VERSION) {
+  const premiumUserValue = localStorage.getItem(PREMIUM_USER_KEY);
+  const premiumHashValue = localStorage.getItem(PREMIUM_HASH_KEY);
   localStorage.clear(); // Clear all cached data
+  if (premiumUserValue)
+    localStorage.setItem(PREMIUM_USER_KEY, premiumUserValue);
+  if (premiumHashValue)
+    localStorage.setItem(PREMIUM_HASH_KEY, premiumHashValue);
   localStorage.setItem("app-version", APP_VERSION);
   console.log("App version updated, cache cleared");
 }
@@ -27,6 +98,8 @@ document.addEventListener("DOMContentLoaded", () => {
   meta3.httpEquiv = "Expires";
   meta3.content = "0";
   document.head.appendChild(meta3);
+
+  updatePremiumUI();
 });
 
 // ---------- Import / Export ----------
@@ -980,6 +1053,9 @@ document.addEventListener("click", (e) => {
 });
 
 function performExport(format) {
+  const featureKey = format.format === "csv" ? "csv_backup" : "export_data";
+  if (!canUseFeature(featureKey)) return;
+
   try {
     let content, filename, mimeType;
 
@@ -1374,10 +1450,12 @@ const importFileInput = $("importFile");
 const optionsBtn = $("optionsBtn");
 const optionsMenu = $("optionsMenu");
 const themeToggle = $("themeToggle");
+const planBadge = $("planBadge");
 const exportOption = $("exportOption");
 const downloadReportOption = $("downloadReportOption");
 const importOption = $("importOption");
 const settingsOption = $("settingsOption");
+const upgradeOption = $("upgradeOption");
 const clearOption = $("clearOption");
 // Tabs and title
 const screenTitle = $("screenTitle");
@@ -1610,6 +1688,148 @@ function saveExpiry() {
 
 function savePurchase() {
   localStorage.setItem(PURCHASE_STORAGE_KEY, JSON.stringify(purchaseData));
+}
+
+function getEntries() {
+  return Array.isArray(data) ? data : [];
+}
+
+function saveEntries(entries) {
+  data = Array.isArray(entries) ? entries : [];
+  save();
+}
+
+function getRemainingFreeEntries() {
+  if (isPremium()) return Infinity;
+  return Math.max(0, LIMITS.free_entries - getEntries().length);
+}
+
+function updatePremiumUI() {
+  const planBadgeEl = document.getElementById("planBadge");
+  if (!planBadgeEl) return;
+
+  if (isPremium()) {
+    planBadgeEl.textContent = "Premium";
+    planBadgeEl.classList.add("premium");
+    planBadgeEl.title = "Premium unlocked";
+  } else {
+    const remaining = getRemainingFreeEntries();
+    planBadgeEl.textContent = `Free ${remaining}/${LIMITS.free_entries}`;
+    planBadgeEl.classList.remove("premium");
+    planBadgeEl.title = `${remaining} free entries left`;
+  }
+}
+
+function showFeatureLockedMessage(featureLabel) {
+  alert(`${featureLabel} is available only in Premium. Upgrade to continue.`);
+  showUpgradeModal();
+}
+
+function canUseFeature(featureKey) {
+  if (isPremium()) return true;
+  if (featureKey === "advanced_analytics") {
+    showFeatureLockedMessage("Advanced analytics");
+    return false;
+  }
+  if (featureKey === "export_data") {
+    showFeatureLockedMessage("Export data");
+    return false;
+  }
+  if (featureKey === "csv_backup") {
+    showFeatureLockedMessage("CSV backup");
+    return false;
+  }
+  return true;
+}
+
+function showUpgradeModal() {
+  let premiumModal = document.getElementById("premiumModal");
+  if (premiumModal) {
+    premiumModal.classList.remove("hide");
+    setTimeout(() => premiumModal.classList.add("show"), 10);
+    return;
+  }
+
+  const remaining = getRemainingFreeEntries();
+  premiumModal = document.createElement("div");
+  premiumModal.id = "premiumModal";
+  premiumModal.className = "modal hide";
+  premiumModal.setAttribute("role", "dialog");
+  premiumModal.setAttribute("aria-modal", "true");
+  premiumModal.innerHTML = `
+    <div class="modal-content premium-modal-content">
+      <header>
+        <h3>Upgrade to Premium</h3>
+        <button id="closePremiumModal" class="icon">✕</button>
+      </header>
+      <form id="premiumForm">
+        <div class="premium-limit-note">
+          Free limit: ${LIMITS.free_entries} entries. Remaining: ${remaining}.
+        </div>
+        <div class="premium-feature-grid">
+          <div class="premium-feature-row"><span>Entries</span><span>${FEATURES.entries.free} / ${FEATURES.entries.paid}</span></div>
+          <div class="premium-feature-row"><span>Export data</span><span>Free: No / Paid: Yes</span></div>
+          <div class="premium-feature-row"><span>Cloud backup</span><span>Free: No / Paid: Yes</span></div>
+          <div class="premium-feature-row"><span>Advanced analytics</span><span>Free: No / Paid: Yes</span></div>
+        </div>
+        <div class="premium-benefits">
+          <strong>Premium includes:</strong>
+          <div>• Unlimited entries</div>
+          <div>• Data export (JSON + CSV)</div>
+          <div>• Cloud backup access</div>
+          <div>• Advanced analytics</div>
+        </div>
+        <div class="premium-limit-note">
+          Click <strong>Open Payment Link</strong>, complete the Razorpay payment, then enter your unlock code or Razorpay Payment ID (pay_...) below.
+        </div>
+        <div class="floating">
+          <input id="premiumCodeInput" type="text" placeholder=" " autocomplete="off" />
+          <label for="premiumCodeInput" class="floating-label">Unlock code or Razorpay Payment ID</label>
+        </div>
+        <div class="actions">
+          <button type="button" id="premiumCloseBtn" class="secondary">Close</button>
+          <button type="button" id="premiumPayBtn" class="secondary premium-upgrade-btn">Open Payment Link</button>
+          <button type="button" id="premiumApplyBtn" class="primary">Apply Code</button>
+        </div>
+      </form>
+    </div>
+  `;
+
+  document.body.appendChild(premiumModal);
+
+  const closePremiumModal = () => {
+    premiumModal.classList.remove("show");
+    premiumModal.classList.add("hide");
+  };
+
+  document.getElementById("closePremiumModal").onclick = closePremiumModal;
+  document.getElementById("premiumCloseBtn").onclick = closePremiumModal;
+  document.getElementById("premiumPayBtn").onclick = () => {
+    window.open(PREMIUM_CONFIG.paymentLink, "_blank", "noopener");
+  };
+  document.getElementById("premiumApplyBtn").onclick = () => {
+    const codeInput = document.getElementById("premiumCodeInput");
+    if (!codeInput) return;
+    if (applyCode(codeInput.value)) {
+      closePremiumModal();
+      updatePremiumUI();
+    }
+  };
+  premiumModal.onclick = (e) => {
+    if (e.target === premiumModal) closePremiumModal();
+  };
+
+  setTimeout(() => {
+    premiumModal.classList.remove("hide");
+    premiumModal.classList.add("show");
+  }, 10);
+}
+
+function showFreeLimitReachedPrompt() {
+  alert(
+    `Free version allows only ${LIMITS.free_entries} entries. Upgrade to Premium for unlimited entries, export, backup, and advanced analytics.`,
+  );
+  showUpgradeModal();
 }
 
 function formatMoney(n) {
@@ -1860,8 +2080,14 @@ function clearData() {
       "Are you sure you want to clear all data? This action cannot be undone.\n\nAll transactions, categories, and settings will be permanently deleted.",
     )
   ) {
+    const premiumUserValue = localStorage.getItem(PREMIUM_USER_KEY);
+    const premiumHashValue = localStorage.getItem(PREMIUM_HASH_KEY);
     // Clear all data from localStorage
     localStorage.clear();
+    if (premiumUserValue)
+      localStorage.setItem(PREMIUM_USER_KEY, premiumUserValue);
+    if (premiumHashValue)
+      localStorage.setItem(PREMIUM_HASH_KEY, premiumHashValue);
 
     // Reset data arrays
     data = [];
@@ -1878,6 +2104,7 @@ function clearData() {
     if (!summaryTabEl.classList.contains("hidden")) renderChart();
     renderExpiry();
     renderPurchase();
+    updatePremiumUI();
 
     // Show success message
     alert("All data has been cleared successfully.");
@@ -1929,6 +2156,8 @@ function normalizeTx(raw) {
 }
 
 function exportData() {
+  if (!canUseFeature("export_data")) return;
+
   try {
     const payload = {
       version: 1,
@@ -2672,6 +2901,8 @@ function switchTab(name) {
     screenTitle.textContent = "Expenses";
     if (optionsMenu) optionsMenu.classList.remove("open");
   } else if (name === "summary") {
+    if (!canUseFeature("advanced_analytics")) return;
+
     homeTabEl.classList.add("hidden");
     summaryTabEl.classList.remove("hidden");
     expiryTabEl && expiryTabEl.classList.add("hidden");
@@ -2716,6 +2947,7 @@ function switchTab(name) {
 
 function renderList() {
   transactionsEl.innerHTML = "";
+  updatePremiumUI();
   const ft = filterType.value;
   const fc = filterCategory.value;
   // Search functionality removed
@@ -3280,6 +3512,17 @@ if (settingsOption) {
     closeMenu();
   });
 }
+if (upgradeOption) {
+  upgradeOption.addEventListener("click", () => {
+    showUpgradeModal();
+    closeMenu();
+  });
+}
+if (planBadge) {
+  planBadge.addEventListener("click", () => {
+    showUpgradeModal();
+  });
+}
 if (importOption && importFileInput) {
   importOption.addEventListener("click", () => {
     importFileInput.click();
@@ -3403,6 +3646,13 @@ txForm.addEventListener("submit", (e) => {
       };
     }
   } else {
+    const entries = getEntries();
+    if (!isPremium() && entries.length >= LIMITS.free_entries) {
+      hapticFeedback("error");
+      showFreeLimitReachedPrompt();
+      return;
+    }
+
     const tx = {
       id: uid(),
       amount: Math.abs(amount),
@@ -3413,12 +3663,14 @@ txForm.addEventListener("submit", (e) => {
       createdAt: Date.now(),
     };
     // if amount negative and type expense, convert accordingly - UI expects positive and type denotes sign
-    data.push(tx);
+    entries.push(tx);
+    saveEntries(entries);
   }
-  save();
+  if (editId) save();
   populateCategories();
   computeTotals();
   renderList();
+  updatePremiumUI();
   // update chart if on summary tab
   if (!summaryTabEl.classList.contains("hidden")) renderChart();
 
