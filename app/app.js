@@ -2693,16 +2693,18 @@ function getCategoryIcon(category) {
     </svg>`,
 
     chitfund: `<svg viewBox="0 0 24 24" width="${iconSize}" height="${iconSize}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <circle cx="12" cy="12" r="10"/>
-      <path d="M12 6v6l4 2"/>
-      <path d="M8 12h8"/>
-      <circle cx="12" cy="12" r="2"/>
+      <circle cx="8" cy="8" r="2"/>
+      <circle cx="16" cy="8" r="2"/>
+      <circle cx="12" cy="16" r="2"/>
+      <path d="M8 10c0 2 4 3 4 3s4-1 4-3"/>
+      <path d="M12 13v3"/>
+      <circle cx="12" cy="18" r="1"/>
     </svg>`,
 
     lic: `<svg viewBox="0 0 24 24" width="${iconSize}" height="${iconSize}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/>
+      <path d="M12 3l-8 4v7c0 5 4 9 8 9s8-4 8-9V7l-8-4z"/>
       <path d="M12 8v4"/>
-      <path d="M12 16h.01"/>
+      <circle cx="12" cy="14" r="1"/>
     </svg>`,
 
     terminsurance: `<svg viewBox="0 0 24 24" width="${iconSize}" height="${iconSize}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
