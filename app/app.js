@@ -30,235 +30,17 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // ---------- Import / Export ----------
-function showExportOptions() {
-  const formats = [
-    {
-      name: "JSON",
-      format: "json",
-      extension: "json",
-      mimeType: "application/json",
-    },
-    {
-      name: "Excel (CSV)",
-      format: "csv",
-      extension: "csv",
-      mimeType: "text/csv;charset=utf-8",
-    },
-  ];
+const JSON_EXPORT_FORMAT = {
+  format: "json",
+  extension: "json",
+  mimeType: "application/json",
+};
 
-  const formatOptions = formats
-    .map((fmt, index) => `<option value="${index}">${fmt.name}</option>`)
-    .join("");
-
-  // Create bottom sheet modal
-  const exportModal = document.createElement("div");
-  exportModal.id = "exportModal";
-  exportModal.className = "modal hide";
-  exportModal.setAttribute("role", "dialog");
-  exportModal.setAttribute("aria-modal", "true");
-
-  exportModal.innerHTML = `
-    <div class="modal-content export-modal-content">
-      <header>
-        <h3>Export Data</h3>
-        <button id="closeExportModal" class="icon">✕</button>
-      </header>
-      <form id="exportForm">
-        <div class="form-group floating">
-          <select id="exportFormatSelect" required>
-            <option value="" disabled selected hidden></option>
-            ${formatOptions}
-          </select>
-          <label for="exportFormatSelect" class="floating-label">Choose export format</label>
-        </div>
-        <div class="export-info">
-          <div class="info-item">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-            </svg>
-            <span>Export includes transactions, expiries, and shopping list</span>
-          </div>
-          <div class="info-item">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-            </svg>
-            <span>Your data stays private and secure</span>
-          </div>
-        </div>
-        <div class="actions">
-          <button type="button" id="exportCancelBtn" class="secondary">Cancel</button>
-          <button type="button" id="exportConfirmBtn" class="primary">Export</button>
-        </div>
-      </form>
-    </div>
-  `;
-
-  document.body.appendChild(exportModal);
-
-  // Initialize drag to close for export modal
-  initExportModalDragToClose();
-
-  // Show modal with animation
-  setTimeout(() => {
-    exportModal.classList.remove("hide");
-    exportModal.classList.add("show");
-
-    // Set default export format for floating label
-    const exportSelect = document.getElementById("exportFormatSelect");
-    if (exportSelect && exportSelect.options.length > 1) {
-      exportSelect.selectedIndex = 1; // Select first actual option (index 0 is placeholder)
-    }
-  }, 10);
-
-  // Handle export confirmation
-  document.getElementById("exportConfirmBtn").onclick = () => {
-    const selectedValue = document.getElementById("exportFormatSelect").value;
-    const selectedFormat = formats[Number(selectedValue)];
-    performExport(selectedFormat);
-    closeExportModal();
-  };
-
-  document.getElementById("exportCancelBtn").onclick = closeExportModal;
-  document.getElementById("closeExportModal").onclick = closeExportModal;
-
-  // Close modal on background click
-  exportModal.onclick = (e) => {
-    if (e.target === exportModal) {
-      closeExportModal();
-    }
-  };
-}
-
-function closeExportModal() {
-  const exportModal = document.getElementById("exportModal");
-  if (exportModal) {
-    exportModal.classList.remove("show");
-    exportModal.classList.add("hide");
-
-    // Reset modal transform when closing
-    const modalContent = exportModal.querySelector(".modal-content");
-    if (modalContent) {
-      modalContent.style.transform = "";
-      modalContent.style.transition = "";
-    }
-
-    setTimeout(() => {
-      document.body.removeChild(exportModal);
-    }, 300);
-  }
-}
-
-// Export modal drag to close functionality
-let exportModalStartY = 0;
-let exportModalCurrentY = 0;
-let exportModalIsDragging = false;
-let exportModalDragThreshold = 100;
-
-function initExportModalDragToClose() {
-  const modalContent = document.querySelector("#exportModal .modal-content");
-  const modalHeader = document.querySelector(
-    "#exportModal .modal-content header",
-  );
-
-  if (!modalContent || !modalHeader) return;
-
-  modalHeader.addEventListener(
-    "touchstart",
-    (e) => {
-      exportModalStartY = e.touches[0].clientY;
-      exportModalCurrentY = exportModalStartY;
-      exportModalIsDragging = true;
-      modalContent.style.transition = "none";
-    },
-    { passive: true },
-  );
-
-  modalHeader.addEventListener(
-    "touchmove",
-    (e) => {
-      if (!exportModalIsDragging) return;
-
-      exportModalCurrentY = e.touches[0].clientY;
-      const deltaY = exportModalCurrentY - exportModalStartY;
-
-      // Only allow downward drag
-      if (deltaY > 0) {
-        modalContent.style.transform = `translateY(${deltaY}px)`;
-      }
-    },
-    { passive: true },
-  );
-
-  modalHeader.addEventListener(
-    "touchend",
-    () => {
-      if (!exportModalIsDragging) return;
-
-      const deltaY = exportModalCurrentY - exportModalStartY;
-      exportModalIsDragging = false;
-
-      // Reset transition
-      modalContent.style.transition =
-        "transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)";
-
-      if (deltaY > exportModalDragThreshold) {
-        // Close modal if dragged far enough
-        hapticFeedback("medium");
-        closeExportModal();
-      } else {
-        // Snap back to original position
-        modalContent.style.transform = "translateY(0)";
-      }
-    },
-    { passive: true },
-  );
-
-  // Also handle mouse events for desktop
-  modalHeader.addEventListener("mousedown", (e) => {
-    exportModalStartY = e.clientY;
-    exportModalCurrentY = exportModalStartY;
-    exportModalIsDragging = true;
-    modalContent.style.transition = "none";
-
-    const handleMouseMove = (e) => {
-      if (!exportModalIsDragging) return;
-
-      exportModalCurrentY = e.clientY;
-      const deltaY = exportModalCurrentY - exportModalStartY;
-
-      // Only allow downward drag
-      if (deltaY > 0) {
-        modalContent.style.transform = `translateY(${deltaY}px)`;
-      }
-    };
-
-    const handleMouseUp = () => {
-      if (!exportModalIsDragging) return;
-
-      const deltaY = exportModalCurrentY - exportModalStartY;
-      exportModalIsDragging = false;
-
-      // Reset transition
-      modalContent.style.transition =
-        "transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)";
-
-      if (deltaY > exportModalDragThreshold) {
-        // Close modal if dragged far enough
-        hapticFeedback("medium");
-        closeExportModal();
-      } else {
-        // Snap back to original position
-        modalContent.style.transform = "translateY(0)";
-      }
-
-      document.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("mouseup", handleMouseUp);
-    };
-
-    document.addEventListener("mousemove", handleMouseMove);
-    document.addEventListener("mouseup", handleMouseUp);
-  });
-}
+const REPORT_EXPORT_FORMAT = {
+  format: "csv",
+  extension: "csv",
+  mimeType: "text/csv;charset=utf-8",
+};
 
 // ---------- Settings ----------
 function showSettingsOptions() {
@@ -1593,6 +1375,7 @@ const optionsBtn = $("optionsBtn");
 const optionsMenu = $("optionsMenu");
 const themeToggle = $("themeToggle");
 const exportOption = $("exportOption");
+const downloadReportOption = $("downloadReportOption");
 const importOption = $("importOption");
 const settingsOption = $("settingsOption");
 const clearOption = $("clearOption");
@@ -3481,7 +3264,13 @@ if (themeToggle) {
 }
 if (exportOption) {
   exportOption.addEventListener("click", () => {
-    showExportOptions();
+    performExport(JSON_EXPORT_FORMAT);
+    closeMenu();
+  });
+}
+if (downloadReportOption) {
+  downloadReportOption.addEventListener("click", () => {
+    performExport(REPORT_EXPORT_FORMAT);
     closeMenu();
   });
 }
