@@ -3949,6 +3949,11 @@ div.app {
   transition: all 0.2s ease;
 }
 
+/* Add animation for dynamically added category chips */
+.category-chip[data-dynamic="true"] {
+  animation: chipSlideIn 0.3s ease;
+}
+
 .category-chip:hover {
   background: color-mix(in srgb, var(--accent) 18%, var(--card));
   border-color: color-mix(in srgb, var(--accent) 50%, transparent);
@@ -4089,18 +4094,25 @@ div.app {
 }
 
 .remove-category-btn {
-  padding: 4px 6px;
-  border: none;
-  background: var(--danger);
+  width: 20px;
+  height: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  background: rgba(239, 68, 68, 0.9);
   color: white;
-  border-radius: 4px;
-  font-size: 12px;
+  border-radius: 50%;
   cursor: pointer;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition: all 0.2s ease;
+  margin-left: -8px;
+  z-index: 1;
+  position: relative;
 }
 
 .remove-category-btn:hover {
-  background: #c82333;
+  background: rgba(239, 68, 68, 1);
   transform: scale(1.05);
 }
 

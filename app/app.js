@@ -755,18 +755,7 @@ function renderCategoryList(type, categories) {
         chip.className = "category-chip";
         chip.setAttribute("data-dynamic", "true");
         chip.textContent = category;
-        chip.style.cssText = `
-          display: inline-block;
-          padding: 6px 12px;
-          background: rgba(15, 110, 253, 0.1);
-          border: 1px solid rgba(15, 110, 253, 0.2);
-          border-radius: 16px;
-          font-size: 12px;
-          font-weight: 500;
-          color: var(--text);
-          transition: all 0.2s ease;
-          cursor: default;
-        `;
+        // Remove inline styles to use CSS class
 
         // Create remove button for the chip
         const chipRemoveBtn = document.createElement("button");
@@ -775,31 +764,7 @@ function renderCategoryList(type, categories) {
         chipRemoveBtn.textContent = "✕";
         chipRemoveBtn.setAttribute("data-category", category);
         chipRemoveBtn.setAttribute("data-type", type);
-        chipRemoveBtn.style.cssText = `
-          width: 20px;
-          height: 20px;
-          border: 1px solid rgba(255, 255, 255, 0.5);
-          background: rgba(239, 68, 68, 0.9);
-          color: white;
-          border-radius: 50%;
-          cursor: pointer;
-          font-size: 10px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          transition: all 0.2s ease;
-          margin-left: -8px;
-          z-index: 1;
-          position: relative;
-        `;
-
-        // Add hover effect
-        chipRemoveBtn.addEventListener("mouseenter", () => {
-          chipRemoveBtn.style.background = "rgba(239, 68, 68, 1)";
-        });
-        chipRemoveBtn.addEventListener("mouseleave", () => {
-          chipRemoveBtn.style.background = "rgba(239, 68, 68, 0.8)";
-        });
+        // Remove inline styles to use CSS class
 
         // Assemble the container
         chipContainer.appendChild(chip);
@@ -928,19 +893,7 @@ function addCategoryFromSettings(type) {
         chip.className = "category-chip";
         chip.setAttribute("data-dynamic", "true");
         chip.textContent = capitalizedCategory;
-        chip.style.cssText = `
-          display: inline-block;
-          padding: 6px 12px;
-          background: rgba(15, 110, 253, 0.1);
-          border: 1px solid rgba(15, 110, 253, 0.2);
-          border-radius: 16px;
-          font-size: 12px;
-          font-weight: 500;
-          color: var(--text);
-          transition: all 0.2s ease;
-          cursor: default;
-          animation: chipSlideIn 0.3s ease;
-        `;
+        // Remove inline styles to use CSS class
 
         // Create remove button for the chip
         const chipRemoveBtn = document.createElement("button");
@@ -949,31 +902,7 @@ function addCategoryFromSettings(type) {
         chipRemoveBtn.textContent = "✕";
         chipRemoveBtn.setAttribute("data-category", newCategory);
         chipRemoveBtn.setAttribute("data-type", type);
-        chipRemoveBtn.style.cssText = `
-          width: 20px;
-          height: 20px;
-          border: 1px solid rgba(255, 255, 255, 0.5);
-          background: rgba(239, 68, 68, 0.9);
-          color: white;
-          border-radius: 50%;
-          cursor: pointer;
-          font-size: 10px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          transition: all 0.2s ease;
-          margin-left: -8px;
-          z-index: 1;
-          position: relative;
-        `;
-
-        // Add hover effect
-        chipRemoveBtn.addEventListener("mouseenter", () => {
-          chipRemoveBtn.style.background = "rgba(239, 68, 68, 1)";
-        });
-        chipRemoveBtn.addEventListener("mouseleave", () => {
-          chipRemoveBtn.style.background = "rgba(239, 68, 68, 0.8)";
-        });
+        // Remove inline styles to use CSS class
 
         // Assemble the container
         chipContainer.appendChild(chip);
