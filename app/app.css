@@ -756,45 +756,109 @@ html:not([data-theme="dark"]) .summary .card:nth-child(4) {
   display: flex;
   gap: 10px;
   align-items: center;
-  overflow-x: auto;
+  overflow-x: visible;
   scrollbar-width: none;
   -ms-overflow-style: none;
   position: relative;
-  flex-wrap: nowrap; /* Keep all items in single row */
+  flex-wrap: wrap; /* Allow wrapping for better responsive behavior */
 }
 
 .filters-row::-webkit-scrollbar {
   display: none;
 }
 
-/* Summary tab: make date filters a single row with horizontal scroll */
-.date-filter-buttons {
+/* Date chips container */
+.date-chips-container {
   display: flex;
-  gap: 12px;
-  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
   align-items: center;
-  overflow-x: auto;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE/Edge */
-  flex-wrap: nowrap; /* single line */
 }
 
-.date-filter-buttons::-webkit-scrollbar {
-  display: none; /* WebKit */
-}
-
-.date-filter-buttons .filter-btn {
-  flex: 0 0 auto;
-  min-width: 100px; /* match filters-row defaults */
-  height: 40px;
-  display: flex;
+/* Date chip styles */
+.date-chip {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 12px;
-  font-size: 16px;
+  padding: 6px 12px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 32px;
+  white-space: nowrap;
+  outline: none;
+  position: relative;
 }
 
-/* Ensure filter buttons work within filters-row */
+.date-chip:hover {
+  border-color: var(--accent);
+  color: var(--text);
+  background: rgba(30, 144, 255, 0.04);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(2, 6, 23, 0.08);
+}
+
+.date-chip:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 4px rgba(2, 6, 23, 0.12);
+}
+
+.date-chip.active {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(30, 144, 255, 0.3);
+}
+
+.date-chip:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Dark theme for date chips */
+[data-theme="dark"] .date-chip {
+  background: rgba(30, 41, 59, 0.8);
+  border-color: rgba(148, 163, 184, 0.2);
+  color: var(--muted);
+}
+
+[data-theme="dark"] .date-chip:hover {
+  background: rgba(148, 163, 184, 0.1);
+  border-color: rgba(30, 144, 255, 0.5);
+  color: var(--text);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .date-chip.active {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+  box-shadow: 0 2px 8px rgba(30, 144, 255, 0.4);
+}
+
+/* Mobile optimizations for date chips */
+@media (max-width: 420px) {
+  .date-chips-container {
+    gap: 6px;
+    margin-top: 8px;
+  }
+
+  .date-chip {
+    padding: 5px 10px;
+    font-size: 12px;
+    min-height: 28px;
+    border-radius: 14px;
+  }
+}
+
+/* Legacy: date-filter-buttons class is deprecated, use date-chips-container instead */
 .filters-row .filter-btn {
   flex: 0 0 auto;
   min-width: 100px;
@@ -3097,7 +3161,6 @@ div.app {
     .content::-webkit-scrollbar,
     .filters::-webkit-scrollbar,
     .filters-row::-webkit-scrollbar,
-    .date-filter-buttons::-webkit-scrollbar,
     .custom-date-range::-webkit-scrollbar,
     .transactions::-webkit-scrollbar {
       display: none !important;
@@ -3113,7 +3176,6 @@ div.app {
     .content,
     .filters,
     .filters-row,
-    .date-filter-buttons,
     .custom-date-range,
     .transactions {
       scrollbar-width: none !important;
@@ -3155,8 +3217,9 @@ div.app {
 
   /* Make filters row more compact on mobile */
   .filters-row {
-    gap: 10px; /* Increased spacing on mobile */
-    margin-bottom: 10px;
+    gap: 8px; /* Reduced spacing on mobile */
+    margin-bottom: 8px;
+    flex-wrap: wrap; /* Allow wrapping on mobile */
   }
 
   .filters-row select {
@@ -3179,17 +3242,163 @@ div.app {
   }
 
   /* Summary tab: compact single-row layout on mobile */
-  .date-filter-buttons {
-    gap: 10px; /* Increased spacing on mobile */
-    margin-bottom: 10px;
+  .date-chips-container {
+    gap: 6px; /* Reduced spacing on mobile */
+    margin-bottom: 8px;
   }
 
-  .date-filter-buttons .filter-btn {
-    min-width: 70px;
-    padding: 12px;
+  /* Mobile-friendly layout - keep amount and category in same row */
+  .amount-category-row {
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  /* Mobile-friendly layout - keep date and description in same row */
+  .date-description-row {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .checkbox-label {
+    min-height: 44px;
     font-size: 16px;
+  }
+
+  .checkbox-custom {
+    width: 20px;
+    height: 20px;
+  }
+
+  /* Extra bottom padding for transactions on mobile to prevent footer overlap */
+  .transactions {
+    padding-bottom: 10px;
+  }
+
+  /* Normalize native select appearance on iOS */
+  select {
+    -webkit-appearance: none;
+    appearance: none;
+    background-color: #fff;
+  }
+
+  /* Force hide scrollbars on mobile/iPhone */
+  * {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+
+  *::-webkit-scrollbar {
+    display: none !important;
+    width: 0px !important;
+    height: 0px !important;
+    background: transparent !important;
+  }
+
+  *::-webkit-scrollbar-track {
+    display: none !important;
+    background: transparent !important;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    display: none !important;
+    background: transparent !important;
+  }
+
+  /* Universal mobile scrollbar hiding - works in DevTools and real devices */
+  @media (max-width: 768px) {
+    /* Force hide scrollbars on all elements */
+    * {
+      scrollbar-width: none !important;
+      -ms-overflow-style: none !important;
+    }
+
+    html::-webkit-scrollbar,
+    body::-webkit-scrollbar,
+    .app::-webkit-scrollbar,
+    .content::-webkit-scrollbar,
+    .filters::-webkit-scrollbar,
+    .filters-row::-webkit-scrollbar,
+    .custom-date-range::-webkit-scrollbar,
+    .transactions::-webkit-scrollbar {
+      display: none !important;
+      width: 0 !important;
+      height: 0 !important;
+      background: transparent !important;
+    }
+
+    /* Specific element overrides */
+    html,
+    body,
+    .app,
+    .content,
+    .filters,
+    .filters-row,
+    .custom-date-range,
+    .transactions {
+      scrollbar-width: none !important;
+      -ms-overflow-style: none !important;
+      overscroll-behavior: none;
+    }
+  }
+
+  /* Additional iOS-specific scrollbar hiding */
+  body,
+  html,
+  .app,
+  .content,
+  .filters,
+  .transactions {
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none !important;
+  }
+
+  body::-webkit-scrollbar,
+  html::-webkit-scrollbar,
+  .app::-webkit-scrollbar,
+  .content::-webkit-scrollbar,
+  .filters::-webkit-scrollbar,
+  .transactions::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+  }
+
+  /* Mobile-specific sizing for custom date inputs */
+  .custom-date-range input {
+    min-width: 150px; /* Reduced to prevent horizontal scroll */
+    flex: 1 1 150px;
+    height: 48px;
+    font-size: 16px; /* Prevent zoom on iOS */
+    /* All other styling inherited from global .date-input styles */
+  }
+
+  /* Make filters row more compact on mobile */
+  .filters-row {
+    gap: 8px; /* Reduced spacing on mobile */
+    margin-bottom: 8px;
+    flex-wrap: wrap; /* Allow wrapping on mobile */
+  }
+
+  .filters-row select {
+    min-width: 80px; /* Smaller to fit more items */
+    font-size: 16px; /* Prevent zoom on iOS */
     height: 40px;
   }
+
+  /* Give category filter more width on mobile */
+  .filters-row #filterCategory {
+    min-width: 140px; /* Even wider for "All categories" text */
+    flex: 1.8; /* Take significantly more space than other filters */
+  }
+
+  /* Make filter buttons smaller on mobile for single row */
+  .filters-row .filter-btn {
+    min-width: 70px; /* Even smaller on mobile */
+    padding: 12px; /* Consistent 12px padding */
+    font-size: 16px; /* Consistent 16px font size */
+  }
+
+  /* Remove old date-filter-buttons styles as they're no longer used */
 }
 
 /* Pull to refresh indicator */
@@ -3950,4 +4159,22 @@ div.app {
   .category-name {
     font-size: 13px;
   }
+}
+
+/* Filters touch/scroll override */
+.filters,
+.filters-row,
+.date-filter-buttons {
+  pointer-events: auto !important;
+  overscroll-behavior-y: auto !important;
+  overscroll-behavior-x: contain !important;
+}
+
+.filters {
+  touch-action: pan-y !important;
+}
+
+.filters-row,
+.date-filter-buttons {
+  touch-action: pan-x pan-y !important;
 }

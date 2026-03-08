@@ -3764,7 +3764,7 @@ function setDateFilter(filter) {
 
   // Update button states
   document
-    .querySelectorAll(".filter-btn")
+    .querySelectorAll(".date-chip")
     .forEach((btn) => btn.classList.remove("active"));
   document.querySelector(`[data-filter="${filter}"]`).classList.add("active");
 
@@ -3799,7 +3799,7 @@ function setSummaryDateFilter(filter) {
 
   // Update button states for summary page
   document
-    .querySelectorAll("#summaryTab .filter-btn")
+    .querySelectorAll("#summaryTab .date-chip")
     .forEach((btn) => btn.classList.remove("active"));
   document
     .querySelector(`#summaryTab [data-filter="${filter}"]`)
@@ -3905,16 +3905,6 @@ filterType.addEventListener("change", () => {
 filterCategory.addEventListener("change", () => {
   renderList();
   setTimeout(() => checkPWAInstallPrompt(1000), 500);
-});
-
-// Prevent select dropdowns from closing automatically on mobile/PWA
-[filterType, filterCategory].forEach((select) => {
-  select.addEventListener("focus", () =>
-    document.body.classList.add("select-open"),
-  );
-  select.addEventListener("blur", () =>
-    document.body.classList.remove("select-open"),
-  );
 });
 
 // Search input event listener removed

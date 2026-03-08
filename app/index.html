@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-title" content="Expense Tracker">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-  <link rel="stylesheet" href="app.css?v=16">
+  <link rel="stylesheet" href="app.css?v=20">
   <title>Expense Tracker</title>
 </head>
 <body>
@@ -105,10 +105,12 @@
         <div class="filters-row">
           <select id="filterType"><option value="all">All</option><option value="income">Income</option><option value="expense">Expense</option><option value="investment">Investment</option></select>
           <select id="filterCategory"><option value="all">All categories</option></select>
-          <button id="filterAllTime" class="filter-btn active" data-filter="all">All time</button>
-          <button id="filterThisMonth" class="filter-btn" data-filter="thisMonth">This month</button>
-          <button id="filterPrevMonth" class="filter-btn" data-filter="previousMonth">Previous month</button>
-          <button id="filterCustom" class="filter-btn" data-filter="custom">Custom range</button>
+        </div>
+        <div class="date-chips-container">
+          <button id="filterAllTime" class="date-chip active" data-filter="all">All time</button>
+          <button id="filterThisMonth" class="date-chip" data-filter="thisMonth">This month</button>
+          <button id="filterPrevMonth" class="date-chip" data-filter="previousMonth">Previous month</button>
+          <button id="filterCustom" class="date-chip" data-filter="custom">Custom range</button>
         </div>
       </section>
       
@@ -154,11 +156,11 @@
     
     <main id="summaryTab" class="content hidden">
       <section class="filters">
-        <div class="date-filter-buttons">
-          <button id="summaryFilterAllTime" class="filter-btn active" data-filter="all">All time</button>
-          <button id="summaryFilterThisMonth" class="filter-btn" data-filter="thisMonth">This month</button>
-          <button id="summaryFilterPrevMonth" class="filter-btn" data-filter="previousMonth">Previous month</button>
-          <button id="summaryFilterCustom" class="filter-btn" data-filter="custom">Custom range</button>
+        <div class="date-chips-container">
+          <button id="summaryFilterAllTime" class="date-chip active" data-filter="all">All time</button>
+          <button id="summaryFilterThisMonth" class="date-chip" data-filter="thisMonth">This month</button>
+          <button id="summaryFilterPrevMonth" class="date-chip" data-filter="previousMonth">Previous month</button>
+          <button id="summaryFilterCustom" class="date-chip" data-filter="custom">Custom range</button>
         </div>
       </section>
       
@@ -400,7 +402,7 @@
   </div>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-  <script src="app.js?v=18"></script>
+  <script src="app.js?v=20"></script>
   <script>
     const isWebOrigin = location.protocol === "http:" || location.protocol === "https:";
     if (isWebOrigin) {
