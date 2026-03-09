@@ -416,6 +416,16 @@ html:not([data-theme="dark"]) #sunIcon {
   border-color: rgba(45, 212, 191, 0.4);
   background: rgba(13, 148, 136, 0.2);
 }
+
+/* iOS PWA specific fix for planBadge vertical alignment */
+@supports (-webkit-touch-callout: none) {
+  @media (display-mode: standalone) {
+    .plan-badge {
+      top: calc(12px + env(safe-area-inset-top, 0px) + 20px);
+      transform: translateY(-50%);
+    }
+  }
+}
 .summary {
   display: flex;
   flex-wrap: wrap;
