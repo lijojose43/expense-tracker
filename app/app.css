@@ -421,7 +421,7 @@ html:not([data-theme="dark"]) #sunIcon {
 @supports (-webkit-touch-callout: none) {
   @media (display-mode: standalone) {
     .plan-badge {
-      top: calc(12px + env(safe-area-inset-top, 0px) + 20px);
+      top: calc(8px + env(safe-area-inset-top, 0px) + 20px);
       transform: translateY(-50%);
     }
   }
