@@ -383,6 +383,9 @@ html:not([data-theme="dark"]) #sunIcon {
 }
 
 .plan-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   position: absolute;
   left: 66px;
   top: 50%;
