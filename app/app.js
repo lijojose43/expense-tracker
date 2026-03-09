@@ -3081,7 +3081,10 @@ function renderList() {
       const formattedAmount = amountValue.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
       // Get saved currency or default to $
       const currency = localStorage.getItem("currency") || "$";
-      amt.textContent = currency + formattedAmount;
+      // Add + for income, - for expense, no sign for investment
+      const sign =
+        t.type === "expense" ? "-" : t.type === "investment" ? "" : "+";
+      amt.textContent = sign + (sign ? " " : "") + currency + formattedAmount;
       el.appendChild(meta);
       el.appendChild(amt);
 
