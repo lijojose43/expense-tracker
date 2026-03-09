@@ -822,12 +822,12 @@ html:not([data-theme="dark"]) .summary .card:nth-child(4) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 6px 12px;
+  padding: 8px 17px;
   border-radius: 16px;
   border: 1px solid var(--line);
   background: var(--card);
   color: var(--muted);
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -1796,7 +1796,8 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
 .modal-content header #closeExpiryModal,
 .modal-content header #closePurchaseModal,
 .modal-content header #closeSettingsModal,
-.modal-content header #closeExportModal {
+.modal-content header #closeExportModal,
+.modal-content header #closePremiumModal {
   position: absolute;
   top: 10px; /* keep away from top edge */
   right: 10px; /* keep away from right edge */
@@ -1818,7 +1819,8 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
 .modal-content header #closeExpiryModal:hover,
 .modal-content header #closePurchaseModal:hover,
 .modal-content header #closeSettingsModal:hover,
-.modal-content header #closeExportModal:hover {
+.modal-content header #closeExportModal:hover,
+.modal-content header #closePremiumModal:hover {
   background: transparent;
   box-shadow: none;
 }
@@ -1827,7 +1829,8 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
 [data-theme="dark"] .modal-content header #closeExpiryModal,
 [data-theme="dark"] .modal-content header #closePurchaseModal,
 [data-theme="dark"] .modal-content header #closeSettingsModal,
-[data-theme="dark"] .modal-content header #closeExportModal {
+[data-theme="dark"] .modal-content header #closeExportModal,
+[data-theme="dark"] .modal-content header #closePremiumModal {
   color: var(--muted);
 }
 
@@ -1835,7 +1838,8 @@ html:not([data-theme="dark"]) .iconBox[data-cat="other"] {
 [data-theme="dark"] .modal-content header #closeExpiryModal:hover,
 [data-theme="dark"] .modal-content header #closePurchaseModal:hover,
 [data-theme="dark"] .modal-content header #closeSettingsModal:hover,
-[data-theme="dark"] .modal-content header #closeExportModal:hover {
+[data-theme="dark"] .modal-content header #closeExportModal:hover,
+[data-theme="dark"] .modal-content header #closePremiumModal:hover {
   background: transparent;
   box-shadow: none;
 }
@@ -4280,7 +4284,6 @@ div.app {
   border: 1px solid rgba(2, 6, 23, 0.1);
   border-radius: 10px;
   margin-bottom: 12px;
-  overflow: hidden;
 }
 
 .premium-feature-row {
@@ -4301,16 +4304,32 @@ div.app {
   color: var(--muted);
 }
 
-.premium-upgrade-btn {
-  position: absolute;
-  right: 20px;
-  top: 20px;
+.premium-pay-row {
+  margin-top: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
-.premium-actions .premium-upgrade-btn {
-  position: absolute;
-  right: 20px;
-  top: 20px;
+.premium-pay-row .secondary {
+  width: 100%;
+  order: 2; /* Push payment link to bottom */
+}
+
+.premium-modal-content .actions {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(2, 6, 23, 0.08);
+  margin-left: 0;
+  margin-right: 0;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.premium-modal-content .actions .primary,
+.premium-modal-content .actions .secondary {
+  flex: 1 1 calc(50% - 6px);
+  min-width: 140px;
 }
 
 [data-theme="dark"] .premium-feature-grid {
@@ -4318,5 +4337,9 @@ div.app {
 }
 
 [data-theme="dark"] .premium-feature-row + .premium-feature-row {
+  border-top-color: rgba(148, 163, 184, 0.15);
+}
+
+[data-theme="dark"] .premium-modal-content .actions {
   border-top-color: rgba(148, 163, 184, 0.15);
 }

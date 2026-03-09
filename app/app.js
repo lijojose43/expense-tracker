@@ -1727,10 +1727,7 @@ function showFeatureLockedMessage(featureLabel) {
 
 function canUseFeature(featureKey) {
   if (isPremium()) return true;
-  if (featureKey === "advanced_analytics") {
-    showFeatureLockedMessage("Advanced analytics");
-    return false;
-  }
+  if (featureKey === "advanced_analytics") return true;
   if (featureKey === "export_data") {
     showFeatureLockedMessage("Export data");
     return false;
@@ -1782,13 +1779,15 @@ function showUpgradeModal() {
         <div class="premium-limit-note">
           Click <strong>Open Payment Link</strong>, complete the Razorpay payment, then enter your unlock code or Razorpay Payment ID (pay_...) below.
         </div>
+        <div class="premium-pay-row">
+          <button type="button" id="premiumPayBtn" class="secondary">Open Payment Link</button>
+        </div>
         <div class="floating">
           <input id="premiumCodeInput" type="text" placeholder=" " autocomplete="off" />
           <label for="premiumCodeInput" class="floating-label">Unlock code or Razorpay Payment ID</label>
         </div>
         <div class="actions">
           <button type="button" id="premiumCloseBtn" class="secondary">Close</button>
-          <button type="button" id="premiumPayBtn" class="secondary premium-upgrade-btn">Open Payment Link</button>
           <button type="button" id="premiumApplyBtn" class="primary">Apply Code</button>
         </div>
       </form>
