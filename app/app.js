@@ -4945,6 +4945,35 @@ function renderExpiry() {
 const underAddSummary = document.getElementById("underAddSummary");
 const underAddExpiry = document.getElementById("underAddExpiry");
 
+// Handle shot-frame image loading
+function initShotFrameLoaders() {
+  const shotFrames = document.querySelectorAll(".shot-frame img");
+
+  shotFrames.forEach((img) => {
+    if (img.complete && img.naturalHeight !== 0) {
+      // Image already loaded
+      img.classList.add("loaded");
+    } else {
+      // Add load event listener
+      img.addEventListener("load", () => {
+        img.classList.add("loaded");
+      });
+
+      // Also handle error case
+      img.addEventListener("error", () => {
+        img.classList.add("loaded"); // Remove loader even on error
+      });
+    }
+  });
+}
+
+// Initialize shot-frame loaders when DOM is ready
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initShotFrameLoaders);
+} else {
+  initShotFrameLoaders();
+}
+
 if (underAddSummary) {
   underAddSummary.addEventListener("click", () => {
     hapticFeedback("light");
