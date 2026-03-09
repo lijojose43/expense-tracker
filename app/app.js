@@ -1,4 +1,4 @@
-// Simple Expense Tracker (localStorage)
+// Simple Expense Tracker (Dexie + IndexedDB for core app data)
 // Data: array of {id, amount (number), type: 'expense'|'income', category, date, description}
 
 // ---------- Monetization ----------
@@ -68,11 +68,13 @@ function applyCode(code) {
 
 // Version control for cache busting
 const APP_VERSION = "10.0";
+let shouldResetIndexedStorage = false;
 
 // Force reload if version mismatch
 if (localStorage.getItem("app-version") !== APP_VERSION) {
   const premiumUserValue = localStorage.getItem(PREMIUM_USER_KEY);
   const premiumHashValue = localStorage.getItem(PREMIUM_HASH_KEY);
+  shouldResetIndexedStorage = true;
   localStorage.clear(); // Clear all cached data
   if (premiumUserValue)
     localStorage.setItem(PREMIUM_USER_KEY, premiumUserValue);
@@ -1387,6 +1389,19 @@ function renderPurchase() {
 const STORAGE_KEY = "expense-tracker-data-v1";
 const EXPIRY_STORAGE_KEY = "expense-tracker-expiry-v1";
 const PURCHASE_STORAGE_KEY = "expense-tracker-purchase-v1";
+const INDEXED_DB_NAME = "expense-tracker-db";
+const APP_STATE_TABLE = "app_state";
+const APP_STATE_KEYS = {
+  transactions: "transactions",
+  expiry: "expiry",
+  purchase: "purchase",
+};
+const LEGACY_STORAGE_BY_STATE_KEY = {
+  [APP_STATE_KEYS.transactions]: STORAGE_KEY,
+  [APP_STATE_KEYS.expiry]: EXPIRY_STORAGE_KEY,
+  [APP_STATE_KEYS.purchase]: PURCHASE_STORAGE_KEY,
+};
+let appDb = null;
 
 // Mobile app enhancements
 let isRefreshing = false;
@@ -1415,11 +1430,81 @@ const defaultCategories = [
 ];
 
 // ... (rest of the code remains the same)
-let data = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null") || [];
-let expiryData =
-  JSON.parse(localStorage.getItem(EXPIRY_STORAGE_KEY) || "null") || [];
-let purchaseData =
-  JSON.parse(localStorage.getItem(PURCHASE_STORAGE_KEY) || "null") || [];
+let data = [];
+let expiryData = [];
+let purchaseData = [];
+
+function parseLegacyArray(legacyStorageKey) {
+  try {
+    const raw = localStorage.getItem(legacyStorageKey);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (_) {
+    return [];
+  }
+}
+
+function getAppDb() {
+  if (appDb) return appDb;
+  if (typeof window === "undefined" || typeof window.Dexie !== "function") {
+    return null;
+  }
+  appDb = new window.Dexie(INDEXED_DB_NAME);
+  appDb.version(1).stores({
+    [APP_STATE_TABLE]: "&key",
+  });
+  return appDb;
+}
+
+async function readStateArray(stateKey) {
+  const db = getAppDb();
+  const legacyKey = LEGACY_STORAGE_BY_STATE_KEY[stateKey];
+  if (!db) return parseLegacyArray(legacyKey);
+  const record = await db.table(APP_STATE_TABLE).get(stateKey);
+  if (record && Array.isArray(record.value)) return record.value;
+  const legacyValue = parseLegacyArray(legacyKey);
+  if (legacyValue.length > 0) {
+    await db.table(APP_STATE_TABLE).put({ key: stateKey, value: legacyValue });
+  }
+  return legacyValue;
+}
+
+async function writeStateArray(stateKey, entries) {
+  const normalizedEntries = Array.isArray(entries) ? entries : [];
+  const db = getAppDb();
+  const legacyKey = LEGACY_STORAGE_BY_STATE_KEY[stateKey];
+  if (!db) {
+    localStorage.setItem(legacyKey, JSON.stringify(normalizedEntries));
+    return;
+  }
+  await db.table(APP_STATE_TABLE).put({ key: stateKey, value: normalizedEntries });
+}
+
+async function clearCoreStorage() {
+  const db = getAppDb();
+  if (db) {
+    await db.table(APP_STATE_TABLE).clear();
+    return;
+  }
+  localStorage.removeItem(STORAGE_KEY);
+  localStorage.removeItem(EXPIRY_STORAGE_KEY);
+  localStorage.removeItem(PURCHASE_STORAGE_KEY);
+}
+
+async function initCoreStorage() {
+  if (shouldResetIndexedStorage) {
+    await clearCoreStorage();
+  }
+  const [transactions, expiryEntries, purchaseEntries] = await Promise.all([
+    readStateArray(APP_STATE_KEYS.transactions),
+    readStateArray(APP_STATE_KEYS.expiry),
+    readStateArray(APP_STATE_KEYS.purchase),
+  ]);
+  data = transactions;
+  expiryData = expiryEntries;
+  purchaseData = purchaseEntries;
+}
 
 const $ = (id) => document.getElementById(id);
 const transactionsEl = $("transactions");
@@ -1696,15 +1781,21 @@ function initDatePickers() {
 }
 
 function save() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  return writeStateArray(APP_STATE_KEYS.transactions, data).catch((err) => {
+    console.error("Failed to persist transactions:", err);
+  });
 }
 
 function saveExpiry() {
-  localStorage.setItem(EXPIRY_STORAGE_KEY, JSON.stringify(expiryData));
+  return writeStateArray(APP_STATE_KEYS.expiry, expiryData).catch((err) => {
+    console.error("Failed to persist expiry items:", err);
+  });
 }
 
 function savePurchase() {
-  localStorage.setItem(PURCHASE_STORAGE_KEY, JSON.stringify(purchaseData));
+  return writeStateArray(APP_STATE_KEYS.purchase, purchaseData).catch((err) => {
+    console.error("Failed to persist shopping list:", err);
+  });
 }
 
 function getEntries() {
@@ -1713,7 +1804,7 @@ function getEntries() {
 
 function saveEntries(entries) {
   data = Array.isArray(entries) ? entries : [];
-  save();
+  return save();
 }
 
 function getRemainingFreeEntries() {
@@ -2117,42 +2208,47 @@ function isDateInRange(dateStr, startDate, endDate) {
 }
 
 // ---------- Import / Export ----------
-function clearData() {
+async function clearData() {
   if (
     confirm(
       "Are you sure you want to clear all data? This action cannot be undone.\n\nAll transactions, categories, and settings will be permanently deleted.",
     )
   ) {
-    const premiumUserValue = localStorage.getItem(PREMIUM_USER_KEY);
-    const premiumHashValue = localStorage.getItem(PREMIUM_HASH_KEY);
-    // Clear all data from localStorage
-    localStorage.clear();
-    if (premiumUserValue)
-      localStorage.setItem(PREMIUM_USER_KEY, premiumUserValue);
-    if (premiumHashValue)
-      localStorage.setItem(PREMIUM_HASH_KEY, premiumHashValue);
+    try {
+      const premiumUserValue = localStorage.getItem(PREMIUM_USER_KEY);
+      const premiumHashValue = localStorage.getItem(PREMIUM_HASH_KEY);
+      // Clear all data from localStorage
+      localStorage.clear();
+      if (premiumUserValue)
+        localStorage.setItem(PREMIUM_USER_KEY, premiumUserValue);
+      if (premiumHashValue)
+        localStorage.setItem(PREMIUM_HASH_KEY, premiumHashValue);
 
-    // Reset data arrays
-    data = [];
-    expiryData = [];
-    purchaseData = [];
+      // Reset data arrays
+      data = [];
+      expiryData = [];
+      purchaseData = [];
+      await clearCoreStorage();
 
-    // Reset app version to trigger fresh initialization
-    localStorage.setItem("app-version", APP_VERSION);
+      // Reset app version to trigger fresh initialization
+      localStorage.setItem("app-version", APP_VERSION);
 
-    // Re-initialize the app
-    populateCategories();
-    computeTotals();
-    renderList();
-    if (!summaryTabEl.classList.contains("hidden")) renderChart();
-    renderExpiry();
-    renderPurchase();
-    updatePremiumUI();
+      // Re-initialize the app
+      populateCategories();
+      computeTotals();
+      renderList();
+      if (!summaryTabEl.classList.contains("hidden")) renderChart();
+      renderExpiry();
+      renderPurchase();
+      updatePremiumUI();
 
-    // Show success message
-    alert("All data has been cleared successfully.");
-
-    hapticFeedback("success");
+      // Show success message
+      alert("All data has been cleared successfully.");
+      hapticFeedback("success");
+    } catch (err) {
+      console.error("Failed to clear data:", err);
+      alert("Failed to clear data. Please try again.");
+    }
   }
 }
 
@@ -2413,9 +2509,7 @@ async function importFromFile(file) {
   }
 
   // Save all data
-  save();
-  saveExpiry();
-  savePurchase();
+  await Promise.all([save(), saveExpiry(), savePurchase()]);
 
   // Update UI
   populateCategories();
@@ -4282,9 +4376,14 @@ function initExpiryNotifications() {
   );
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   // initialize theme
   applyTheme();
+  try {
+    await initCoreStorage();
+  } catch (err) {
+    console.error("Failed to initialize IndexedDB storage:", err);
+  }
   populateCategories();
   // initialize calendar picker for every date input
   initDatePickers();
