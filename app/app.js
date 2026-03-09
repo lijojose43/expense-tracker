@@ -81,7 +81,6 @@ if (localStorage.getItem("app-version") !== APP_VERSION) {
   if (premiumHashValue)
     localStorage.setItem(PREMIUM_HASH_KEY, premiumHashValue);
   localStorage.setItem("app-version", APP_VERSION);
-  console.log("App version updated, cache cleared");
 }
 
 // Add meta tags for cache control
@@ -773,14 +772,6 @@ function addCategoryFromSettings(type) {
         chipContainer.appendChild(chip);
         chipContainer.appendChild(chipRemoveBtn);
 
-        // Debug: Log the creation
-        console.log(
-          "Created chip with remove button for:",
-          newCategory,
-          "type:",
-          type,
-        );
-
         // Replace input container with chip container
         inputContainer.replaceWith(chipContainer);
 
@@ -908,14 +899,6 @@ function addCategoryFromSettings(type) {
           chipContainer.appendChild(chip);
           chipContainer.appendChild(chipRemoveBtn);
 
-          // Debug: Log the creation
-          console.log(
-            "Created chip with remove button for:",
-            newCategory,
-            "type:",
-            type,
-          );
-
           // Replace input container with chip container
           inputContainer.replaceWith(chipContainer);
 
@@ -977,9 +960,6 @@ function saveCategoriesFromSettings() {
     (item) => item.textContent,
   );
 
-  // Debug logging
-  console.log("Saving categories:", categories);
-
   // Save to localStorage
   localStorage.setItem("categories", JSON.stringify(categories));
 
@@ -989,25 +969,12 @@ function saveCategoriesFromSettings() {
 
 // Add event delegation for remove buttons
 document.addEventListener("click", (e) => {
-  console.log("Click detected on:", e.target.className, e.target.classList);
-
   if (e.target.classList.contains("remove-category-btn")) {
     if (!canUseFeature("custom_categories")) return;
-
-    console.log("Remove button clicked!");
 
     const type = e.target.getAttribute("data-type");
     const category = e.target.getAttribute("data-category");
     const index = e.target.getAttribute("data-index");
-
-    console.log(
-      "Remove data - type:",
-      type,
-      "category:",
-      category,
-      "index:",
-      index,
-    );
 
     // Get existing categories
     const savedCategories = localStorage.getItem("categories");
@@ -1135,7 +1102,6 @@ function performExport(format) {
       filename = `expense-tracker-data-${new Date().toISOString().slice(0, 10)}-${new Date().toTimeString().slice(0, 5).replace(/:/g, "-")}.json`;
       mimeType = format.mimeType;
 
-      console.log(`Export completed: ${filename}`);
       const totalItems = data.length + expiryData.length + purchaseData.length;
       const totalCategories = Object.keys(categories).reduce(
         (sum, type) => sum + categories[type].length,
@@ -1159,10 +1125,8 @@ function performExport(format) {
     a.remove();
     URL.revokeObjectURL(url);
 
-    console.log(`Export completed: ${filename}`);
     alert(`Exported ${data.length} items to ${filename}`);
   } catch (err) {
-    console.error(err);
     alert("Export failed");
   }
 }
@@ -1781,21 +1745,15 @@ function initDatePickers() {
 }
 
 function save() {
-  return writeStateArray(APP_STATE_KEYS.transactions, data).catch((err) => {
-    console.error("Failed to persist transactions:", err);
-  });
+  return writeStateArray(APP_STATE_KEYS.transactions, data).catch(() => {});
 }
 
 function saveExpiry() {
-  return writeStateArray(APP_STATE_KEYS.expiry, expiryData).catch((err) => {
-    console.error("Failed to persist expiry items:", err);
-  });
+  return writeStateArray(APP_STATE_KEYS.expiry, expiryData).catch(() => {});
 }
 
 function savePurchase() {
-  return writeStateArray(APP_STATE_KEYS.purchase, purchaseData).catch((err) => {
-    console.error("Failed to persist shopping list:", err);
-  });
+  return writeStateArray(APP_STATE_KEYS.purchase, purchaseData).catch(() => {});
 }
 
 function getEntries() {
@@ -2246,7 +2204,6 @@ async function clearData() {
       alert("All data has been cleared successfully.");
       hapticFeedback("success");
     } catch (err) {
-      console.error("Failed to clear data:", err);
       alert("Failed to clear data. Please try again.");
     }
   }
@@ -2337,13 +2294,11 @@ function exportData() {
     a.remove();
     URL.revokeObjectURL(url);
 
-    console.log("Export completed:", a.download);
     const totalItems = data.length + expiryData.length + purchaseData.length;
     alert(
       `Exported ${totalItems} items (${data.length} expenses, ${expiryData.length} expiries, ${purchaseData.length} shopping items) to ${a.download}`,
     );
   } catch (err) {
-    console.error(err);
     alert("Export failed");
   }
 }
@@ -3678,7 +3633,6 @@ if (importFileInput) {
       try {
         await importFromFile(file);
       } catch (err) {
-        console.error("Import failed:", err);
         alert("Import failed: " + err.message);
       }
     }
@@ -4084,15 +4038,9 @@ function hidePWAInstallPopup(withDelay = false) {
   if (withDelay) {
     const dismissTime = Date.now();
     localStorage.setItem("pwa-dismiss-time", dismissTime.toString());
-    console.log(
-      "PWA install modal dismissed. Next show scheduled in 1 minute.",
-    );
 
     // Schedule next show after 1 minute
     setTimeout(() => {
-      console.log(
-        "1-minute delay completed. Checking if PWA install modal should show.",
-      );
       checkPWAInstallPrompt(0);
     }, 60000); // 60 seconds = 1 minute
   }
@@ -4160,12 +4108,6 @@ if (pwaInstallBtn) {
         // Wait for the user to respond to the prompt
         const { outcome } = await deferredPrompt.userChoice;
 
-        if (outcome === "accepted") {
-          console.log("User accepted the install prompt");
-        } else {
-          console.log("User dismissed the install prompt");
-        }
-
         // Clear the deferredPrompt and hide popup
         deferredPrompt = null;
         hidePWAInstallPopup();
@@ -4202,7 +4144,6 @@ if (pwaInstallBtn) {
         }
       }
     } catch (error) {
-      console.error("PWA install error:", error);
       hidePWAInstallPopup();
     }
   });
@@ -4381,9 +4322,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   applyTheme();
   try {
     await initCoreStorage();
-  } catch (err) {
-    console.error("Failed to initialize IndexedDB storage:", err);
-  }
+  } catch (_) {}
   populateCategories();
   // initialize calendar picker for every date input
   initDatePickers();
@@ -4487,14 +4426,10 @@ document.addEventListener("DOMContentLoaded", async () => {
               : ".tx";
         const items = tabContent.querySelectorAll(itemSelector);
 
-        items.forEach((item, index) => {
+        items.forEach((item) => {
           item.addEventListener(
             "wheel",
-            (e) => {
-              console.log(
-                `Wheel event on ${tab.name} item ${index}:`,
-                e.deltaY,
-              );
+            () => {
               // Allow the event to bubble up to the scrollable container
             },
             { passive: true },
@@ -4505,12 +4440,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           children.forEach((child) => {
             child.addEventListener(
               "wheel",
-              (e) => {
-                console.log(
-                  `Wheel event on ${tab.name} item child:`,
-                  child.className,
-                  e.deltaY,
-                );
+              () => {
                 // Let the event bubble up to the scrollable container
               },
               { passive: true },
