@@ -361,6 +361,16 @@ body {
   padding: 12px 0 48px;
 }
 
+@supports (content-visibility: auto) {
+  .shots,
+  .features,
+  .plans,
+  .proof {
+    content-visibility: auto;
+    contain-intrinsic-size: 1px 900px;
+  }
+}
+
 .plans {
   padding: 6px 0 18px;
 }

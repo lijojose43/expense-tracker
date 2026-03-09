@@ -7,6 +7,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-title" content="Expense Tracker">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
   <link rel="stylesheet" href="app.min.css?v=25">
   <title>Expense Tracker</title>
@@ -427,10 +428,10 @@
       </form>
     </div>
   </div>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-  <script src="https://cdn.jsdelivr.net/npm/dexie@4/dist/dexie.min.js"></script>
-  <script src="app.min.js?v=25"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/chart.js" fetchpriority="low"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/flatpickr" fetchpriority="low"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/dexie@4/dist/dexie.min.js"></script>
+  <script defer src="app.min.js?v=26"></script>
   <script>
     const isWebOrigin = location.protocol === "http:" || location.protocol === "https:";
     if (isWebOrigin) {

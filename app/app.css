@@ -235,11 +235,6 @@ body {
   display: none;
 }
 
-[data-theme="dark"] .shot-frame::before {
-  background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
-  background-size: 200% 100%;
-}
-
 /* Title centering with app icon */
 .topbar h1 {
   margin: 0;
@@ -1407,6 +1402,12 @@ textarea:focus {
     background 0.2s ease;
   -webkit-backdrop-filter: blur(6px);
   backdrop-filter: blur(6px);
+}
+@supports (content-visibility: auto) {
+  .tx {
+    content-visibility: auto;
+    contain-intrinsic-size: 72px;
+  }
 }
 [data-theme="dark"] .tx {
   background:
