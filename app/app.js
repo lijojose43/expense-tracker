@@ -8,10 +8,10 @@ const LIMITS = {
 
 const FEATURES = {
   entries: { free: LIMITS.free_entries, paid: "Unlimited" },
+  custom_categories: { free: false, paid: true },
   export_data: { free: false, paid: true },
-  cloud_backup: { free: false, paid: true },
-  advanced_analytics: { free: false, paid: true },
   csv_backup: { free: false, paid: true },
+  advanced_analytics: { free: true, paid: true },
 };
 
 const PREMIUM_CONFIG = {
@@ -331,6 +331,19 @@ function showSettingsOptions() {
   document.getElementById("addInvestmentCategory").onclick = () =>
     addCategoryFromSettings("investment");
 
+  if (!isPremium()) {
+    [
+      "addExpenseCategory",
+      "addIncomeCategory",
+      "addInvestmentCategory",
+    ].forEach((id) => {
+      const btn = document.getElementById(id);
+      if (!btn) return;
+      btn.textContent = "Premium";
+      btn.title = "Custom categories are available in Premium";
+    });
+  }
+
   // Load categories into settings
   loadCategoriesIntoSettings();
 
@@ -631,6 +644,8 @@ function renderCategoryList(type, categories) {
 }
 
 function addCategoryFromSettings(type) {
+  if (!canUseFeature("custom_categories")) return;
+
   // Find the categories container for the given type
   const categoriesContainer = document.querySelector(
     `#${type}Categories .categories-container`,
@@ -975,6 +990,8 @@ document.addEventListener("click", (e) => {
   console.log("Click detected on:", e.target.className, e.target.classList);
 
   if (e.target.classList.contains("remove-category-btn")) {
+    if (!canUseFeature("custom_categories")) return;
+
     console.log("Remove button clicked!");
 
     const type = e.target.getAttribute("data-type");
@@ -1728,12 +1745,16 @@ function showFeatureLockedMessage(featureLabel) {
 function canUseFeature(featureKey) {
   if (isPremium()) return true;
   if (featureKey === "advanced_analytics") return true;
+  if (featureKey === "custom_categories") {
+    showFeatureLockedMessage("Custom categories");
+    return false;
+  }
   if (featureKey === "export_data") {
     showFeatureLockedMessage("Export data");
     return false;
   }
   if (featureKey === "csv_backup") {
-    showFeatureLockedMessage("CSV backup");
+    showFeatureLockedMessage("Download report");
     return false;
   }
   return true;
@@ -1765,12 +1786,27 @@ function showUpgradeModal() {
         </div>
         <div class="premium-feature-grid">
           <div class="premium-feature-row"><span>Entries</span><span>Free: ${FEATURES.entries.free} / Paid: ${FEATURES.entries.paid}</span></div>
+          <div class="premium-feature-row"><span>Custom categories</span><span>Free: No / Paid: Yes</span></div>
           <div class="premium-feature-row"><span>Export data</span><span>Free: No / Paid: Yes</span></div>
+          <div class="premium-feature-row"><span>CSV backup</span><span>Free: No / Paid: Yes</span></div>
+          <div class="premium-feature-row"><span>Advanced analytics</span><span>Free: Yes / Paid: Yes</span></div>
         </div>
         <div class="premium-benefits">
-          <strong>Premium includes:</strong>
-          <div>• Unlimited entries</div>
-          <div>• Data export (JSON + CSV)</div>
+          <div class="premium-benefits-title">Premium includes:</div>
+          <div class="premium-benefits-list">
+            <div class="premium-benefit-item">
+              <span class="benefit-icon">∞</span>
+              <span class="benefit-text">Unlimited entries</span>
+            </div>
+            <div class="premium-benefit-item">
+              <span class="benefit-icon">🏷️</span>
+              <span class="benefit-text">Custom categories</span>
+            </div>
+            <div class="premium-benefit-item">
+              <span class="benefit-icon">📊</span>
+              <span class="benefit-text">Data export (JSON + CSV)</span>
+            </div>
+          </div>
         </div>
         <div class="premium-limit-note">
           Click <strong>Open Payment Link</strong>, complete the Razorpay payment, then enter your unlock code or Razorpay Payment ID (pay_...) below.
