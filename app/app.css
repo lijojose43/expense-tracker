@@ -1403,6 +1403,12 @@ textarea:focus {
   -webkit-backdrop-filter: blur(6px);
   backdrop-filter: blur(6px);
 }
+
+.tx-sentinel {
+  height: 1px;
+  width: 100%;
+}
+
 @supports (content-visibility: auto) {
   .tx {
     content-visibility: auto;

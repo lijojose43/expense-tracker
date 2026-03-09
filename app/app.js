@@ -1562,6 +1562,14 @@ const donutCharts = {
   investment: null,
 };
 let editId = null; // track transaction being edited
+const TRANSACTION_RENDER_CHUNK_SIZE = 40;
+let transactionRenderState = {
+  list: [],
+  index: 0,
+  lastRenderedDate: null,
+};
+let transactionLoadObserver = null;
+let transactionLoadSentinel = null;
 
 const DATE_INPUT_IDS = [
   "date",
@@ -3037,15 +3045,230 @@ function switchTab(name) {
   setTimeout(() => checkPWAInstallPrompt(1000), 500);
 }
 
-function renderList() {
-  transactionsEl.innerHTML = "";
-  updatePremiumUI();
+function disconnectTransactionLazyLoader() {
+  if (transactionLoadObserver) {
+    transactionLoadObserver.disconnect();
+    transactionLoadObserver = null;
+  }
+  if (transactionLoadSentinel && transactionLoadSentinel.parentNode) {
+    transactionLoadSentinel.parentNode.removeChild(transactionLoadSentinel);
+  }
+  transactionLoadSentinel = null;
+}
+
+function getDateHeaderText(date) {
+  const today = new Date().toISOString().slice(0, 10);
+  const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+
+  if (date === today) return "Today";
+  if (date === yesterday) return "Yesterday";
+
+  const transactionDate = new Date(date);
+  if (!isNaN(transactionDate.getTime())) {
+    const daysDiff = Math.floor(
+      (new Date() - transactionDate) / (1000 * 60 * 60 * 24),
+    );
+    if (daysDiff <= 7) {
+      return transactionDate.toLocaleDateString("en-US", {
+        weekday: "long",
+      });
+    }
+  }
+  return formatDateDisplay(date);
+}
+
+function appendDateHeader(date) {
+  const dateHeader = document.createElement("div");
+  dateHeader.className = "date-header";
+  dateHeader.textContent = getDateHeaderText(date);
+  transactionsEl.appendChild(dateHeader);
+}
+
+function createTransactionRow(t) {
+  const el = document.createElement("div");
+  el.className = "tx";
+  const meta = document.createElement("div");
+  meta.className = "meta";
+  const box = document.createElement("div");
+  box.className = "iconBox";
+  box.innerHTML = getCategoryIcon(t.category);
+  try {
+    const slug = catSlug(t.category || "other");
+    box.setAttribute("data-cat", slug);
+  } catch (_) {}
+  const info = document.createElement("div");
+  const title = document.createElement("div");
+  title.className = "title";
+  title.textContent = t.category;
+  const cat = document.createElement("div");
+  cat.className = "category";
+  const description = t.description || "";
+  const maxLength = 30;
+  const truncatedDesc =
+    description.length > maxLength
+      ? description.substring(0, maxLength) + ".."
+      : description;
+  cat.textContent = truncatedDesc || formatDateDisplay(t.date);
+  info.appendChild(title);
+  info.appendChild(cat);
+  meta.appendChild(box);
+  meta.appendChild(info);
+  const amt = document.createElement("div");
+  amt.className = "amount " + (t.type === "expense" ? "expense" : "income");
+  const amountValue = Math.abs(Number(t.amount)).toFixed(2);
+  const formattedAmount = amountValue.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  const currency = localStorage.getItem("currency") || "$";
+  const sign = t.type === "expense" ? "-" : t.type === "investment" ? "" : "+";
+  amt.textContent = sign + (sign ? " " : "") + currency + formattedAmount;
+  el.appendChild(meta);
+  el.appendChild(amt);
+
+  let startX = 0;
+  let startY = 0;
+  let dx = 0;
+  let dy = 0;
+  let swiping = false;
+  let moved = false;
+
+  function resetTransform() {
+    el.style.transition = "transform 0.2s ease";
+    el.style.transform = "translateX(0)";
+    setTimeout(() => (el.style.transition = ""), 220);
+  }
+
+  el.addEventListener(
+    "touchstart",
+    (e) => {
+      if (!e.touches || e.touches.length === 0) return;
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+      dx = 0;
+      dy = 0;
+      swiping = false;
+      moved = false;
+      el.style.transition = "";
+    },
+    { passive: true },
+  );
+
+  el.addEventListener(
+    "touchmove",
+    (e) => {
+      if (!e.touches || e.touches.length === 0) return;
+      dx = e.touches[0].clientX - startX;
+      dy = e.touches[0].clientY - startY;
+
+      if (Math.abs(dx) > Math.abs(dy) && dx < -10) {
+        swiping = true;
+      }
+      if (Math.abs(dx) > 6 || Math.abs(dy) > 6) moved = true;
+
+      if (swiping) {
+        e.preventDefault();
+        const limited = Math.max(dx, -120);
+        el.style.transform = `translateX(${limited}px)`;
+      }
+    },
+    { passive: false },
+  );
+
+  el.addEventListener("touchend", () => {
+    if (swiping && dx <= -80) {
+      hapticFeedback("medium");
+      if (confirm("Delete this transaction?")) {
+        hapticFeedback("heavy");
+        data = data.filter((x) => x.id !== t.id);
+        save();
+        populateCategories();
+        computeTotals();
+        renderList();
+        if (!summaryTabEl.classList.contains("hidden")) renderChart();
+        return;
+      }
+    }
+    resetTransform();
+  });
+
+  el.addEventListener("click", () => {
+    if (moved) return;
+    editId = t.id;
+    const modalTitle = document.getElementById("modalTitle");
+    if (modalTitle) modalTitle.textContent = "Edit Transaction";
+    const submitBtn = txForm.querySelector('button[type="submit"]');
+    if (submitBtn) submitBtn.textContent = "Update";
+    openModal({
+      amount: Math.abs(Number(t.amount)).toFixed(2),
+      type: t.type,
+      category: t.category,
+      date: t.date,
+      description: t.description || "",
+    });
+  });
+
+  el.addEventListener("contextmenu", (e) => {
+    e.preventDefault();
+    if (confirm("Delete this transaction?")) {
+      data = data.filter((x) => x.id !== t.id);
+      save();
+      populateCategories();
+      computeTotals();
+      renderList();
+    }
+  });
+  return el;
+}
+
+function renderNextTransactionChunk() {
+  if (!transactionRenderState.list.length) return;
+  disconnectTransactionLazyLoader();
+
+  const end = Math.min(
+    transactionRenderState.index + TRANSACTION_RENDER_CHUNK_SIZE,
+    transactionRenderState.list.length,
+  );
+
+  for (let i = transactionRenderState.index; i < end; i++) {
+    const tx = transactionRenderState.list[i];
+    if (tx.date !== transactionRenderState.lastRenderedDate) {
+      appendDateHeader(tx.date);
+      transactionRenderState.lastRenderedDate = tx.date;
+    }
+    transactionsEl.appendChild(createTransactionRow(tx));
+  }
+  transactionRenderState.index = end;
+
+  if (transactionRenderState.index >= transactionRenderState.list.length) return;
+
+  transactionLoadSentinel = document.createElement("div");
+  transactionLoadSentinel.className = "tx-sentinel";
+  transactionLoadSentinel.setAttribute("aria-hidden", "true");
+  transactionsEl.appendChild(transactionLoadSentinel);
+
+  if (typeof IntersectionObserver !== "function") {
+    renderNextTransactionChunk();
+    return;
+  }
+
+  transactionLoadObserver = new IntersectionObserver(
+    (entries) => {
+      if (entries.some((entry) => entry.isIntersecting)) {
+        renderNextTransactionChunk();
+      }
+    },
+    {
+      root: homeTabEl || null,
+      rootMargin: "240px 0px",
+      threshold: 0.01,
+    },
+  );
+  transactionLoadObserver.observe(transactionLoadSentinel);
+}
+
+function buildFilteredTransactions() {
   const ft = filterType.value;
   const fc = filterCategory.value;
-  // Search functionality removed
-
-  // Get date range based on filter selection
   let dateRange = null;
+
   if (currentDateFilter === "thisMonth") {
     dateRange = getThisMonthRange();
   } else if (currentDateFilter === "previousMonth") {
@@ -3058,10 +3281,9 @@ function renderList() {
     }
   }
 
-  const list = data
+  return data
     .slice()
     .sort((a, b) => {
-      // Primary: by transaction date (day precision) desc
       const da = new Date(a.date);
       const db = new Date(b.date);
       const dayA = isNaN(da.getTime())
@@ -3071,7 +3293,6 @@ function renderList() {
         ? 0
         : new Date(db.getFullYear(), db.getMonth(), db.getDate()).getTime();
       if (dayB !== dayA) return dayB - dayA;
-      // Secondary: by createdAt (time added) desc
       const ca = isFinite(Number(a.createdAt)) ? Number(a.createdAt) : 0;
       const cb = isFinite(Number(b.createdAt)) ? Number(b.createdAt) : 0;
       return cb - ca;
@@ -3079,210 +3300,31 @@ function renderList() {
     .filter((t) => {
       if (ft !== "all" && t.type !== ft) return false;
       if (fc !== "all" && t.category !== fc) return false;
-      // Search filter removed
-
-      // Date filtering
-      if (dateRange) {
-        if (!isDateInRange(t.date, dateRange.start, dateRange.end)) {
-          return false;
-        }
+      if (dateRange && !isDateInRange(t.date, dateRange.start, dateRange.end)) {
+        return false;
       }
-
       return true;
     });
-  if (list.length === 0) {
+}
+
+function renderList() {
+  disconnectTransactionLazyLoader();
+  transactionsEl.innerHTML = "";
+  updatePremiumUI();
+
+  const list = buildFilteredTransactions();
+  if (!list.length) {
     transactionsEl.innerHTML =
       '<div style="color:var(--muted);padding:12px">No transactions yet</div>';
     return;
   }
 
-  // Group transactions by date
-  const groupedByDate = {};
-  list.forEach((transaction) => {
-    const date = transaction.date;
-    if (!groupedByDate[date]) {
-      groupedByDate[date] = [];
-    }
-    groupedByDate[date].push(transaction);
-  });
-
-  // Render transactions grouped by date
-  Object.keys(groupedByDate).forEach((date) => {
-    // Add date header
-    const dateHeader = document.createElement("div");
-    dateHeader.className = "date-header";
-
-    // Format date header
-    const today = new Date().toISOString().slice(0, 10);
-    const yesterday = new Date(Date.now() - 86400000)
-      .toISOString()
-      .slice(0, 10);
-
-    let displayDate = formatDateDisplay(date);
-    if (date === today) {
-      displayDate = "Today";
-    } else if (date === yesterday) {
-      displayDate = "Yesterday";
-    } else {
-      // Add relative time for older dates
-      const transactionDate = new Date(date);
-      const daysDiff = Math.floor(
-        (new Date() - transactionDate) / (1000 * 60 * 60 * 24),
-      );
-      if (daysDiff <= 7) {
-        displayDate = transactionDate.toLocaleDateString("en-US", {
-          weekday: "long",
-        });
-      }
-    }
-
-    dateHeader.textContent = displayDate;
-    transactionsEl.appendChild(dateHeader);
-
-    // Add transactions for this date
-    groupedByDate[date].forEach((t) => {
-      const el = document.createElement("div");
-      el.className = "tx";
-      const meta = document.createElement("div");
-      meta.className = "meta";
-      const box = document.createElement("div");
-      box.className = "iconBox";
-      // Set category icon and data attribute for styling
-      box.innerHTML = getCategoryIcon(t.category);
-      try {
-        const slug = catSlug(t.category || "other");
-        box.setAttribute("data-cat", slug);
-      } catch (_) {}
-      const info = document.createElement("div");
-      const title = document.createElement("div");
-      title.className = "title";
-      title.textContent = t.category; // Category as main title (big text)
-      const cat = document.createElement("div");
-      cat.className = "category";
-      // Description as secondary text with truncation, show date if empty
-      const description = t.description || "";
-      const maxLength = 30; // Limit description length to prevent design break
-      const truncatedDesc =
-        description.length > maxLength
-          ? description.substring(0, maxLength) + ".."
-          : description;
-      const displayText = truncatedDesc || formatDateDisplay(t.date);
-      cat.textContent = displayText;
-      info.appendChild(title);
-      info.appendChild(cat);
-      meta.appendChild(box);
-      meta.appendChild(info);
-      const amt = document.createElement("div");
-      amt.className = "amount " + (t.type === "expense" ? "expense" : "income");
-      const amountValue = Math.abs(Number(t.amount)).toFixed(2);
-      const formattedAmount = amountValue.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-      // Get saved currency or default to $
-      const currency = localStorage.getItem("currency") || "$";
-      // Add + for income, - for expense, no sign for investment
-      const sign =
-        t.type === "expense" ? "-" : t.type === "investment" ? "" : "+";
-      amt.textContent = sign + (sign ? " " : "") + currency + formattedAmount;
-      el.appendChild(meta);
-      el.appendChild(amt);
-
-      // Swipe-to-delete gesture handling
-      let startX = 0;
-      let startY = 0;
-      let dx = 0;
-      let dy = 0;
-      let swiping = false;
-      let moved = false;
-
-      function resetTransform() {
-        el.style.transition = "transform 0.2s ease";
-        el.style.transform = "translateX(0)";
-        setTimeout(() => (el.style.transition = ""), 220);
-      }
-
-      el.addEventListener(
-        "touchstart",
-        (e) => {
-          if (!e.touches || e.touches.length === 0) return;
-          startX = e.touches[0].clientX;
-          startY = e.touches[0].clientY;
-          dx = 0;
-          dy = 0;
-          swiping = false;
-          moved = false;
-          el.style.transition = ""; // disable during drag
-        },
-        { passive: true },
-      );
-
-      el.addEventListener(
-        "touchmove",
-        (e) => {
-          if (!e.touches || e.touches.length === 0) return;
-          dx = e.touches[0].clientX - startX;
-          dy = e.touches[0].clientY - startY;
-
-          // Only consider it a swipe if horizontal movement is dominant
-          if (Math.abs(dx) > Math.abs(dy) && dx < -10) {
-            swiping = true;
-          }
-          if (Math.abs(dx) > 6 || Math.abs(dy) > 6) moved = true;
-
-          if (swiping) {
-            e.preventDefault(); // Prevent scrolling when swiping
-            const limited = Math.max(dx, -120);
-            el.style.transform = `translateX(${limited}px)`;
-          }
-          // If not swiping (vertical scroll), allow default behavior
-        },
-        { passive: false },
-      );
-
-      el.addEventListener("touchend", () => {
-        if (swiping && dx <= -80) {
-          hapticFeedback("medium");
-          if (confirm("Delete this transaction?")) {
-            hapticFeedback("heavy");
-            data = data.filter((x) => x.id !== t.id);
-            save();
-            populateCategories();
-            computeTotals();
-            renderList();
-            if (!summaryTabEl.classList.contains("hidden")) renderChart();
-            return; // element removed; do not animate back
-          }
-        }
-        resetTransform();
-      });
-
-      // Open edit on row click (ignore if a swipe occurred)
-      el.addEventListener("click", () => {
-        if (moved) return; // don't treat swipe as click
-        editId = t.id;
-        const modalTitle = document.getElementById("modalTitle");
-        if (modalTitle) modalTitle.textContent = "Edit Transaction";
-        const submitBtn = txForm.querySelector('button[type="submit"]');
-        if (submitBtn) submitBtn.textContent = "Update";
-        openModal({
-          amount: Math.abs(Number(t.amount)).toFixed(2),
-          type: t.type,
-          category: t.category,
-          date: t.date,
-          description: t.description || "",
-        });
-      });
-      el.addEventListener("contextmenu", (e) => {
-        e.preventDefault();
-        if (confirm("Delete this transaction?")) {
-          data = data.filter((x) => x.id !== t.id);
-          save();
-          populateCategories();
-          computeTotals();
-          renderList();
-        }
-      });
-      transactionsEl.appendChild(el);
-    });
-  });
+  transactionRenderState = {
+    list,
+    index: 0,
+    lastRenderedDate: null,
+  };
+  renderNextTransactionChunk();
 }
 
 function openModal(defaults) {
