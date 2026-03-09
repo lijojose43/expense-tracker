@@ -1729,11 +1729,23 @@ function updatePremiumUI() {
     planBadgeEl.textContent = "Premium";
     planBadgeEl.classList.add("premium");
     planBadgeEl.title = "Premium unlocked";
+
+    // Hide upgrade option for premium users
+    const upgradeOptionEl = document.getElementById("upgradeOption");
+    if (upgradeOptionEl) {
+      upgradeOptionEl.style.display = "none";
+    }
   } else {
     const remaining = getRemainingFreeEntries();
     planBadgeEl.textContent = `Free ${remaining}/${LIMITS.free_entries}`;
     planBadgeEl.classList.remove("premium");
     planBadgeEl.title = `${remaining} free entries left`;
+
+    // Show upgrade option for free users
+    const upgradeOptionEl = document.getElementById("upgradeOption");
+    if (upgradeOptionEl) {
+      upgradeOptionEl.style.display = "";
+    }
   }
 }
 
@@ -3554,7 +3566,9 @@ if (upgradeOption) {
 }
 if (planBadge) {
   planBadge.addEventListener("click", () => {
-    showUpgradeModal();
+    if (!isPremium()) {
+      showUpgradeModal();
+    }
   });
 }
 if (importOption && importFileInput) {

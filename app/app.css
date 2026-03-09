@@ -897,15 +897,15 @@ html:not([data-theme="dark"]) .summary .card:nth-child(4) {
 /* Mobile optimizations for date chips */
 @media (max-width: 420px) {
   .date-chips-container {
-    gap: 6px;
+    gap: 8px;
     margin-top: 8px;
   }
 
   .date-chip {
-    padding: 5px 10px;
-    font-size: 12px;
-    min-height: 28px;
-    border-radius: 14px;
+    padding: 12px 18px;
+    font-size: 15px;
+    min-height: 44px;
+    border-radius: 18px;
   }
 }
 
