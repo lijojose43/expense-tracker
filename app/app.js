@@ -3,7 +3,7 @@
 
 // ---------- Monetization ----------
 const LIMITS = {
-  free_entries: 15,
+  free_entries: 10,
 };
 
 const FEATURES = {
