@@ -3,7 +3,7 @@
 
 // ---------- Monetization ----------
 const LIMITS = {
-  free_entries: 10,
+  free_entries: 15,
 };
 
 const FEATURES = {
@@ -1764,17 +1764,13 @@ function showUpgradeModal() {
           Free limit: ${LIMITS.free_entries} entries. Remaining: ${remaining}.
         </div>
         <div class="premium-feature-grid">
-          <div class="premium-feature-row"><span>Entries</span><span>${FEATURES.entries.free} / ${FEATURES.entries.paid}</span></div>
+          <div class="premium-feature-row"><span>Entries</span><span>Free: ${FEATURES.entries.free} / Paid: ${FEATURES.entries.paid}</span></div>
           <div class="premium-feature-row"><span>Export data</span><span>Free: No / Paid: Yes</span></div>
-          <div class="premium-feature-row"><span>Cloud backup</span><span>Free: No / Paid: Yes</span></div>
-          <div class="premium-feature-row"><span>Advanced analytics</span><span>Free: No / Paid: Yes</span></div>
         </div>
         <div class="premium-benefits">
           <strong>Premium includes:</strong>
           <div>• Unlimited entries</div>
           <div>• Data export (JSON + CSV)</div>
-          <div>• Cloud backup access</div>
-          <div>• Advanced analytics</div>
         </div>
         <div class="premium-limit-note">
           Click <strong>Open Payment Link</strong>, complete the Razorpay payment, then enter your unlock code or Razorpay Payment ID (pay_...) below.
