@@ -47,6 +47,17 @@ function unlockPremium() {
 function applyCode(code) {
   const normalized = (code || "").trim();
   const upper = normalized.toUpperCase();
+  const razorpayPaymentIdPattern = /^pay_[A-Za-z0-9]{14,20}$/;
+
+  if (!normalized) {
+    alert("Enter your unlock code or Razorpay Payment ID.");
+    return false;
+  }
+
+  if (normalized.length < 8 || normalized.length > 32) {
+    alert("Code must be 8 to 32 characters.");
+    return false;
+  }
 
   if (upper === PREMIUM_CONFIG.unlockCode) {
     unlockPremium();
@@ -54,15 +65,20 @@ function applyCode(code) {
     return true;
   }
 
-  // Razorpay payment IDs usually look like: pay_xxxxxxxxxxxxx
-  if (/^pay_[A-Za-z0-9]{10,}$/.test(normalized)) {
+  // Razorpay payment IDs look like: pay_ + 14-20 alphanumeric chars
+  if (razorpayPaymentIdPattern.test(normalized)) {
     localStorage.setItem(PREMIUM_PAYMENT_ID_KEY, normalized);
     unlockPremium();
     alert("Premium activated from Razorpay payment ID.");
     return true;
   }
 
-  alert("Invalid code/payment ID. Please check and try again.");
+  if (normalized.startsWith("pay_")) {
+    alert("Invalid Razorpay Payment ID.");
+    return false;
+  }
+
+  alert("Invalid code/payment ID. Use your unlock code or a Razorpay ID.");
   return false;
 }
 
@@ -1879,14 +1895,14 @@ function showUpgradeModal() {
           </div>
         </div>
         <div class="premium-limit-note">
-          Click <strong>Open Payment Link</strong>, complete the Razorpay payment, then enter your unlock code or Razorpay Payment ID (pay_...) below.
+          Click <strong>Open Payment Link</strong>, finish payment, then enter your unlock code or Razorpay Payment ID.
         </div>
         <div class="premium-pay-row">
           <button type="button" id="premiumPayBtn" class="secondary">Open Payment Link</button>
         </div>
         <div class="floating">
-          <input id="premiumCodeInput" type="text" placeholder=" " autocomplete="off" />
-          <label for="premiumCodeInput" class="floating-label">Unlock code or Razorpay Payment ID</label>
+          <input id="premiumCodeInput" type="text" placeholder=" " autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="32" />
+          <label for="premiumCodeInput" class="floating-label">Unlock code or Payment ID</label>
         </div>
         <div class="actions">
           <button type="button" id="premiumCloseBtn" class="secondary">Close</button>
