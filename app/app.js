@@ -1487,13 +1487,17 @@ const endDate = $("endDate");
 // Search input removed
 // Date filter buttons
 const filterAllTime = $("filterAllTime");
+const filterThisWeek = $("filterThisWeek");
 const filterThisMonth = $("filterThisMonth");
 const filterPrevMonth = $("filterPrevMonth");
+const filterThisYear = $("filterThisYear");
 const filterCustom = $("filterCustom");
 // Summary page date filter buttons
 const summaryFilterAllTime = $("summaryFilterAllTime");
+const summaryFilterThisWeek = $("summaryFilterThisWeek");
 const summaryFilterThisMonth = $("summaryFilterThisMonth");
 const summaryFilterPrevMonth = $("summaryFilterPrevMonth");
+const summaryFilterThisYear = $("summaryFilterThisYear");
 const summaryFilterCustom = $("summaryFilterCustom");
 const summaryCustomDateRange = $("summaryCustomDateRange");
 const summaryStartDate = $("summaryStartDate");
@@ -2062,12 +2066,32 @@ function getThisMonthRange() {
   return { start, end };
 }
 
+function getThisWeekRange() {
+  const now = new Date();
+  const dayOfWeek = now.getDay();
+  const start = new Date(now);
+  start.setDate(now.getDate() - dayOfWeek);
+  start.setHours(0, 0, 0, 0);
+  const end = new Date(start);
+  end.setDate(start.getDate() + 6);
+  end.setHours(23, 59, 59, 999);
+  return { start, end };
+}
+
 function getPreviousMonthRange() {
   const now = new Date();
   const year = now.getFullYear();
   const month = now.getMonth();
   const start = new Date(year, month - 1, 1);
   const end = new Date(year, month, 0);
+  return { start, end };
+}
+
+function getThisYearRange() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const start = new Date(year, 0, 1); // January 1st
+  const end = new Date(year, 11, 31); // December 31st
   return { start, end };
 }
 
@@ -2541,10 +2565,14 @@ function computeTotals() {
 
   // Get current date filter settings
   let dateRange = null;
-  if (currentDateFilter === "thisMonth") {
+  if (currentDateFilter === "thisWeek") {
+    dateRange = getThisWeekRange();
+  } else if (currentDateFilter === "thisMonth") {
     dateRange = getThisMonthRange();
   } else if (currentDateFilter === "previousMonth") {
     dateRange = getPreviousMonthRange();
+  } else if (currentDateFilter === "thisYear") {
+    dateRange = getThisYearRange();
   } else if (currentDateFilter === "custom") {
     const start = startDate.value;
     const end = endDate.value;
@@ -2585,10 +2613,14 @@ function computeTotals() {
 
 function getSummaryDateRange() {
   let dateRange = null;
-  if (summaryDateFilter === "thisMonth") {
+  if (summaryDateFilter === "thisWeek") {
+    dateRange = getThisWeekRange();
+  } else if (summaryDateFilter === "thisMonth") {
     dateRange = getThisMonthRange();
   } else if (summaryDateFilter === "previousMonth") {
     dateRange = getPreviousMonthRange();
+  } else if (summaryDateFilter === "thisYear") {
+    dateRange = getThisYearRange();
   } else if (summaryDateFilter === "custom") {
     const start = summaryStartDate.value;
     const end = summaryEndDate.value;
@@ -3182,10 +3214,14 @@ function buildFilteredTransactions() {
   const fc = filterCategory.value;
   let dateRange = null;
 
-  if (currentDateFilter === "thisMonth") {
+  if (currentDateFilter === "thisWeek") {
+    dateRange = getThisWeekRange();
+  } else if (currentDateFilter === "thisMonth") {
     dateRange = getThisMonthRange();
   } else if (currentDateFilter === "previousMonth") {
     dateRange = getPreviousMonthRange();
+  } else if (currentDateFilter === "thisYear") {
+    dateRange = getThisYearRange();
   } else if (currentDateFilter === "custom") {
     const start = startDate.value;
     const end = endDate.value;
@@ -3905,8 +3941,10 @@ function setDateFilter(filter) {
 
 // Add event listeners for date filter buttons
 filterAllTime.addEventListener("click", () => setDateFilter("all"));
+filterThisWeek.addEventListener("click", () => setDateFilter("thisWeek"));
 filterThisMonth.addEventListener("click", () => setDateFilter("thisMonth"));
 filterPrevMonth.addEventListener("click", () => setDateFilter("previousMonth"));
+filterThisYear.addEventListener("click", () => setDateFilter("thisYear"));
 filterCustom.addEventListener("click", () => setDateFilter("custom"));
 
 // Handle summary page date filter button changes
@@ -3983,11 +4021,17 @@ function setMaxTodayForFilterDates() {
 summaryFilterAllTime.addEventListener("click", () =>
   setSummaryDateFilter("all"),
 );
+summaryFilterThisWeek.addEventListener("click", () =>
+  setSummaryDateFilter("thisWeek"),
+);
 summaryFilterThisMonth.addEventListener("click", () =>
   setSummaryDateFilter("thisMonth"),
 );
 summaryFilterPrevMonth.addEventListener("click", () =>
   setSummaryDateFilter("previousMonth"),
+);
+summaryFilterThisYear.addEventListener("click", () =>
+  setSummaryDateFilter("thisYear"),
 );
 summaryFilterCustom.addEventListener("click", () =>
   setSummaryDateFilter("custom"),

@@ -3397,7 +3397,7 @@ div.app {
 
   /* Summary tab: compact single-row layout on mobile */
   .date-chips-container {
-    gap: 6px; /* Reduced spacing on mobile */
+    gap: 8px; /* Reduced spacing on mobile */
     margin-bottom: 8px;
   }
 
