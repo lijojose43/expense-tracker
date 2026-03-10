@@ -2947,7 +2947,7 @@ function switchTab(name) {
     tabSummary.classList.remove("active");
     tabExpiry && tabExpiry.classList.remove("active");
     tabPurchase && tabPurchase.classList.add("active");
-    screenTitle.textContent = "Shopping List";
+    screenTitle.textContent = "Shopping";
     if (optionsMenu) optionsMenu.classList.remove("open");
     renderPurchase();
   }
