@@ -3028,11 +3028,6 @@ footer {
 
   .tx:active {
     transform: translateY(1px);
-    box-shadow: 0 2px 8px rgba(2, 6, 23, 0.15);
-  }
-
-  [data-theme="dark"] .tx:active {
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
   }
 }
 
