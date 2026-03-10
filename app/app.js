@@ -1437,7 +1437,9 @@ async function writeStateArray(stateKey, entries) {
     localStorage.setItem(legacyKey, JSON.stringify(normalizedEntries));
     return;
   }
-  await db.table(APP_STATE_TABLE).put({ key: stateKey, value: normalizedEntries });
+  await db
+    .table(APP_STATE_TABLE)
+    .put({ key: stateKey, value: normalizedEntries });
 }
 
 async function clearCoreStorage() {
@@ -2409,7 +2411,7 @@ async function importFromFile(file) {
   alert(importMessage);
 }
 
-function populateCategories() {
+function populateCategories(defaultCategory = null) {
   categorySelect.innerHTML = "";
   filterCategory.innerHTML = '<option value="all">All categories</option>';
 
@@ -2574,8 +2576,7 @@ function computeTotals() {
       investments += Math.abs(Number(t.amount));
     }
   }
-  const formattedInvestments = formatMoney(Math.abs(investments));
-  investmentsEl.textContent = formattedInvestments;
+  investmentsEl.textContent = formatMoney(Math.abs(investments));
 
   // Calculate savings after subtracting investments
   const savings = income - expense - investments;
@@ -3148,7 +3149,8 @@ function renderNextTransactionChunk() {
   }
   transactionRenderState.index = end;
 
-  if (transactionRenderState.index >= transactionRenderState.list.length) return;
+  if (transactionRenderState.index >= transactionRenderState.list.length)
+    return;
 
   transactionLoadSentinel = document.createElement("div");
   transactionLoadSentinel.className = "tx-sentinel";
@@ -3328,7 +3330,13 @@ function openModal(defaults) {
     setSelectedType(defaults.type);
     populateCategories();
 
-    const defaultCategory = defaults.category || "Other";
+    const defaultCategory =
+      defaultCategory ||
+      (currentType === "income"
+        ? "Salary"
+        : currentType === "investment"
+          ? "Business"
+          : "Other");
     const categoryExists = Array.from(categorySelect.options).some(
       (opt) => opt.value === defaultCategory,
     );
@@ -3360,6 +3368,69 @@ function closeModalFn() {
     modalContent.style.transform = "";
     modalContent.style.transition = "";
   }
+}
+
+// Add click listener to total income card (always clickable)
+if (totalIncomeEl) {
+  totalIncomeEl.addEventListener("click", () => {
+    hapticFeedback("light");
+    // Open add transaction modal with income pre-selected
+    populateCategories("Salary");
+    editId = null;
+    const modalTitle = document.getElementById("modalTitle");
+    if (modalTitle) modalTitle.textContent = "Create Transaction";
+    const submitBtn = txForm.querySelector('button[type="submit"]');
+    if (submitBtn) submitBtn.textContent = "Save";
+    openModal({
+      amount: "",
+      type: "income",
+      category: "Salary",
+      date: new Date().toISOString().split("T")[0],
+      description: "",
+    });
+  });
+}
+
+// Add click listener to total expense card (always clickable)
+if (totalExpensesEl) {
+  totalExpensesEl.addEventListener("click", () => {
+    hapticFeedback("light");
+    // Open add transaction modal with expense pre-selected
+    populateCategories("Other");
+    editId = null;
+    const modalTitle = document.getElementById("modalTitle");
+    if (modalTitle) modalTitle.textContent = "Create Transaction";
+    const submitBtn = txForm.querySelector('button[type="submit"]');
+    if (submitBtn) submitBtn.textContent = "Save";
+    openModal({
+      amount: "",
+      type: "expense",
+      category: "Other",
+      date: new Date().toISOString().split("T")[0],
+      description: "",
+    });
+  });
+}
+
+// Add click listener to investments card (always clickable)
+if (investmentsEl) {
+  investmentsEl.addEventListener("click", () => {
+    hapticFeedback("light");
+    // Open add transaction modal with investment pre-selected
+    populateCategories("Business");
+    editId = null;
+    const modalTitle = document.getElementById("modalTitle");
+    if (modalTitle) modalTitle.textContent = "Create Transaction";
+    const submitBtn = txForm.querySelector('button[type="submit"]');
+    if (submitBtn) submitBtn.textContent = "Save";
+    openModal({
+      amount: "",
+      type: "investment",
+      category: "Business",
+      date: new Date().toISOString().split("T")[0],
+      description: "",
+    });
+  });
 }
 
 addBtn.addEventListener("click", () => {
