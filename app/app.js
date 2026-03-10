@@ -1367,11 +1367,6 @@ const LEGACY_STORAGE_BY_STATE_KEY = {
 };
 let appDb = null;
 
-// Mobile app enhancements
-let isRefreshing = false;
-let startY = 0;
-let pullDistance = 0;
-
 const defaultCategories = [
   "Groceries",
   "Dining",
@@ -1966,90 +1961,6 @@ function hapticFeedback(type = "light") {
         navigator.vibrate([100, 50, 100, 50, 100]);
         break;
     }
-  }
-}
-
-function addPullToRefresh() {
-  const app = document.querySelector(".app");
-  if (!app) return;
-
-  let pullIndicator = document.createElement("div");
-  pullIndicator.className = "pull-refresh-indicator";
-  pullIndicator.innerHTML = "↓ Pull to refresh";
-  app.insertBefore(pullIndicator, app.firstChild);
-
-  app.addEventListener(
-    "touchstart",
-    (e) => {
-      if (app.scrollTop === 0 && !isRefreshing) {
-        startY = e.touches[0].clientY;
-      }
-    },
-    { passive: true },
-  );
-
-  app.addEventListener(
-    "touchmove",
-    (e) => {
-      if (app.scrollTop === 0 && !isRefreshing && startY > 0) {
-        pullDistance = Math.max(0, e.touches[0].clientY - startY);
-
-        if (pullDistance > 0) {
-          e.preventDefault();
-          const maxPull = 80;
-          const normalizedDistance = Math.min(pullDistance, maxPull);
-
-          pullIndicator.style.transform = `translateY(${normalizedDistance}px)`;
-          pullIndicator.style.opacity = normalizedDistance / maxPull;
-
-          if (pullDistance > 60) {
-            pullIndicator.innerHTML = "↑ Release to refresh";
-            pullIndicator.classList.add("ready");
-          } else {
-            pullIndicator.innerHTML = "↓ Pull to refresh";
-            pullIndicator.classList.remove("ready");
-          }
-        }
-      }
-    },
-    { passive: false },
-  );
-
-  app.addEventListener("touchend", () => {
-    if (pullDistance > 60 && !isRefreshing) {
-      triggerRefresh();
-    } else {
-      resetPullIndicator();
-    }
-    startY = 0;
-    pullDistance = 0;
-  });
-
-  function triggerRefresh() {
-    isRefreshing = true;
-    pullIndicator.innerHTML = "⟳ Refreshing...";
-    pullIndicator.classList.add("refreshing");
-    hapticFeedback("medium");
-
-    // Simulate refresh (recalculate and re-render)
-    setTimeout(() => {
-      computeTotals();
-      renderList();
-      if (!summaryTabEl.classList.contains("hidden")) renderChart();
-
-      hapticFeedback("success");
-      resetPullIndicator();
-      isRefreshing = false;
-    }, 1000);
-  }
-
-  function resetPullIndicator() {
-    pullIndicator.style.transform = "translateY(-100%)";
-    pullIndicator.style.opacity = "0";
-    pullIndicator.classList.remove("ready", "refreshing");
-    setTimeout(() => {
-      pullIndicator.innerHTML = "↓ Pull to refresh";
-    }, 300);
   }
 }
 
@@ -4540,8 +4451,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   renderChart();
   // initialize enhanced mobile focus for form inputs
   setupEnhancedMobileFocus();
-  // initialize mobile app enhancements
-  addPullToRefresh();
   // initialize modal drag-to-close functionality
   initModalDragToClose();
   // attempt to show PWA install popup on first load (covers iOS which lacks beforeinstallprompt)

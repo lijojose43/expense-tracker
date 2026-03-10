@@ -3541,48 +3541,6 @@ div.app {
   /* Remove old date-filter-buttons styles as they're no longer used */
 }
 
-/* Pull to refresh indicator */
-.pull-refresh-indicator {
-  position: absolute;
-  top: -60px;
-  left: 50%;
-  transform: translateX(-50%) translateY(-100%);
-  background: var(--card);
-  color: var(--muted);
-  padding: 8px 16px;
-  border-radius: 20px;
-  font-size: 14px;
-  font-weight: 500;
-  box-shadow: 0 4px 12px rgba(2, 6, 23, 0.1);
-  border: 1px solid rgba(2, 6, 23, 0.08);
-  z-index: 999;
-  opacity: 0;
-  transition: all 0.3s ease;
-  white-space: nowrap;
-}
-
-.pull-refresh-indicator.ready {
-  color: var(--accent);
-}
-
-.pull-refresh-indicator.refreshing {
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  from {
-    transform: translateX(-50%) rotate(0deg);
-  }
-  to {
-    transform: translateX(-50%) rotate(360deg);
-  }
-}
-
-[data-theme="dark"] .pull-refresh-indicator {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  border-color: rgba(148, 163, 184, 0.2);
-}
-
 /* Loading skeleton for better perceived performance */
 .skeleton {
   background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
