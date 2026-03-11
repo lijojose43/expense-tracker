@@ -356,7 +356,7 @@ function showSettingsOptions() {
     ].forEach((id) => {
       const btn = document.getElementById(id);
       if (!btn) return;
-      btn.textContent = "Premium";
+      btn.textContent = "+ Add";
       btn.title = "Custom categories are available in Premium";
     });
   }
@@ -3077,7 +3077,7 @@ function createTransactionRow(t) {
   amt.className = "amount " + (t.type === "expense" ? "expense" : "income");
   const amountValue = Math.abs(Number(t.amount)).toFixed(2);
   const formattedAmount = amountValue.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  const currency = localStorage.getItem("currency") || "$";
+  const currency = localStorage.getItem("currency") || "₹";
   const sign = t.type === "expense" ? "-" : t.type === "investment" ? "" : "+";
   amt.textContent = sign + (sign ? " " : "") + currency + formattedAmount;
   el.appendChild(meta);
