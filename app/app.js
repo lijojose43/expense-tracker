@@ -4091,7 +4091,42 @@ filterCategory.addEventListener("input", handleFilterCategoryUpdate);
 
 function enableImmediateSelectOpen(selectEl) {
   if (!selectEl) return;
+  let opening = false;
   let touchMoved = false;
+
+  const openPickerNow = (event) => {
+    if (opening) return;
+    opening = true;
+    if (event && typeof event.preventDefault === "function") {
+      event.preventDefault();
+    }
+    if (typeof selectEl.showPicker === "function") {
+      try {
+        selectEl.showPicker();
+        setTimeout(() => {
+          opening = false;
+        }, 50);
+        return;
+      } catch (_) {}
+    }
+    try {
+      selectEl.focus({ preventScroll: true });
+      selectEl.click();
+    } catch (_) {}
+    setTimeout(() => {
+      opening = false;
+    }, 50);
+  };
+
+  selectEl.addEventListener(
+    "pointerdown",
+    (event) => {
+      if (event.pointerType === "touch" || event.pointerType === "pen") {
+        openPickerNow(event);
+      }
+    },
+    { passive: false },
+  );
   selectEl.addEventListener(
     "touchstart",
     () => {
@@ -4108,20 +4143,11 @@ function enableImmediateSelectOpen(selectEl) {
   );
   selectEl.addEventListener(
     "touchend",
-    () => {
+    (event) => {
       if (touchMoved) return;
-      if (typeof selectEl.showPicker === "function") {
-        try {
-          selectEl.showPicker();
-          return;
-        } catch (_) {}
-      }
-      try {
-        selectEl.focus({ preventScroll: true });
-        selectEl.click();
-      } catch (_) {}
+      openPickerNow(event);
     },
-    { passive: true },
+    { passive: false },
   );
 }
 
