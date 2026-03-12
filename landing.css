@@ -32,8 +32,16 @@ body {
   position: fixed;
   inset: 0;
   background:
-    radial-gradient(circle at 10% 12%, rgba(15, 110, 253, 0.22) 0, rgba(15, 110, 253, 0) 33%),
-    radial-gradient(circle at 86% 4%, rgba(0, 167, 127, 0.18) 0, rgba(0, 167, 127, 0) 36%),
+    radial-gradient(
+      circle at 10% 12%,
+      rgba(15, 110, 253, 0.22) 0,
+      rgba(15, 110, 253, 0) 33%
+    ),
+    radial-gradient(
+      circle at 86% 4%,
+      rgba(0, 167, 127, 0.18) 0,
+      rgba(0, 167, 127, 0) 36%
+    ),
     linear-gradient(180deg, #eff4ff 0%, #e8eef9 45%, #dfe8f6 100%);
   z-index: -1;
 }
@@ -48,7 +56,7 @@ body {
   top: 0;
   z-index: 10;
   backdrop-filter: blur(10px);
-  background: rgba(232, 238, 249, 0.75);
+  background: rgb(232 238 249 / 88%);
   border-bottom: 1px solid rgba(13, 27, 54, 0.08);
 }
 
@@ -89,7 +97,10 @@ body {
   padding: 11px 18px;
   font-weight: 700;
   border: 1px solid transparent;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
 }
 
 .btn:hover {
@@ -165,7 +176,11 @@ body {
 }
 
 .hero-panel {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.82));
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.95),
+    rgba(255, 255, 255, 0.82)
+  );
   border: 1px solid var(--line);
   border-radius: 24px;
   padding: 16px;
@@ -186,7 +201,11 @@ body {
 }
 
 .mock-card {
-  background: linear-gradient(140deg, rgba(0, 167, 127, 0.13), rgba(0, 167, 127, 0.04));
+  background: linear-gradient(
+    140deg,
+    rgba(0, 167, 127, 0.13),
+    rgba(0, 167, 127, 0.04)
+  );
   border: 1px solid rgba(0, 167, 127, 0.22);
   border-radius: 14px;
   padding: 12px;
@@ -194,7 +213,11 @@ body {
 }
 
 .mock-card.danger {
-  background: linear-gradient(140deg, rgba(217, 63, 87, 0.14), rgba(217, 63, 87, 0.04));
+  background: linear-gradient(
+    140deg,
+    rgba(217, 63, 87, 0.14),
+    rgba(217, 63, 87, 0.04)
+  );
   border-color: rgba(217, 63, 87, 0.25);
 }
 
@@ -395,7 +418,11 @@ body {
 }
 
 .plan-card.premium {
-  background: linear-gradient(160deg, rgba(15, 110, 253, 0.1), rgba(0, 167, 127, 0.12));
+  background: linear-gradient(
+    160deg,
+    rgba(15, 110, 253, 0.1),
+    rgba(0, 167, 127, 0.12)
+  );
 }
 
 .plan-tag {
@@ -462,7 +489,11 @@ body {
 }
 
 .proof-card.accent {
-  background: linear-gradient(160deg, rgba(15, 110, 253, 0.08), rgba(0, 167, 127, 0.08));
+  background: linear-gradient(
+    160deg,
+    rgba(15, 110, 253, 0.08),
+    rgba(0, 167, 127, 0.08)
+  );
 }
 
 .install-hero-panel {
@@ -517,7 +548,11 @@ body {
   justify-content: center;
   font-size: 0.62rem;
   font-weight: 800;
-  background: linear-gradient(145deg, rgba(15, 110, 253, 0.15), rgba(0, 167, 127, 0.15));
+  background: linear-gradient(
+    145deg,
+    rgba(15, 110, 253, 0.15),
+    rgba(0, 167, 127, 0.15)
+  );
   color: #1f3e68;
 }
 
