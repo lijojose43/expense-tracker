@@ -4089,6 +4089,45 @@ filterType.addEventListener("input", handleFilterTypeUpdate);
 filterCategory.addEventListener("change", handleFilterCategoryUpdate);
 filterCategory.addEventListener("input", handleFilterCategoryUpdate);
 
+function enableImmediateSelectOpen(selectEl) {
+  if (!selectEl) return;
+  let touchMoved = false;
+  selectEl.addEventListener(
+    "touchstart",
+    () => {
+      touchMoved = false;
+    },
+    { passive: true },
+  );
+  selectEl.addEventListener(
+    "touchmove",
+    () => {
+      touchMoved = true;
+    },
+    { passive: true },
+  );
+  selectEl.addEventListener(
+    "touchend",
+    () => {
+      if (touchMoved) return;
+      if (typeof selectEl.showPicker === "function") {
+        try {
+          selectEl.showPicker();
+          return;
+        } catch (_) {}
+      }
+      try {
+        selectEl.focus({ preventScroll: true });
+        selectEl.click();
+      } catch (_) {}
+    },
+    { passive: true },
+  );
+}
+
+enableImmediateSelectOpen(filterType);
+enableImmediateSelectOpen(filterCategory);
+
 // Search input event listener removed
 
 // PWA Install functionality

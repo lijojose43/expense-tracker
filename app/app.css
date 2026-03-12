@@ -4288,7 +4288,11 @@ div.app {
 
 .filters-row,
 .date-filter-buttons {
-  touch-action: pan-x pan-y !important;
+  touch-action: pan-y !important;
+}
+
+.filters-row select {
+  touch-action: manipulation !important;
 }
 
 /* Premium modal */
