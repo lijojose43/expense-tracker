@@ -4073,15 +4073,21 @@ endDate.addEventListener("change", () => {
   if (!summaryTabEl.classList.contains("hidden")) renderChart();
 });
 
-filterType.addEventListener("change", () => {
+function handleFilterTypeUpdate() {
   populateCategories();
   renderList();
   setTimeout(() => checkPWAInstallPrompt(1000), 500);
-});
-filterCategory.addEventListener("change", () => {
+}
+
+function handleFilterCategoryUpdate() {
   renderList();
   setTimeout(() => checkPWAInstallPrompt(1000), 500);
-});
+}
+
+filterType.addEventListener("change", handleFilterTypeUpdate);
+filterType.addEventListener("input", handleFilterTypeUpdate);
+filterCategory.addEventListener("change", handleFilterCategoryUpdate);
+filterCategory.addEventListener("input", handleFilterCategoryUpdate);
 
 // Search input event listener removed
 
