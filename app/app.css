@@ -870,8 +870,8 @@ html:not([data-theme="dark"]) .summary .card:nth-child(4) {
 /* Fine-tune first two filters' text baseline and chevron */
 .filters-row #filterType,
 .filters-row #filterCategory {
-  padding-top: 10px;
-  padding-bottom: 10px;
+  padding-top: 8px;
+  padding-bottom: 8px;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
   background-position: right 10px center;
   background-size: 16px 16px;
@@ -2769,8 +2769,8 @@ footer {
   /* PWA-only: nudge first two select texts slightly higher */
   .filters-row #filterType,
   .filters-row #filterCategory {
-    padding-top: 10px;
-    padding-bottom: 10px;
+    padding-top: 8px;
+    padding-bottom: 8px;
   }
 
   [data-theme="dark"] .bottombar {
@@ -4453,7 +4453,7 @@ div.app {
   font-size: 16px;
   font-weight: 600;
   padding: 14px 20px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--accent);
   color: white;
   border: none;
   border-radius: 12px;

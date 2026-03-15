@@ -1497,6 +1497,7 @@ const cancelBtn = $("cancelBtn");
 const categorySelect = $("category");
 const filterCategory = $("filterCategory");
 const filterType = $("filterType");
+const transactionsTitle = $("transactionsTitle");
 const customDateRange = $("customDateRange");
 const startDate = $("startDate");
 const endDate = $("endDate");
@@ -3949,6 +3950,7 @@ function setDateFilter(filter) {
 
   computeTotals();
   renderList();
+  updateTransactionsTitle();
   if (!summaryTabEl.classList.contains("hidden")) renderChart();
 
   // Show PWA install modal after filter change
@@ -4065,23 +4067,69 @@ summaryEndDate.addEventListener("change", () => {
 startDate.addEventListener("change", () => {
   computeTotals();
   renderList();
+  updateTransactionsTitle();
   if (!summaryTabEl.classList.contains("hidden")) renderChart();
 });
 endDate.addEventListener("change", () => {
   computeTotals();
   renderList();
+  updateTransactionsTitle();
   if (!summaryTabEl.classList.contains("hidden")) renderChart();
 });
 
 function handleFilterTypeUpdate() {
   populateCategories();
   renderList();
+  updateTransactionsTitle();
   setTimeout(() => checkPWAInstallPrompt(1000), 500);
 }
 
 function handleFilterCategoryUpdate() {
   renderList();
+  updateTransactionsTitle();
   setTimeout(() => checkPWAInstallPrompt(1000), 500);
+}
+
+function updateTransactionsTitle() {
+  const type = filterType.value;
+  const category = filterCategory.value;
+  const dateFilter = currentDateFilter;
+
+  let title = "";
+
+  // Build title based on filters
+  if (type !== "all" && category !== "all") {
+    title = `${category} ${type}`;
+  } else if (type !== "all") {
+    title = `${type} transactions`;
+  } else if (category !== "all") {
+    title = `${category} transactions`;
+  } else {
+    title = "All Transactions";
+  }
+
+  // Add date filter context for all filters including "all"
+  if (dateFilter === "all") {
+    title += " - All time";
+  } else if (dateFilter === "thisWeek") {
+    title += " - This Week";
+  } else if (dateFilter === "thisMonth") {
+    title += " - This Month";
+  } else if (dateFilter === "previousMonth") {
+    title += " - Previous Month";
+  } else if (dateFilter === "thisYear") {
+    title += " - This Year";
+  } else if (dateFilter === "custom") {
+    const start = startDate.value;
+    const end = endDate.value;
+    if (start && end) {
+      title += ` - ${start} to ${end}`;
+    } else {
+      title += " - Custom Range";
+    }
+  }
+
+  transactionsTitle.textContent = title;
 }
 
 filterType.addEventListener("change", handleFilterTypeUpdate);
@@ -4649,6 +4697,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   computeTotals();
   renderList();
+  updateTransactionsTitle();
   // initial chart render (will no-op if canvas missing)
   renderChart();
   // initialize enhanced mobile focus for form inputs
