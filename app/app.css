@@ -358,9 +358,7 @@ html:not([data-theme="dark"]) #sunIcon {
   color: #e5e7eb; /* light text on dark bg */
   border-color: rgba(148, 163, 184, 0.5);
 }
-[data-theme="dark"] .secondary:hover {
-  background: rgba(148, 163, 184, 0.1);
-}
+
 .content {
   padding: 16px;
   overflow-x: hidden; /* Prevent horizontal scroll in content areas */
@@ -3258,7 +3256,7 @@ div.app {
   .modal-content select {
     font-size: 16px !important; /* iOS: >=16px prevents zoom */
     min-height: 44px; /* Apple HIG minimum touch target */
-    padding: 12px;
+    padding: 10px;
   }
 
   /* Ensure segmented buttons are comfortable on mobile */
@@ -4478,21 +4476,6 @@ div.app {
     transparent
   );
   transition: left 0.5s ease;
-}
-
-.premium-pay-row .secondary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
-  background: linear-gradient(135deg, #5a6fd8 0%, #6b4199 100%);
-}
-
-.premium-pay-row .secondary:hover::before {
-  left: 100%;
-}
-
-.premium-pay-row .secondary:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 10px rgba(102, 126, 234, 0.25);
 }
 
 .premium-modal-content .actions {
